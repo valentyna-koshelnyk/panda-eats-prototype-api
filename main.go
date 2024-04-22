@@ -39,6 +39,7 @@ func main() {
 
 	// Start the server
 	go func() {
+		log.Info("Starting server on port :3000")
 		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("HTTP server error: %v", err)
 		}
