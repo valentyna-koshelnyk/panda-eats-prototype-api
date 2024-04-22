@@ -1,8 +1,14 @@
 package main
 
 import (
+	"context"
+	"errors"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -25,10 +31,34 @@ func main() {
 		}
 	})
 
-	log.Info("Starting server on port :3000")
-	err := http.ListenAndServe(":3000", r)
-	if err != nil {
-		log.Error("Error starting server: %v", err)
+	// Create a server
+	server := &http.Server{
+		Addr:    ":3000",
+		Handler: r,
 	}
 
+	// Start the server
+	go func() {
+		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("HTTP server error: %v", err)
+		}
+		log.Info("Stopped serving new connections.")
+	}()
+
+	// Create a channel to receive  notifications from signal
+	sigChan := make(chan os.Signal, 1)
+
+	//Register the given channel to receive notifications
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	// Block until the signal is received
+	<-sigChan
+
+	//Shut down gracefully
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownRelease()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		log.Fatalf("HTTP shutdown error: %v", err)
+	}
+	log.Info("Graceful shutdown complete.")
 }
