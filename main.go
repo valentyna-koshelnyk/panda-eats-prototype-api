@@ -18,7 +18,7 @@ func init() {
 func main() {
 	// Set a router
 	r := chi.NewRouter()
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte("OK"))
 		if err != nil {
 			log.Error("Failed to write response: %v", err)
