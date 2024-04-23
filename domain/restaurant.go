@@ -15,10 +15,13 @@ type Restaurant struct {
 	Category    string  `json:"category"`
 	PriceRange  string  `json:"price_range"`
 	FullAddress string  `json:"full_address"`
-	// use int instead of uint since JSON doesn't distinguish and to avoid casting
+	// use int instead of uint since JSON doesn't distinguish and to avoid casting.
+	//TODO: Add additional validation for the zip range
 	ZipCode int64 `json:"zip_code"`
 	// JS might not handle very large integers or high-precision floating numbers accurately
+	// TODO: add validation
 	Lat string `json:"lat"`
+	// TODO: add validation
 	Lng string `json:"lng"`
 }
 
