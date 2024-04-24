@@ -12,6 +12,7 @@ import (
 
 // ConverterRestaurant converts the CSV file to JSON, using mapping for Restaurant entity
 // TODO: to decompose the function, so it takes mapped object and converts it respectively to the fields
+
 func ConverterRestaurant() {
 	csvFile, err := os.Open("./scripts/data/restaurants.csv")
 	if err != nil {
