@@ -19,3 +19,11 @@
 
 # Go workspace file
 go.work
+
+# Output for the converter to JSON
+**/*.json
+
+# Data files
+
+**/*.csv
+**/scripts/*.DS_Store

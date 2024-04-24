@@ -1,5 +1,5 @@
 # Application name
-APP_NAME := pd-billing-orchestrator
+APP_NAME := panda-eats-prototype-api
 
 test: ## Run tests
 	go test -v ./...
