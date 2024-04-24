@@ -1,4 +1,4 @@
-package scripts
+package main
 
 import (
 	"encoding/csv"
@@ -10,11 +10,13 @@ import (
 	"strconv"
 )
 
-// ConverterRestaurant converts the CSV file to JSON, using mapping for Restaurant entity
-// TODO: to decompose the function, so it takes mapped object and converts it respectively to the fields
+const RestaurantPath = "data/restaurants.csv"
+const MenuPath = "data/restaurant-menus.csv"
 
+// ConverterRestaurant converts the CSV file to JSON, using mapping for Restaurant entity
+// TODO: to create a generic converter
 func ConverterRestaurant() {
-	csvFile, err := os.Open("./scripts/data/restaurants.csv")
+	csvFile, err := os.Open(RestaurantPath)
 	if err != nil {
 		log.Fatalf("Error opening CSV file: %v", err)
 	}
@@ -58,12 +60,63 @@ func ConverterRestaurant() {
 		os.Exit(1)
 	}
 
-	fmt.Println(string(jsonData))
-
-	jsonFile, err := os.Create("./data.json")
+	jsonFile, err := os.Create("./restaurants.json")
 	if err != nil {
 		fmt.Println(err)
 	}
 	jsonFile.Write(jsonData)
 	jsonFile.Close()
+}
+
+func ConverterMenu() {
+	csvFile, err := os.Open(MenuPath)
+	if err != nil {
+		log.Fatalf("Error opening CSV file: %v", err)
+	}
+
+	reader := csv.NewReader(csvFile)
+	// No check for expected field per record
+	reader.FieldsPerRecord = -1
+	// Put quotes for unquoted fields
+	reader.LazyQuotes = true
+
+	csvData, err := reader.ReadAll()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	menu := domain.Menu{}
+	var menus []domain.Menu
+	for _, each := range csvData {
+		if len(each) < 5 {
+			fmt.Println("Encountered a row with insufficient fields")
+			continue
+		}
+		menu.RestaurantID, _ = strconv.ParseInt(each[0], 10, 64)
+		menu.Name = each[1]
+		menu.Price = each[2]
+		menu.Description = each[3]
+		menu.Category = each[4]
+
+		menus = append(menus, menu)
+	}
+
+	jsonData, err := json.Marshal(menus)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	jsonFile, err := os.Create("./menus.json")
+	if err != nil {
+		fmt.Println(err)
+	}
+	jsonFile.Write(jsonData)
+	jsonFile.Close()
+}
+
+func main() {
+	ConverterMenu()
+	ConverterRestaurant()
 }
