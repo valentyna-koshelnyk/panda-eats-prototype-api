@@ -5,6 +5,7 @@ import (
 	"regexp"
 )
 
+// A Restaurant represents information about the restaurant entity
 type Restaurant struct {
 	// use int instead of uint since JSON doesn't distinguish and to avoid casting
 	ID          int64   `json:"id"`
@@ -15,9 +16,8 @@ type Restaurant struct {
 	Category    string  `json:"category"`
 	PriceRange  string  `json:"price_range"`
 	FullAddress string  `json:"full_address"`
-	// use int instead of uint since JSON doesn't distinguish and to avoid casting.
 	//TODO: Add additional validation for the zip range
-	ZipCode int64 `json:"zip_code"`
+	ZipCode string `json:"zip_code"`
 	// JS might not handle very large integers or high-precision floating numbers accurately
 	// TODO: add validation
 	Lat string `json:"lat"`
@@ -25,11 +25,13 @@ type Restaurant struct {
 	Lng string `json:"lng"`
 }
 
+// Regular expressions validating input, e.g. if price range consists just of '$' sign or category doesn't have any digits
 var (
 	regexContainsOnlySymbol = regexp.MustCompile(`^\$+$`)
 	regexContainsOnlyLetter = regexp.MustCompile(`^[a-zA-Z]+$`)
 )
 
+// ValidateScore Validates if score for the restaurant is in a valid range
 func ValidateScore(score float64) error {
 	if score < 0 || score > 5.0 {
 		return errors.New("invalid rating")
@@ -37,6 +39,7 @@ func ValidateScore(score float64) error {
 	return nil
 }
 
+// ValidateRestaurant Validates such restaurant fields as ID, Score, Category and Price Range
 func ValidateRestaurant(restaurant *Restaurant) []error {
 	errs := make([]error, 0)
 	//Validate restaurant.

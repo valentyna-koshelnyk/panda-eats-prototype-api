@@ -14,8 +14,9 @@ import (
 )
 
 func init() {
+	// TODO: implement a custom structured logger
+
 	// Log as JSON instead of the default ASCII formatter.
-	//TODO: implement a custom structured logger
 	log.SetFormatter(&log.JSONFormatter{})
 	// Log for informational purposes, then depends on necessity use log.SetLevel(log.WarnLevel)
 	log.SetLevel(log.InfoLevel)
@@ -63,4 +64,5 @@ func main() {
 		log.Fatalf("HTTP shutdown error: %v", err)
 	}
 	log.Info("Graceful shutdown complete.")
+
 }
