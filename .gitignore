@@ -15,11 +15,7 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-.DS_Store
-.env*
-.idea/
-.netrc
-mocks
+# vendor/
 
 # Go workspace file
 go.work
@@ -27,3 +23,7 @@ go.work
 # Output for the converter to JSON
 **/*.json
 
+# Data files
+
+**/*.csv
+**/scripts/*.DS_Store

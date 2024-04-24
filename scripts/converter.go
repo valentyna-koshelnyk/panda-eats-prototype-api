@@ -1,4 +1,4 @@
-package main
+package scripts
 
 import (
 	"encoding/csv"
@@ -59,7 +59,6 @@ func ConverterRestaurant() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
 	jsonFile, err := os.Create("./restaurants.json")
 	if err != nil {
 		fmt.Println(err)
