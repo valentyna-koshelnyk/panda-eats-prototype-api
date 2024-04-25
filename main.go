@@ -53,9 +53,11 @@ func init() {
 func main() {
 	// Set a router
 	r := chi.NewRouter()
-
+	// Generate a unique identifier for every incoming HTTP request
 	r.Use(middleware.RequestID)
+	// Log start and end of each request
 	r.Use(middleware.Logger)
+	// Prevent server crashes
 	r.Use(middleware.Recoverer)
 
 	// Initiate a server

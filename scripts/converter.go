@@ -10,11 +10,15 @@ import (
 	"strconv"
 )
 
+// RestaurantPath The path to the dataset with restaurants list
 const RestaurantPath = "data/restaurants.csv"
+
+// MenuPath The path to the dataset with menus list
 const MenuPath = "data/restaurant-menus.csv"
 
-// ConverterRestaurant converts the CSV file to JSON, using mapping for Restaurant entity
 // TODO: to create a generic converter
+
+// ConverterRestaurant converts the CSV file to JSON, using mapping for Restaurant entity
 func ConverterRestaurant() []byte {
 	csvFile, err := os.Open(RestaurantPath)
 	if err != nil {
@@ -68,6 +72,7 @@ func ConverterRestaurant() []byte {
 	return jsonData
 }
 
+// ConverterMenu converts the CSV file to JSON, using mapping for Menu entity
 func ConverterMenu() []byte {
 	csvFile, err := os.Open(MenuPath)
 	if err != nil {
