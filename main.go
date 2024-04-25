@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
 	scripts "github.com/valentyna-koshelnyk/panda-eats-prototype-api/scripts"
 	"net/http"
@@ -53,6 +54,10 @@ func main() {
 	// Set a router
 	r := chi.NewRouter()
 
+	r.Use(middleware.RequestID)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
 	// Initiate a server
 	server := &http.Server{
 		Addr:    ":3000",
@@ -69,9 +74,10 @@ func main() {
 		}
 	})
 	// A route for restaurants
-	r.Get("/restaurants", getAllRestaurants)
-	// A route for menus
-	r.Get("/menu", getAllMenu)
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Get("/restaurants", getAllRestaurants)
+		r.Get("/menus", getAllMenu)
+	})
 
 	// Start the server
 	go func() {
