@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
-	scripts "github.com/valentyna-koshelnyk/panda-eats-prototype-api/scripts"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/restaurant"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,31 +15,13 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-var (
-	restaurantsJSON = scripts.ConverterRestaurant()
-	menuJSON        = scripts.ConverterMenu()
-)
+//const (
+//	// PageIDKey refers to the context key that stores the next page id
+//	PageIDKey CustomKey = "page_id"
+//)
 
 // Set handlers
 //TODO implement pagination
-
-// Fetch all restaurants handler
-func getAllRestaurants(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	if _, err := w.Write(restaurantsJSON); err != nil {
-		http.Error(w, "Failed to write response", http.StatusInternalServerError)
-		return
-	}
-}
-
-// Fetch all menus handler
-func getAllMenu(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	if _, err := w.Write(menuJSON); err != nil {
-		http.Error(w, "Failed to write response", http.StatusInternalServerError)
-		return
-	}
-}
 
 func init() {
 	// TODO: implement a custom structured logger
@@ -75,10 +57,15 @@ func main() {
 			log.Error("Failed to write response: %v", err)
 		}
 	})
+	//
+	//r.Route("/api/v1", func(r chi.Router) {
+	//	r.With(m.Pagination).Get("/restaurants", getAllRestaurants)
+	//	// A route for menus
+	//	r.With(m.Pagination.Get("/menus", getAllMenu)
+	//})
 	// A route for restaurants
 	r.Route("/api/v1", func(r chi.Router) {
-		r.Get("/restaurants", getAllRestaurants)
-		r.Get("/menus", getAllMenu)
+		r.Get("/restaurants", restaurant.GetAllRestaurants)
 	})
 
 	// Start the server
@@ -109,11 +96,39 @@ func main() {
 
 }
 
-// Pagination Object
-type Pagination struct {
-	Next          int
-	Previous      int
-	RecordPerPage int
-	CurrentPage   int
-	TotalPage     int
+//// Pagination Object
+//type Pagination struct {
+//	Next          int
+//	Previous      int
+//	RecordPerPage int
+//	CurrentPage   int
+//	TotalPage     int
+//}
+
+//// Pagination middleware is used to extract the next page id from the url query
+//func Pagination(next http.Handler) http.Handler {
+//	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+//		PageID := r.URL.Query().Get(string(PageIDKey))
+//		intPageID := 0
+//		var err error
+//		if PageID != "" {
+//			intPageID, err = strconv.Atoi(PageID)
+//			if err != nil {
+//				_ = render.Render(w, r, types.ErrInvalidRequest(fmt.Errorf("couldn't read %s: %w", PageIDKey, err)))
+//				return
+//			}
+//		}
+//		ctx := context.WithValue(r.Context(), PageIDKey, intPageID)
+//		next.ServeHTTP(w, r.WithContext(ctx))
+//	})
+//}
+
+type ErrResponse struct {
+	Err            error
+	HTTPStatusCode int
+	StatusText     string
+}
+
+func ErrInvalidRequest(err error) *ErrResponse {
+	return &ErrResponse{Err: err, HTTPStatusCode: http.StatusBadRequest, StatusText: "Invalid request."}
 }

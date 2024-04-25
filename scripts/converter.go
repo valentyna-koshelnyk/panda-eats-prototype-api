@@ -1,25 +1,22 @@
-package scripts
+package main
 
 import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	domain "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain"
+	menu2 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/menu"
+	domain "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/restaurant"
 	"os"
 	"strconv"
 )
 
-// RestaurantPath The path to the dataset with restaurants list
 const RestaurantPath = "data/restaurants.csv"
-
-// MenuPath The path to the dataset with menus list
 const MenuPath = "data/restaurant-menus.csv"
 
-// TODO: to create a generic converter
-
 // ConverterRestaurant converts the CSV file to JSON, using mapping for Restaurant entity
-func ConverterRestaurant() []byte {
+// TODO: to create a generic converter
+func ConverterRestaurant() {
 	csvFile, err := os.Open(RestaurantPath)
 	if err != nil {
 		log.Fatalf("Error opening CSV file: %v", err)
@@ -63,17 +60,15 @@ func ConverterRestaurant() []byte {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	jsonFile, err := os.Create("./restaurants.json")
+	jsonFile, err := os.Create("data/restaurants.json")
 	if err != nil {
 		fmt.Println(err)
 	}
 	jsonFile.Write(jsonData)
 	jsonFile.Close()
-	return jsonData
 }
 
-// ConverterMenu converts the CSV file to JSON, using mapping for Menu entity
-func ConverterMenu() []byte {
+func ConverterMenu() {
 	csvFile, err := os.Open(MenuPath)
 	if err != nil {
 		log.Fatalf("Error opening CSV file: %v", err)
@@ -91,8 +86,8 @@ func ConverterMenu() []byte {
 		os.Exit(1)
 	}
 
-	menu := domain.Menu{}
-	var menus []domain.Menu
+	menu := menu2.Menu{}
+	var menus []menu2.Menu
 	for _, each := range csvData {
 		if len(each) < 5 {
 			fmt.Println("Encountered a row with insufficient fields")
@@ -113,11 +108,15 @@ func ConverterMenu() []byte {
 		os.Exit(1)
 	}
 
-	jsonFile, err := os.Create("./menus.json")
+	jsonFile, err := os.Create("data/menus.json")
 	if err != nil {
 		fmt.Println(err)
 	}
 	jsonFile.Write(jsonData)
 	jsonFile.Close()
-	return jsonData
+}
+
+func main() {
+	ConverterMenu()
+	ConverterRestaurant()
 }

@@ -1,4 +1,4 @@
-package domain
+package menu
 
 // A Menu represents menu entity which is a menu of the restaurant
 type Menu struct {
