@@ -1,11 +1,11 @@
-package main
+package scripts
 
 import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/domain"
+	domain "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain"
 	"os"
 	"strconv"
 )
@@ -15,7 +15,7 @@ const MenuPath = "data/restaurant-menus.csv"
 
 // ConverterRestaurant converts the CSV file to JSON, using mapping for Restaurant entity
 // TODO: to create a generic converter
-func ConverterRestaurant() {
+func ConverterRestaurant() []byte {
 	csvFile, err := os.Open(RestaurantPath)
 	if err != nil {
 		log.Fatalf("Error opening CSV file: %v", err)
@@ -65,9 +65,10 @@ func ConverterRestaurant() {
 	}
 	jsonFile.Write(jsonData)
 	jsonFile.Close()
+	return jsonData
 }
 
-func ConverterMenu() {
+func ConverterMenu() []byte {
 	csvFile, err := os.Open(MenuPath)
 	if err != nil {
 		log.Fatalf("Error opening CSV file: %v", err)
@@ -113,9 +114,5 @@ func ConverterMenu() {
 	}
 	jsonFile.Write(jsonData)
 	jsonFile.Close()
-}
-
-func main() {
-	ConverterMenu()
-	ConverterRestaurant()
+	return jsonData
 }

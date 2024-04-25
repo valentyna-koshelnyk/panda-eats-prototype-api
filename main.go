@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	log "github.com/sirupsen/logrus"
+	scripts "github.com/valentyna-koshelnyk/panda-eats-prototype-api/scripts"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,9 +14,34 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+var (
+	restaurantsJSON = scripts.ConverterRestaurant()
+	menuJSON        = scripts.ConverterMenu()
+)
+
+// Set handlers
+//TODO implement pagination
+
+// Fetch all restaurants handler
+func getAllRestaurants(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if _, err := w.Write(restaurantsJSON); err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+		return
+	}
+}
+
+// Fetch all menus handler
+func getAllMenu(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if _, err := w.Write(menuJSON); err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+		return
+	}
+}
+
 func init() {
 	// TODO: implement a custom structured logger
-
 	// Log as JSON instead of the default ASCII formatter.
 	log.SetFormatter(&log.JSONFormatter{})
 	// Log for informational purposes, then depends on necessity use log.SetLevel(log.WarnLevel)
@@ -26,18 +52,26 @@ func init() {
 func main() {
 	// Set a router
 	r := chi.NewRouter()
+
+	// Initiate a server
+	server := &http.Server{
+		Addr:    ":3000",
+		Handler: r,
+	}
+
+	//Set routes
+
+	// A route for health check
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte("OK"))
 		if err != nil {
 			log.Error("Failed to write response: %v", err)
 		}
 	})
-
-	// Create a server
-	server := &http.Server{
-		Addr:    ":3000",
-		Handler: r,
-	}
+	// A route for restaurants
+	r.Get("/restaurants", getAllRestaurants)
+	// A route for menus
+	r.Get("/menu", getAllMenu)
 
 	// Start the server
 	go func() {
@@ -65,4 +99,13 @@ func main() {
 	}
 	log.Info("Graceful shutdown complete.")
 
+}
+
+// Pagination Object
+type Pagination struct {
+	Next          int
+	Previous      int
+	RecordPerPage int
+	CurrentPage   int
+	TotalPage     int
 }
