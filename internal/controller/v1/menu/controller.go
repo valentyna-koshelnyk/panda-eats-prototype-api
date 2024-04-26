@@ -7,7 +7,7 @@ import (
 )
 
 // GetAllMenu is a handler for getting all menus
-func GetAllMenu(w http.ResponseWriter, r *http.Request) {
+func GetAllMenus(w http.ResponseWriter, r *http.Request) {
 	service := menu.MenuServiceImpl{}
 	menus, err := service.GetAll()
 	if err != nil {
@@ -21,8 +21,8 @@ func GetAllMenu(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetMenusByRestaurant is a handler for getting menu fetched by restaurant Id
-func GetMenusByRestaurant(id int64, w http.ResponseWriter, r *http.Request) {
+// GetMenuByRestaurant is a handler for getting menu fetched by restaurant Id
+func GetMenuByRestaurant(id int64, w http.ResponseWriter, r *http.Request) {
 	service := menu.MenuServiceImpl{}
 	restaurants, err := service.GetByRestaurantId(id)
 	if err != nil {

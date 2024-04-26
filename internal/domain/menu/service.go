@@ -48,7 +48,7 @@ func (service MenuServiceImpl) GetByRestaurantId(id int64) ([]Menu, error) {
 	return nil, errors.New("menu not found")
 }
 
-// loadMenus reads and unmarshals the menus from JSON file
+// loadMenus reads and deserializes the menus from JSON file
 func (service *MenuServiceImpl) loadMenus() error {
 	data, err := os.ReadFile(MenuPath)
 	if err != nil {

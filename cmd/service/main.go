@@ -15,13 +15,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-//const (
-//	// PageIDKey refers to the context key that stores the next page id
-//	PageIDKey CustomKey = "page_id"
-//)
-
-// Set handlers
-//TODO implement pagination
+var version string
 
 func init() {
 	// TODO: implement a custom structured logger
@@ -29,6 +23,7 @@ func init() {
 	log.SetFormatter(&log.JSONFormatter{})
 	// Log for informational purposes, then depends on necessity use log.SetLevel(log.WarnLevel)
 	log.SetLevel(log.InfoLevel)
+	log.Info("starting up API...", log.WithField("version", version))
 
 }
 
@@ -64,8 +59,9 @@ func main() {
 	//	r.With(m.Pagination.Get("/menus", getAllMenu)
 	//})
 	// A route for restaurants
-	r.Route("/api/v1", func(r chi.Router) {
-		r.Get("/restaurants", restaurant.GetAllRestaurants)
+	r.Route("/api/v1/restaurants", func(r chi.Router) {
+		r.With(paginate).Get("/", restaurant.GetAllRestaurants)
+
 	})
 
 	// Start the server
@@ -95,33 +91,6 @@ func main() {
 	log.Info("Graceful shutdown complete.")
 
 }
-
-//// Pagination Object
-//type Pagination struct {
-//	Next          int
-//	Previous      int
-//	RecordPerPage int
-//	CurrentPage   int
-//	TotalPage     int
-//}
-
-//// Pagination middleware is used to extract the next page id from the url query
-//func Pagination(next http.Handler) http.Handler {
-//	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-//		PageID := r.URL.Query().Get(string(PageIDKey))
-//		intPageID := 0
-//		var err error
-//		if PageID != "" {
-//			intPageID, err = strconv.Atoi(PageID)
-//			if err != nil {
-//				_ = render.Render(w, r, types.ErrInvalidRequest(fmt.Errorf("couldn't read %s: %w", PageIDKey, err)))
-//				return
-//			}
-//		}
-//		ctx := context.WithValue(r.Context(), PageIDKey, intPageID)
-//		next.ServeHTTP(w, r.WithContext(ctx))
-//	})
-//}
 
 type ErrResponse struct {
 	Err            error
