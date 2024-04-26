@@ -28,4 +28,4 @@ go.work
 **/*.json
 
 # Configuration files
-**/*.yaml
+config/*.yaml
