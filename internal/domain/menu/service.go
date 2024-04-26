@@ -6,7 +6,8 @@ import (
 	"os"
 )
 
-const MenuPath = "../../data/menus.json"
+// Add path to the configuration file
+const MenuPath = "internal/data/menus.json"
 
 // MenuService defines an API for menu service to be used by presentation layer
 type MenuService interface {

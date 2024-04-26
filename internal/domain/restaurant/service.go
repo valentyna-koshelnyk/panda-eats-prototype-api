@@ -24,7 +24,7 @@ type RestaurantServiceImpl struct {
 	Restaurants []Restaurant
 }
 
-const restaurantJSON = "../../data/restaurants.json"
+const restaurantJSON = "internal/data/restaurants.json"
 
 // loadRestaurants returns list of restaurants
 func (service *RestaurantServiceImpl) loadRestaurants() error {
