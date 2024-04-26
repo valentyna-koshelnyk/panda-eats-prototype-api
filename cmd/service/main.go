@@ -5,7 +5,9 @@ import (
 	"errors"
 	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/restaurant"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/repository"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,6 +18,14 @@ import (
 )
 
 var version string
+
+func initConfig() {
+	viper.AddConfigPath("./config")
+	viper.SetConfigName("config.dev")
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalf("Error reading config file, %s", err)
+	}
+}
 
 func init() {
 	// TODO: implement a custom structured logger
@@ -28,6 +38,7 @@ func init() {
 }
 
 func main() {
+	initConfig()
 	// Set a router
 	r := chi.NewRouter()
 	// Generate a unique identifier for every incoming HTTP request
@@ -39,7 +50,7 @@ func main() {
 
 	// Initiate a server
 	server := &http.Server{
-		Addr:    ":3000",
+		Addr:    ":" + viper.GetString("server.port"),
 		Handler: r,
 	}
 
@@ -59,14 +70,15 @@ func main() {
 	//	r.With(m.Pagination.Get("/menus", getAllMenu)
 	//})
 	// A route for restaurants
+
 	r.Route("/api/v1/restaurants", func(r chi.Router) {
-		r.With(paginate).Get("/", restaurant.GetAllRestaurants)
+		r.With(repository.Pagination).Get("/", restaurant.GetAllRestaurants)
 
 	})
 
 	// Start the server
 	go func() {
-		log.Info("Starting server on port :3000")
+		log.Info("Starting server on port :", viper.GetString("server.port"))
 		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("HTTP server error: %v", err)
 		}
@@ -92,12 +104,12 @@ func main() {
 
 }
 
-type ErrResponse struct {
-	Err            error
-	HTTPStatusCode int
-	StatusText     string
-}
+//type ErrResponse struct {
+//	Err            error
+//	HTTPStatusCode int
+//	StatusText     string
+//}
 
-func ErrInvalidRequest(err error) *ErrResponse {
-	return &ErrResponse{Err: err, HTTPStatusCode: http.StatusBadRequest, StatusText: "Invalid request."}
-}
+//func ErrInvalidRequest(err error) *ErrResponse {
+//	return &ErrResponse{Err: err, HTTPStatusCode: http.StatusBadRequest, StatusText: "Invalid request."}
+//}

@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	menu2 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/menu"
 	domain "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/restaurant"
 	"os"
 	"strconv"
 )
 
-const RestaurantPath = "data/restaurants.csv"
-const MenuPath = "data/restaurant-menus.csv"
+var RestaurantPath = viper.GetString("environment.restaurant_path")
+var MenuPath = viper.GetString("environment.menu_path")
 
 // ConverterRestaurant converts the CSV file to JSON, using mapping for Restaurant entity
 // TODO: to create a generic converter

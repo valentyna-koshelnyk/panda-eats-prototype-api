@@ -3,11 +3,12 @@ package menu
 import (
 	"encoding/json"
 	"errors"
+	"github.com/spf13/viper"
 	"os"
 )
 
-// Add path to the configuration file
-const MenuPath = "internal/data/menus.json"
+// MenuPath Add path to the configuration file
+var MenuPath = viper.GetString("paths.menu")
 
 // MenuService defines an API for menu service to be used by presentation layer
 type MenuService interface {

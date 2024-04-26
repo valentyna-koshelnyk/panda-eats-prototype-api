@@ -2,6 +2,7 @@ package restaurant
 
 import (
 	"encoding/json"
+	"github.com/spf13/viper"
 	"os"
 )
 
@@ -24,7 +25,7 @@ type RestaurantServiceImpl struct {
 	Restaurants []Restaurant
 }
 
-const restaurantJSON = "internal/data/restaurants.json"
+var restaurantJSON = viper.GetString("path.restaurant")
 
 // loadRestaurants returns list of restaurants
 func (service *RestaurantServiceImpl) loadRestaurants() error {
