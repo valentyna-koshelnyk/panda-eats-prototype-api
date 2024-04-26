@@ -27,3 +27,5 @@ go.work
 # Output for the converter to JSON
 **/*.json
 
+# Configuration files
+**/*.yaml
