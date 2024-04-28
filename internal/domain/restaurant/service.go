@@ -2,6 +2,7 @@ package restaurant
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/spf13/viper"
 	"os"
 )
@@ -20,16 +21,18 @@ type RestaurantService interface {
 	GetByZipCode(zipCode string) ([]Restaurant, error)
 }
 
-// Cache restaurant list after the first load
+// RestaurantServiceImpl Cache restaurant list after the first load
 type RestaurantServiceImpl struct {
 	Restaurants []Restaurant
 }
 
-var restaurantJSON = viper.GetString("path.restaurant")
+var restaurantJSON = viper.GetString("paths.restaurants")
 
 // loadRestaurants returns list of restaurants
 func (service *RestaurantServiceImpl) loadRestaurants() error {
-	data, err := os.ReadFile(restaurantJSON)
+	x := viper.GetString("paths.restaurants")
+
+	data, err := os.ReadFile(x)
 	if err != nil {
 		return err
 	}
@@ -40,6 +43,7 @@ func (service *RestaurantServiceImpl) loadRestaurants() error {
 	return nil
 }
 
+// GetAll gets the list of all restaurants
 func (service RestaurantServiceImpl) GetAll() ([]Restaurant, error) {
 	if service.Restaurants == nil {
 		if err := service.loadRestaurants(); err != nil {
@@ -47,4 +51,21 @@ func (service RestaurantServiceImpl) GetAll() ([]Restaurant, error) {
 		}
 	}
 	return service.Restaurants, nil
+}
+
+// GetById fetches the restaurant information by restaurant id
+func (service *RestaurantServiceImpl) GetById(id int64) (*Restaurant, error) {
+	if service.Restaurants == nil {
+		if err := service.loadRestaurants(); err != nil {
+			return nil, err
+		}
+	}
+
+	for i, restaurant := range service.Restaurants {
+		if id == restaurant.ID {
+			return &service.Restaurants[i], nil
+		}
+	}
+
+	return nil, fmt.Errorf("restaurant with ID %d not found", id)
 }

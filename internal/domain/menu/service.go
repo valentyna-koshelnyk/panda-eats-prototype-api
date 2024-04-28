@@ -3,6 +3,7 @@ package menu
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/spf13/viper"
 	"os"
 )
@@ -47,6 +48,22 @@ func (service MenuServiceImpl) GetByRestaurantId(id int64) ([]Menu, error) {
 		}
 	}
 	return nil, errors.New("menu not found")
+}
+
+func (service *MenuServiceImpl) GetById(id int64) (*Menu, error) {
+	if service.Menus == nil {
+		if err := service.loadMenus(); err != nil {
+			return nil, err
+		}
+	}
+
+	for i, menu := range service.Menus {
+		if id == menu.RestaurantID {
+			return &service.Menus[i], nil
+		}
+	}
+
+	return nil, fmt.Errorf("restaurant with ID %d not found", id)
 }
 
 // loadMenus reads and deserializes the menus from JSON file

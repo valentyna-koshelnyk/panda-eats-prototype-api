@@ -63,18 +63,18 @@ func main() {
 			log.Error("Failed to write response: %v", err)
 		}
 	})
-	//
-	//r.Route("/api/v1", func(r chi.Router) {
-	//	r.With(m.Pagination).Get("/restaurants", getAllRestaurants)
-	//	// A route for menus
-	//	r.With(m.Pagination.Get("/menus", getAllMenu)
-	//})
-	// A route for restaurants
 
 	r.Route("/api/v1/restaurants", func(r chi.Router) {
-		r.With(repository.Pagination).Get("/", restaurant.GetAllRestaurants)
+		r.Get("/", repository.PaginateHandler)
+		r.Route("/{id}", func(r chi.Router) {
+			r.Get("/", restaurant.GetRestaurantById)
+		})
 
-	})
+	}
+	r.Route("/api/v1/restaurants/{restaurant_id}/items", func(r chi.Router) {
+		r.Route()
+
+	}))
 
 	// Start the server
 	go func() {
@@ -103,13 +103,3 @@ func main() {
 	log.Info("Graceful shutdown complete.")
 
 }
-
-//type ErrResponse struct {
-//	Err            error
-//	HTTPStatusCode int
-//	StatusText     string
-//}
-
-//func ErrInvalidRequest(err error) *ErrResponse {
-//	return &ErrResponse{Err: err, HTTPStatusCode: http.StatusBadRequest, StatusText: "Invalid request."}
-//}

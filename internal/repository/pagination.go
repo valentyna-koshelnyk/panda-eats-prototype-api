@@ -1,55 +1,89 @@
 package repository
 
 import (
-	"context"
+	"encoding/json"
 	"fmt"
-	"github.com/go-chi/render"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/restaurant"
 	"net/http"
 	"strconv"
 )
 
 type CustomKey string
 
-type ErrResponse struct {
-	Err            error `json:"-"` // low-level runtime error
-	HTTPStatusCode int   `json:"-"` // http response status code
+// PageIDKey is the key for the page ID parameter
+const PageIDKey CustomKey = "page_id"
 
-	StatusText string `json:"status" example:"Resource not found."`                                         // user-level status message
-	AppCode    int64  `json:"code,omitempty" example:"404"`                                                 // application-specific error code
-	ErrorText  string `json:"error,omitempty" example:"The requested resource was not found on the server"` // application-level error message, for debugging
-} // @name ErrorResponse
-
-func (e ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
-	return nil
-
+// Pagination struct to hold pagination details
+type Pagination struct {
+	PageID     int    `json:"page_id"`
+	PageSize   int    `json:"page_size"`
+	TotalItems int    `json:"total_items"`
+	TotalPages int    `json:"total_pages"`
+	PrevPage   string `json:"prev_page,omitempty"`
+	NextPage   string `json:"next_page,omitempty"`
 }
 
-const (
-	// PageIDKey refers to the context key that stores the next page id
-	PageIDKey CustomKey = "page_id"
-)
+// PaginateHandler is a handler function that implements pagination
+func PaginateHandler(w http.ResponseWriter, r *http.Request) {
+	pageIDStr := r.URL.Query().Get(string(PageIDKey))
+	pageSize := 10
 
-func Pagination(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		PageID := r.URL.Query().Get(string(PageIDKey))
-		intPageID := 0
-		var err error
-		if PageID != "" {
-			intPageID, err = strconv.Atoi(PageID)
-			if err != nil {
-				_ = render.Render(w, r, ErrInvalidRequest(fmt.Errorf("couldn't read %s: %w", PageIDKey, err)))
-				return
-			}
-		}
-		ctx := context.WithValue(r.Context(), PageIDKey, intPageID)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-func ErrInvalidRequest(err error) render.Renderer {
-	return &ErrResponse{
-		Err:            err,
-		HTTPStatusCode: http.StatusBadRequest,
-		StatusText:     "Invalid request.",
-		ErrorText:      err.Error(),
+	pageID, err := strconv.Atoi(pageIDStr)
+	if err != nil {
+		pageID = 1
 	}
+	items, totalItems, err := fetchData(pageID, pageSize)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	totalPages := (totalItems + pageSize - 1) / pageSize
+	var prevPage, nextPage string
+	if pageID > 1 {
+		prevPage = fmt.Sprintf("%s?%s=%d", r.URL.Path, PageIDKey, pageID-1)
+	}
+	if pageID < totalPages {
+		nextPage = fmt.Sprintf("%s?%s=%d", r.URL.Path, PageIDKey, pageID+1)
+	}
+
+	pagination := Pagination{
+		PageID:     pageID,
+		PageSize:   pageSize,
+		TotalItems: totalItems,
+		TotalPages: totalPages,
+		PrevPage:   prevPage,
+		NextPage:   nextPage,
+	}
+
+	// Render the response
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(map[string]interface{}{
+		"data":       items,
+		"pagination": pagination,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func fetchData(pageID, pageSize int) ([]restaurant.Restaurant, int, error) {
+	service := &restaurant.RestaurantServiceImpl{}
+	restaurants, err := service.GetAll()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	startIndex := (pageID - 1) * pageSize
+	endIndex := startIndex + pageSize
+	if endIndex > len(restaurants) {
+		endIndex = len(restaurants)
+	}
+	paginatedRestaurants := make([]restaurant.Restaurant, 0, endIndex-startIndex)
+	for i := startIndex; i < endIndex; i++ {
+		paginatedRestaurants = append(paginatedRestaurants, restaurants[i])
+	}
+
+	return paginatedRestaurants, len(restaurants), nil
 }
