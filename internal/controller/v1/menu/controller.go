@@ -2,8 +2,10 @@ package menu
 
 import (
 	"encoding/json"
+	"github.com/go-chi/chi/v5"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/menu"
 	"net/http"
+	"strconv"
 )
 
 // GetAllMenu is a handler for getting all menus
@@ -21,17 +23,21 @@ func GetAllMenus(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetMenuByRestaurant is a handler for getting menu fetched by restaurant Id
-func GetMenuByRestaurant(id int64, w http.ResponseWriter, r *http.Request) {
+// GetMenuByRestaurant is a handler for getting dish fetched by restaurant Id
+func GetMenuByRestaurant(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "restaurant_id")
 	service := menu.MenuServiceImpl{}
-	restaurants, err := service.GetByRestaurantId(id)
+	id, err := strconv.ParseInt(idStr, 10, 64)
+
+	menu, err := service.GetById(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	err = json.NewEncoder(w).Encode(restaurants)
+
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(menu)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/menu"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/restaurant"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/repository"
 	"net/http"
@@ -63,18 +64,19 @@ func main() {
 			log.Error("Failed to write response: %v", err)
 		}
 	})
-
+	r.Route("/api/v1/menus", func(r chi.Router) {
+		r.Get("/", menu.GetAllMenus)
+	})
 	r.Route("/api/v1/restaurants", func(r chi.Router) {
 		r.Get("/", repository.PaginateHandler)
 		r.Route("/{id}", func(r chi.Router) {
 			r.Get("/", restaurant.GetRestaurantById)
 		})
+	})
 
-	}
 	r.Route("/api/v1/restaurants/{restaurant_id}/items", func(r chi.Router) {
-		r.Route()
-
-	}))
+		r.Get("/", menu.GetMenuByRestaurant)
+	})
 
 	// Start the server
 	go func() {
@@ -101,5 +103,4 @@ func main() {
 		log.Fatalf("HTTP shutdown error: %v", err)
 	}
 	log.Info("Graceful shutdown complete.")
-
 }

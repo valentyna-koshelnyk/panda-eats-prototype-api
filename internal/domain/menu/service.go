@@ -2,14 +2,12 @@ package menu
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/spf13/viper"
 	"os"
 )
 
 // MenuPath Add path to the configuration file
-var MenuPath = viper.GetString("paths.menu")
 
 // MenuService defines an API for menu service to be used by presentation layer
 type MenuService interface {
@@ -35,40 +33,29 @@ func (service MenuServiceImpl) GetAll() ([]Menu, error) {
 	return service.Menus, nil
 }
 
-func (service MenuServiceImpl) GetByRestaurantId(id int64) ([]Menu, error) {
-	if service.Menus == nil {
-		if err := service.loadMenus(); err != nil {
-		}
-	}
-	dishesByRestaurantId := []Menu{}
-	for _, menu := range service.Menus {
-		if menu.MenuID == id {
-			dishesByRestaurantId = append(dishesByRestaurantId, menu)
-			return dishesByRestaurantId, nil
-		}
-	}
-	return nil, errors.New("menu not found")
-}
-
-func (service *MenuServiceImpl) GetById(id int64) (*Menu, error) {
+func (service *MenuServiceImpl) GetById(id int64) ([]Menu, error) {
 	if service.Menus == nil {
 		if err := service.loadMenus(); err != nil {
 			return nil, err
 		}
 	}
-
-	for i, menu := range service.Menus {
+	var menus []Menu
+	for _, menu := range service.Menus {
 		if id == menu.RestaurantID {
-			return &service.Menus[i], nil
+			menus = append(menus, menu)
 		}
 	}
-
-	return nil, fmt.Errorf("restaurant with ID %d not found", id)
+	if len(menus) == 0 {
+		return nil, fmt.Errorf("no menu found for restaurant with ID %d", id)
+	}
+	return menus, nil
 }
 
 // loadMenus reads and deserializes the menus from JSON file
 func (service *MenuServiceImpl) loadMenus() error {
-	data, err := os.ReadFile(MenuPath)
+	x := viper.GetString("paths.menu")
+	data, err := os.ReadFile(x)
+
 	if err != nil {
 		return err
 	}
