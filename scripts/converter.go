@@ -118,4 +118,5 @@ func ConverterMenu() {
 
 func main() {
 	ConverterMenu()
+	ConverterRestaurant()
 }

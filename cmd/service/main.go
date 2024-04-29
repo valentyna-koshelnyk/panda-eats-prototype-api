@@ -6,9 +6,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	v1 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/menu"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/restaurant"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/repository"
 	"net/http"
 	"os"
 	"os/signal"
@@ -56,7 +55,6 @@ func main() {
 	}
 
 	//Set routes
-
 	// A route for health check
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte("OK"))
@@ -68,17 +66,9 @@ func main() {
 	r.Route("/api/v1/menus", func(r chi.Router) {
 		r.Get("/", menu.GetAllMenus)
 	})
-	//TODO: to check why it extracts 1 restaurant
-	r.Route("/api/v1/restaurants", func(r chi.Router) {
-		r.Get("/", repository.PaginateHandler)
-		r.Route("/{id}", func(r chi.Router) {
-			r.Get("/", restaurant.GetRestaurantById)
-		})
-		r.Route("/{restaurant_id}/items", func(r chi.Router) {
-			r.Get("/", menu.GetMenuByRestaurant)
-		})
-	})
-	// Start the server
+
+	r.Mount("/api/v1/restaurants", v1.RestaurantRoutes())
+
 	go func() {
 		log.Info("Starting server on port :", viper.GetString("server.port"))
 		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
