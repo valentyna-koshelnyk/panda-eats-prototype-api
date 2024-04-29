@@ -8,30 +8,24 @@ import (
 )
 
 // RestaurantService defines an API for restaurant service to be used by presentation layer
-type RestaurantService interface {
+type restaurantService interface {
 	// FindAll fetches all restaurants list
 	FindAll() ([]Restaurant, error)
 	// FindById fetches restaurant by Id
 	FindById(id int64) (*Restaurant, error)
-	// GetByCategory fetches restaurants by category
-	GetByCategory(categoryId string) ([]Restaurant, error)
-	// GetByPriceRange fetches restaurants by price range
-	GetByPriceRange(priceRange string) ([]Restaurant, error)
-	// GetByZipCode fetches restaurants by Zip Code
-	GetByZipCode(zipCode string) ([]Restaurant, error)
 	//FindByCategoryPriceZip retrieves restaurants by category, price and zip
 	FindByCategoryPriceZip(category string, priceRange string, zip string) ([]Restaurant, error)
 }
 
-// RestaurantServiceImpl Cache restaurant list after the first load
-type RestaurantServiceImpl struct {
+// RestaurantService Cache restaurant list after the first load
+type RestaurantService struct {
 	Restaurants []Restaurant
 }
 
 var restaurantJSON = viper.GetString("paths.restaurants")
 
 // loadRestaurants returns list of restaurants
-func (service *RestaurantServiceImpl) loadRestaurants() error {
+func (service *RestaurantService) loadRestaurants() error {
 	x := viper.GetString("paths.restaurants")
 
 	data, err := os.ReadFile(x)
@@ -46,7 +40,7 @@ func (service *RestaurantServiceImpl) loadRestaurants() error {
 }
 
 // FindAll gets the list of all restaurants
-func (service RestaurantServiceImpl) FindAll() ([]Restaurant, error) {
+func (service RestaurantService) FindAll() ([]Restaurant, error) {
 	if service.Restaurants == nil {
 		if err := service.loadRestaurants(); err != nil {
 			return nil, err
@@ -56,7 +50,7 @@ func (service RestaurantServiceImpl) FindAll() ([]Restaurant, error) {
 }
 
 // FindById fetches the restaurant information by restaurant id
-func (service *RestaurantServiceImpl) FindById(id int64) (*Restaurant, error) {
+func (service *RestaurantService) FindById(id int64) (*Restaurant, error) {
 	if service.Restaurants == nil {
 		if err := service.loadRestaurants(); err != nil {
 			return nil, err
@@ -72,7 +66,7 @@ func (service *RestaurantServiceImpl) FindById(id int64) (*Restaurant, error) {
 	return nil, fmt.Errorf("restaurant with ID %d not found", id)
 }
 
-func (service *RestaurantServiceImpl) FindByCategoryPriceZip(category string, priceRange string, zipCode string) []Restaurant {
+func (service *RestaurantService) FindByCategoryPriceZip(category string, priceRange string, zipCode string) []Restaurant {
 	if service.Restaurants == nil {
 		if err := service.loadRestaurants(); err != nil {
 			return nil

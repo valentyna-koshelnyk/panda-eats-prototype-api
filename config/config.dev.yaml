@@ -7,5 +7,5 @@ server:
 paths:
   restaurants: "internal/data/restaurants.json"
   menu: "internal/data/menus.json"
-  menu_csv: "internal/data/restaurant-menus.csv"
-  restaurant_csv: "internal/data/restaurants.csv"
+  menu_csv: "./internal/data/restaurant-menus.csv"
+  restaurant_csv: "./internal/data/restaurants.csv"

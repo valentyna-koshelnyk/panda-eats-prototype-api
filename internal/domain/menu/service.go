@@ -8,7 +8,7 @@ import (
 )
 
 // MenuService defines an API for menu service to be used by presentation layer
-type MenuService interface {
+type menuService interface {
 	// GetAll fetches all dishes (menus) list
 	FindAll() ([]*Menu, error)
 	// GetByMenuId fetches menu by dish Id
