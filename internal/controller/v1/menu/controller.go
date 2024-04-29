@@ -8,8 +8,8 @@ import (
 	"strconv"
 )
 
-// GetAllMenu is a handler for getting all menus
-func GetAllMenus(w http.ResponseWriter, r *http.Request) {
+// GetAllMenus is a handler for getting all menus
+func GetAllMenus(w http.ResponseWriter, _ *http.Request) {
 	service := menu.NewMenuService()
 	menus, err := service.FindAll()
 	if err != nil {
@@ -29,14 +29,14 @@ func GetMenuByRestaurant(w http.ResponseWriter, r *http.Request) {
 	service := menu.NewMenuService()
 	id, err := strconv.ParseInt(idStr, 10, 64)
 
-	menu, err := service.FindByRestaurantId(id)
+	m, err := service.FindByRestaurantId(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(menu)
+	err = json.NewEncoder(w).Encode(m)
 	if err != nil {
 		return
 	}

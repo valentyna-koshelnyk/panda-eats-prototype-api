@@ -21,9 +21,7 @@ type menuService struct {
 }
 
 func NewMenuService() MenuService {
-	return &menuService{
-		Menus: []Menu{},
-	}
+	return &menuService{}
 }
 
 func (service *menuService) FindAll() ([]Menu, error) {
