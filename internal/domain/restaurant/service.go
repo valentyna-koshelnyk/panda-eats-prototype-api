@@ -30,9 +30,9 @@ var restaurantJSON = viper.GetString("paths.restaurants")
 
 // loadRestaurants returns list of restaurants
 func (service *restaurantService) loadRestaurants() error {
-	//x := viper.GetString("paths.restaurants")
+	x := viper.GetString("paths.restaurants")
 
-	data, err := os.ReadFile("/Users/v.koshelnyk/panda-eats-prototype-api/panda-eats-prototype-api/internal/data/restaurants.json")
+	data, err := os.ReadFile(x)
 	if err != nil {
 		return err
 	}
