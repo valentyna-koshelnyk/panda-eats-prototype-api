@@ -7,22 +7,26 @@ import (
 	"os"
 )
 
-// MenuService defines an API for menu service to be used by presentation layer
-type menuService interface {
-	// GetAll fetches all dishes (menus) list
-	FindAll() ([]*Menu, error)
-	// GetByMenuId fetches menu by dish Id
-	FindByMenuId(id int64) (*Menu, error)
-	// GetByRestaurantId fetches menu by restaurant Id
-	FindByRestaurantId(restaurantId int64) (*Menu, error)
+// Service defines an API for menu service to be used by presentation layer
+type MenuService interface {
+	// FindAll fetches all dishes (menus) list
+	FindAll() ([]Menu, error)
+	// FindByRestaurantId fetches menu by restaurant Id
+	FindByRestaurantId(restaurantId int64) ([]Menu, error)
 }
 
 // Cache menus list after the first load
-type MenuServiceImpl struct {
+type menuService struct {
 	Menus []Menu
 }
 
-func (service MenuServiceImpl) FindAll() ([]Menu, error) {
+func NewMenuService() MenuService {
+	return &menuService{
+		Menus: []Menu{},
+	}
+}
+
+func (service *menuService) FindAll() ([]Menu, error) {
 	if service.Menus == nil {
 		if err := service.loadMenus(); err != nil {
 			return nil, err
@@ -31,7 +35,7 @@ func (service MenuServiceImpl) FindAll() ([]Menu, error) {
 	return service.Menus, nil
 }
 
-func (service *MenuServiceImpl) FindByRestaurantId(id int64) ([]Menu, error) {
+func (service *menuService) FindByRestaurantId(id int64) ([]Menu, error) {
 	if service.Menus == nil {
 		if err := service.loadMenus(); err != nil {
 			return nil, err
@@ -50,7 +54,7 @@ func (service *MenuServiceImpl) FindByRestaurantId(id int64) ([]Menu, error) {
 }
 
 // loadMenus reads and deserializes the menus from JSON file
-func (service *MenuServiceImpl) loadMenus() error {
+func (service *menuService) loadMenus() error {
 	x := viper.GetString("paths.menu")
 	data, err := os.ReadFile(x)
 

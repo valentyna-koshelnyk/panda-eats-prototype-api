@@ -13,7 +13,7 @@ import (
 func GetRestaurantById(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 
-	service := restaurant.RestaurantServiceImpl{}
+	service := restaurant.NewRestaurantService()
 	id, err := strconv.ParseInt(idStr, 10, 64)
 
 	restaurant, err := service.FindById(id)
@@ -48,9 +48,9 @@ func GetByCategoryPriceZip(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
 	price_range := r.URL.Query().Get("price_range")
 	zip_code := r.URL.Query().Get("zip_code")
-	service := restaurant.RestaurantServiceImpl{}
+	var service = restaurant.NewRestaurantService()
 	var allRestaurants []restaurant.Restaurant
-	allRestaurants = service.FindByCategoryPriceZip(category, price_range, zip_code)
+	allRestaurants, err = service.FindByCategoryPriceZip(category, price_range, zip_code)
 
 	// Apply pagination to the restaurants
 	startIndex := (pageID - 1) * pageSize
