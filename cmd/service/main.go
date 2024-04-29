@@ -64,22 +64,20 @@ func main() {
 			log.Error("Failed to write response: %v", err)
 		}
 	})
+
 	r.Route("/api/v1/menus", func(r chi.Router) {
 		r.Get("/", menu.GetAllMenus)
 	})
+	//TODO: to check why it extracts 1 restaurant
 	r.Route("/api/v1/restaurants", func(r chi.Router) {
 		r.Get("/", repository.PaginateHandler)
-		//TODO: implement proper routes for filtering by category, price and zip
-		r.Get("/", restaurant.GetByCategoryPriceZip)
 		r.Route("/{id}", func(r chi.Router) {
 			r.Get("/", restaurant.GetRestaurantById)
 		})
+		r.Route("/{restaurant_id}/items", func(r chi.Router) {
+			r.Get("/", menu.GetMenuByRestaurant)
+		})
 	})
-
-	r.Route("/api/v1/restaurants/{restaurant_id}/items", func(r chi.Router) {
-		r.Get("/", menu.GetMenuByRestaurant)
-	})
-
 	// Start the server
 	go func() {
 		log.Info("Starting server on port :", viper.GetString("server.port"))
