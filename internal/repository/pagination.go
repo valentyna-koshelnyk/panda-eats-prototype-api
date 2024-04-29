@@ -70,7 +70,7 @@ func PaginateHandler(w http.ResponseWriter, r *http.Request) {
 
 func fetchData(pageID, pageSize int) ([]restaurant.Restaurant, int, error) {
 	service := &restaurant.RestaurantServiceImpl{}
-	restaurants, err := service.GetAll()
+	restaurants, err := service.FindAll()
 	if err != nil {
 		return nil, 0, err
 	}

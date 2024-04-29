@@ -9,16 +9,18 @@ import (
 
 // RestaurantService defines an API for restaurant service to be used by presentation layer
 type RestaurantService interface {
-	// GetAll fetches all restaurants list
-	GetAll() ([]Restaurant, error)
-	// GetById fetches restaurant by Id
-	GetById(id int64) (*Restaurant, error)
+	// FindAll fetches all restaurants list
+	FindAll() ([]Restaurant, error)
+	// FindById fetches restaurant by Id
+	FindById(id int64) (*Restaurant, error)
 	// GetByCategory fetches restaurants by category
 	GetByCategory(categoryId string) ([]Restaurant, error)
 	// GetByPriceRange fetches restaurants by price range
 	GetByPriceRange(priceRange string) ([]Restaurant, error)
 	// GetByZipCode fetches restaurants by Zip Code
 	GetByZipCode(zipCode string) ([]Restaurant, error)
+	//FindByCategoryPriceZip retrieves restaurants by category, price and zip
+	FindByCategoryPriceZip(category string, priceRange string, zip string) ([]Restaurant, error)
 }
 
 // RestaurantServiceImpl Cache restaurant list after the first load
@@ -43,8 +45,8 @@ func (service *RestaurantServiceImpl) loadRestaurants() error {
 	return nil
 }
 
-// GetAll gets the list of all restaurants
-func (service RestaurantServiceImpl) GetAll() ([]Restaurant, error) {
+// FindAll gets the list of all restaurants
+func (service RestaurantServiceImpl) FindAll() ([]Restaurant, error) {
 	if service.Restaurants == nil {
 		if err := service.loadRestaurants(); err != nil {
 			return nil, err
@@ -53,8 +55,8 @@ func (service RestaurantServiceImpl) GetAll() ([]Restaurant, error) {
 	return service.Restaurants, nil
 }
 
-// GetById fetches the restaurant information by restaurant id
-func (service *RestaurantServiceImpl) GetById(id int64) (*Restaurant, error) {
+// FindById fetches the restaurant information by restaurant id
+func (service *RestaurantServiceImpl) FindById(id int64) (*Restaurant, error) {
 	if service.Restaurants == nil {
 		if err := service.loadRestaurants(); err != nil {
 			return nil, err
@@ -68,4 +70,23 @@ func (service *RestaurantServiceImpl) GetById(id int64) (*Restaurant, error) {
 	}
 
 	return nil, fmt.Errorf("restaurant with ID %d not found", id)
+}
+
+func (service *RestaurantServiceImpl) FindByCategoryPriceZip(category string, priceRange string, zipCode string) []Restaurant {
+	if service.Restaurants == nil {
+		if err := service.loadRestaurants(); err != nil {
+			return nil
+		}
+	}
+	var restaurants []Restaurant
+	for _, restaurant := range service.Restaurants {
+		if restaurant.Category == category && restaurant.ZipCode == zipCode && restaurant.PriceRange == priceRange {
+			restaurants = append(restaurants, restaurant)
+			return []Restaurant{restaurant}
+		}
+	}
+	if len(restaurants) == 0 {
+		return nil
+	}
+	return restaurants
 }

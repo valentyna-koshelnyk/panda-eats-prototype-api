@@ -7,16 +7,14 @@ import (
 	"os"
 )
 
-// MenuPath Add path to the configuration file
-
 // MenuService defines an API for menu service to be used by presentation layer
 type MenuService interface {
 	// GetAll fetches all dishes (menus) list
-	GetAll() ([]*Menu, error)
+	FindAll() ([]*Menu, error)
 	// GetByMenuId fetches menu by dish Id
-	GetByMenuId(id int64) (*Menu, error)
+	FindByMenuId(id int64) (*Menu, error)
 	// GetByRestaurantId fetches menu by restaurant Id
-	GetByRestaurantId(restaurantId int64) (*Menu, error)
+	FindByRestaurantId(restaurantId int64) (*Menu, error)
 }
 
 // Cache menus list after the first load
@@ -24,7 +22,7 @@ type MenuServiceImpl struct {
 	Menus []Menu
 }
 
-func (service MenuServiceImpl) GetAll() ([]Menu, error) {
+func (service MenuServiceImpl) FindAll() ([]Menu, error) {
 	if service.Menus == nil {
 		if err := service.loadMenus(); err != nil {
 			return nil, err
@@ -33,7 +31,7 @@ func (service MenuServiceImpl) GetAll() ([]Menu, error) {
 	return service.Menus, nil
 }
 
-func (service *MenuServiceImpl) GetById(id int64) ([]Menu, error) {
+func (service *MenuServiceImpl) FindByRestaurantId(id int64) ([]Menu, error) {
 	if service.Menus == nil {
 		if err := service.loadMenus(); err != nil {
 			return nil, err

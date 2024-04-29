@@ -69,6 +69,8 @@ func main() {
 	})
 	r.Route("/api/v1/restaurants", func(r chi.Router) {
 		r.Get("/", repository.PaginateHandler)
+		//TODO: implement proper routes for filtering by category, price and zip
+		r.Get("/", restaurant.GetByCategoryPriceZip)
 		r.Route("/{id}", func(r chi.Router) {
 			r.Get("/", restaurant.GetRestaurantById)
 		})
