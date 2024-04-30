@@ -2,7 +2,7 @@ package menu
 
 // A Menu represents menu entity which is a menu of the restaurant
 type Menu struct {
-	RestaurantID int64  `json:"restaurant-id" `
+	RestaurantID int64  `json:"restaurant_id" `
 	Category     string `json:"category"`
 	Name         string `json:"name"`
 	Description  string `json:"description"`

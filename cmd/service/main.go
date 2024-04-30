@@ -7,7 +7,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	v1 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/menu"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,8 +16,6 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-var version string
-
 func initConfig() {
 	viper.AddConfigPath("./config")
 	viper.SetConfigName("config.dev")
@@ -26,6 +23,8 @@ func initConfig() {
 		log.Fatalf("Error reading config file, %s", err)
 	}
 }
+
+var version string
 
 func init() {
 	// TODO: implement a custom structured logger
@@ -63,11 +62,9 @@ func main() {
 		}
 	})
 
-	r.Route("/api/v1/menus", func(r chi.Router) {
-		r.Get("/", menu.GetAllMenus)
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Mount("/", v1.Routes())
 	})
-
-	r.Mount("/api/v1/restaurants", v1.RestaurantRoutes())
 
 	go func() {
 		log.Info("Starting server on port :", viper.GetString("server.port"))

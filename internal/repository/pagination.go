@@ -8,6 +8,7 @@ import (
 	"strconv"
 )
 
+// CustomKey is a custom type for the key to retrieve the page ID param
 type CustomKey string
 
 // PageIDKey is the key for the page ID parameter
@@ -23,8 +24,8 @@ type Pagination struct {
 	NextPage   string `json:"next_page,omitempty"`
 }
 
-// PaginateHandler is a handler function that implements pagination
-func PaginateHandler(w http.ResponseWriter, r *http.Request) {
+// GetAllRestaurants is a handler function that implements pagination
+func GetAllRestaurants(w http.ResponseWriter, r *http.Request) {
 	pageIDStr := r.URL.Query().Get(string(PageIDKey))
 	pageSize := 10
 
@@ -65,6 +66,76 @@ func PaginateHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+}
+
+// GetByCategoryPriceZip is a handler for filtering by category AND/OR price range AND/OR zip
+func GetByCategoryPriceZip(w http.ResponseWriter, r *http.Request) {
+	pageIDStr := r.URL.Query().Get(string(PageIDKey))
+	pageSize := 10
+
+	pageID, err := strconv.Atoi(pageIDStr)
+	if err != nil {
+		pageID = 1
+	}
+
+	category := r.URL.Query().Get("category")
+	priceRange := r.URL.Query().Get("price_range")
+	zipCode := r.URL.Query().Get("zip_code")
+
+	// Initialize restaurant service
+	service := restaurant.NewRestaurantService()
+
+	// Filter restaurants by category, price, and zip before pagination
+	allRestaurants := service.FilterByCategoryPriceZip(category, priceRange, zipCode)
+
+	// Calculate pagination details
+	totalItems := len(allRestaurants)
+	totalPages := (totalItems + pageSize - 1) / pageSize
+
+	// Correct boundary checks for pagination
+	startIndex := (pageID - 1) * pageSize
+	if startIndex > totalItems {
+		http.Error(w, "Page not found", http.StatusNotFound)
+		return
+	}
+	endIndex := startIndex + pageSize
+	if endIndex > totalItems {
+		endIndex = totalItems
+	}
+
+	// Slice the specific page's data
+	restaurants := allRestaurants[startIndex:endIndex]
+
+	// Pagination URLs
+	var prevPage, nextPage string
+	if pageID > 1 {
+		prevPage = fmt.Sprintf("%s?%s=%d&category=%s&price_range=%s&zip_code=%s", r.URL.Path, PageIDKey, pageID-1, category, priceRange, zipCode)
+	}
+	if pageID < totalPages {
+		nextPage = fmt.Sprintf("%s?%s=%d&category=%s&price_range=%s&zip_code=%s", r.URL.Path, PageIDKey, pageID+1, category, priceRange, zipCode)
+	}
+
+	// Prepare the pagination object
+	pagination := map[string]interface{}{
+		"page_id":     pageID,
+		"page_size":   pageSize,
+		"total_items": totalItems,
+		"total_pages": totalPages,
+		"prev_page":   prevPage,
+		"next_page":   nextPage,
+	}
+
+	// Prepare the response
+	response := map[string]interface{}{
+		"data":       restaurants,
+		"pagination": pagination,
+	}
+
+	// Set content type and encode the response as JSON
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 

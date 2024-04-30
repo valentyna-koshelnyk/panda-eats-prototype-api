@@ -7,33 +7,13 @@ import (
 	"os"
 )
 
-// Service defines an API for menu service to be used by presentation layer
-type MenuService interface {
-	// FindAll fetches all dishes (menus) list
-	FindAll() ([]Menu, error)
-	// FindByRestaurantId fetches menu by restaurant Id
-	FindByRestaurantId(restaurantId int64) ([]Menu, error)
-}
-
-// Cache menus list after the first load
-type menuService struct {
+// Service Cache menus list after the first load
+type Service struct {
 	Menus []Menu
 }
 
-func NewMenuService() MenuService {
-	return &menuService{}
-}
-
-func (service *menuService) FindAll() ([]Menu, error) {
-	if service.Menus == nil {
-		if err := service.loadMenus(); err != nil {
-			return nil, err
-		}
-	}
-	return service.Menus, nil
-}
-
-func (service *menuService) FindByRestaurantId(id int64) ([]Menu, error) {
+// FindByRestaurantID fetches menu of the restaurant by restaurant Id and returns the list of dishes
+func (service *Service) FindByRestaurantID(id int64) ([]Menu, error) {
 	if service.Menus == nil {
 		if err := service.loadMenus(); err != nil {
 			return nil, err
@@ -52,7 +32,7 @@ func (service *menuService) FindByRestaurantId(id int64) ([]Menu, error) {
 }
 
 // loadMenus reads and deserializes the menus from JSON file
-func (service *menuService) loadMenus() error {
+func (service *Service) loadMenus() error {
 	x := viper.GetString("paths.menu")
 	data, err := os.ReadFile(x)
 

@@ -21,7 +21,6 @@ func initConfig() {
 }
 
 // ConverterRestaurant converts the CSV file to JSON, using mapping for Restaurant entity
-// TODO: to create a generic converter
 func ConverterRestaurant() {
 	x := viper.GetString("paths.restaurant_csv")
 	csvFile, err := os.Open(x)
@@ -67,8 +66,8 @@ func ConverterRestaurant() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	pr_json := viper.GetString("paths.restaurants")
-	jsonFile, err := os.Create(pr_json)
+	prJSON := viper.GetString("paths.restaurants")
+	jsonFile, err := os.Create(prJSON)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -76,6 +75,7 @@ func ConverterRestaurant() {
 	jsonFile.Close()
 }
 
+// ConverterMenu converts menu csv file to json
 func ConverterMenu() {
 	x := viper.GetString("paths.menu_csv")
 	csvFile, err := os.Open(x)
@@ -116,8 +116,8 @@ func ConverterMenu() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	pm_json := viper.GetString("paths.menu")
-	jsonFile, err := os.Create(pm_json)
+	pmJSON := viper.GetString("paths.menu")
+	jsonFile, err := os.Create(pmJSON)
 	if err != nil {
 		fmt.Println(err)
 	}

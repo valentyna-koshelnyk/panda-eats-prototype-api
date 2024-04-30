@@ -1,6 +1,4 @@
 # config.yaml
-api:
-  version: "1"
 server:
   host: "localhost"
   port: "3000"

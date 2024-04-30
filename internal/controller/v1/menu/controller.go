@@ -8,28 +8,13 @@ import (
 	"strconv"
 )
 
-// GetAllMenus is a handler for getting all menus
-func GetAllMenus(w http.ResponseWriter, _ *http.Request) {
-	service := menu.NewMenuService()
-	menus, err := service.FindAll()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err = json.NewEncoder(w).Encode(menus)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
 // GetMenuByRestaurant is a handler for getting dish fetched by restaurant Id
 func GetMenuByRestaurant(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "restaurant_id")
-	service := menu.NewMenuService()
+	service := menu.Service{}
 	id, err := strconv.ParseInt(idStr, 10, 64)
 
-	m, err := service.FindByRestaurantId(id)
+	m, err := service.FindByRestaurantID(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
