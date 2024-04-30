@@ -2,7 +2,6 @@ package restaurant
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/spf13/viper"
 	"os"
 	"strings"
@@ -12,8 +11,6 @@ import (
 type Service interface {
 	// FindAll fetches all restaurants list
 	FindAll() ([]Restaurant, error)
-	// FindByID fetches restaurant by Id
-	FindByID(id int64) (*Restaurant, error)
 	//FilterByCategoryPriceZip retrieves restaurants by category, price and zip
 	FilterByCategoryPriceZip(category string, priceRange string, zip string) []Restaurant
 }
@@ -53,23 +50,6 @@ func (service service) FindAll() ([]Restaurant, error) {
 		}
 	}
 	return service.Restaurants, nil
-}
-
-// FindByID fetches the restaurant information by restaurant id
-func (service *service) FindByID(id int64) (*Restaurant, error) {
-	if service.Restaurants == nil {
-		if err := service.loadRestaurants(); err != nil {
-			return nil, err
-		}
-	}
-
-	for i, restaurant := range service.Restaurants {
-		if id == restaurant.ID {
-			return &service.Restaurants[i], nil
-		}
-	}
-
-	return nil, fmt.Errorf("restaurant with ID %d not found", id)
 }
 
 // FilterByCategoryPriceZip filters restaurants by category, price range or zip

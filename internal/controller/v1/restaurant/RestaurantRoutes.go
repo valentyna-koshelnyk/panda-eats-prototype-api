@@ -10,7 +10,6 @@ import (
 func Routes() chi.Router {
 	r := chi.NewRouter()
 	r.Get("/", repository.GetAllRestaurants)
-	r.Get("/{id}", GetRestaurantByID)
 	r.Get("/{restaurant_id}/items", menu.GetMenuByRestaurant)
 	r.Get("/", repository.GetByCategoryPriceZip)
 	return r
