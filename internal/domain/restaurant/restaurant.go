@@ -1,4 +1,4 @@
-package domain
+package restaurant
 
 import (
 	"errors"
@@ -7,7 +7,6 @@ import (
 
 // A Restaurant represents information about the restaurant entity
 type Restaurant struct {
-	// use int instead of uint since JSON doesn't distinguish and to avoid casting
 	ID          int64   `json:"id"`
 	Position    string  `json:"position"`
 	Name        string  `json:"name"`

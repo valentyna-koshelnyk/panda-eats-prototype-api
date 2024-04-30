@@ -5,18 +5,25 @@ import (
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/domain"
+	"github.com/spf13/viper"
+	menu2 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/menu"
+	domain "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/restaurant"
 	"os"
 	"strconv"
 )
 
-const RestaurantPath = "data/restaurants.csv"
-const MenuPath = "data/restaurant-menus.csv"
+func initConfig() {
+	viper.AddConfigPath("./config")
+	viper.SetConfigName("config.dev")
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalf("Error reading config file, %s", err)
+	}
+}
 
 // ConverterRestaurant converts the CSV file to JSON, using mapping for Restaurant entity
-// TODO: to create a generic converter
 func ConverterRestaurant() {
-	csvFile, err := os.Open(RestaurantPath)
+	x := viper.GetString("paths.restaurant_csv")
+	csvFile, err := os.Open(x)
 	if err != nil {
 		log.Fatalf("Error opening CSV file: %v", err)
 	}
@@ -59,7 +66,8 @@ func ConverterRestaurant() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	jsonFile, err := os.Create("./restaurants.json")
+	prJSON := viper.GetString("paths.restaurants")
+	jsonFile, err := os.Create(prJSON)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -67,8 +75,10 @@ func ConverterRestaurant() {
 	jsonFile.Close()
 }
 
+// ConverterMenu converts menu csv file to json
 func ConverterMenu() {
-	csvFile, err := os.Open(MenuPath)
+	x := viper.GetString("paths.menu_csv")
+	csvFile, err := os.Open(x)
 	if err != nil {
 		log.Fatalf("Error opening CSV file: %v", err)
 	}
@@ -85,18 +95,18 @@ func ConverterMenu() {
 		os.Exit(1)
 	}
 
-	menu := domain.Menu{}
-	var menus []domain.Menu
+	menu := menu2.Menu{}
+	var menus []menu2.Menu
 	for _, each := range csvData {
 		if len(each) < 5 {
 			fmt.Println("Encountered a row with insufficient fields")
 			continue
 		}
 		menu.RestaurantID, _ = strconv.ParseInt(each[0], 10, 64)
-		menu.Name = each[1]
-		menu.Price = each[2]
+		menu.Category = each[1]
+		menu.Name = each[2]
 		menu.Description = each[3]
-		menu.Category = each[4]
+		menu.Price = each[4]
 
 		menus = append(menus, menu)
 	}
@@ -106,8 +116,8 @@ func ConverterMenu() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
-	jsonFile, err := os.Create("./menus.json")
+	pmJSON := viper.GetString("paths.menu")
+	jsonFile, err := os.Create(pmJSON)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -116,6 +126,7 @@ func ConverterMenu() {
 }
 
 func main() {
+	initConfig()
 	ConverterMenu()
 	ConverterRestaurant()
 }

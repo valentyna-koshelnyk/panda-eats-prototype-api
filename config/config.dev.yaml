@@ -1,0 +1,9 @@
+# config.yaml
+server:
+  host: "localhost"
+  port: "3000"
+paths:
+  restaurants: "./internal/data/restaurants.json"
+  menu: "./internal/data/menus.json"
+  menu_csv: "./internal/data/restaurant-menus.csv"
+  restaurant_csv: "./internal/data/restaurants.csv"
