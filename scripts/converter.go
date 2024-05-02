@@ -7,12 +7,33 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
-	menu2 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/menu"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/menu"
 	domain "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/restaurant"
 	"gorm.io/gorm/clause"
 	"os"
 	"strconv"
 )
+
+const createRestaurantTable = "CREATE TABLE IF NOT EXISTS restaurants(" +
+	"CREATE TABLE Restaurants (restaurant_id SERIAL PRIMARY KEY," +
+	" position INT," +
+	" name VARCHAR(255)," +
+	" score DECIMAL, " +
+	" ratings INT, " +
+	" category VARCHAR(255)," +
+	" price_range VARCHAR(255), " +
+	" full_address VARCHAR(255) NOT NULL," +
+	" zip_code VARCHAR(50) NOT NULL," +
+	" lat DECIMAL(7,2) NOT NULL, " +
+	" lng DECIMAL(7,2) NOT NULL "
+
+const createMenuTable = "CREATE TABLE Menus (" +
+	" restaurant_id INT," +
+	" dish_id SERIAL PRIMARY KEY," +
+	" category VARCHAR(255)," +
+	" name VARCHAR(255)," +
+	" description VARCHAR(255)," +
+	" FOREIGN KEY (restaurant_id) REFERENCES Restaurants(restaurant_id));"
 
 func initConfig() {
 	viper.AddConfigPath("./config")
@@ -96,20 +117,20 @@ func ConverterMenuCSVtoJSON() {
 		os.Exit(1)
 	}
 
-	menu := menu2.Menu{}
-	var menus []menu2.Menu
+	m := menu.Menu{}
+	var menus []menu.Menu
 	for _, each := range csvData {
 		if len(each) < 5 {
 			fmt.Println("Encountered a row with insufficient fields")
 			continue
 		}
-		menu.RestaurantID, _ = strconv.ParseInt(each[0], 10, 64)
-		menu.Category = each[1]
-		menu.Name = each[2]
-		menu.Description = each[3]
-		menu.Price = each[4]
+		m.RestaurantID, _ = strconv.ParseInt(each[0], 10, 64)
+		m.Category = each[1]
+		m.Name = each[2]
+		m.Description = each[3]
+		m.Price = each[4]
 
-		menus = append(menus, menu)
+		menus = append(menus, m)
 	}
 
 	jsonData, err := json.Marshal(menus)
@@ -170,6 +191,7 @@ func ConverterRestaurantCSVtoDB() {
 	}
 
 	db := config.InitDB()
+	db.Exec(createRestaurantTable)
 	sqlDB, err := db.DB()
 	defer sqlDB.Close()
 
@@ -183,9 +205,60 @@ func ConverterRestaurantCSVtoDB() {
 	}
 }
 
+// ConverterMenuCSVtoDB parses data from csv dataset to database
+func ConverterMenuCSVtoDB() {
+	x := viper.GetString("paths.menu_csv")
+	csvFile, err := os.Open(x)
+	if err != nil {
+		log.Fatalf("Error opening CSV file: %v", err)
+	}
+	defer csvFile.Close()
+
+	reader := csv.NewReader(csvFile)
+	reader.FieldsPerRecord = -1
+	reader.LazyQuotes = true
+
+	csvData, err := reader.ReadAll()
+	if err != nil {
+		log.Fatalf("Error reading CSV file: %v", err)
+	}
+
+	var menus []menu.Menu
+	for _, each := range csvData {
+		if len(each) < 5 {
+			log.Printf("Encountered a row with insufficient fields: %v", each)
+			continue
+		}
+
+		restaurantID, _ := strconv.ParseInt(each[0], 10, 64)
+		m := menu.Menu{
+			RestaurantID: restaurantID,
+			Category:     each[1],
+			Name:         each[2],
+			Description:  each[3],
+			Price:        each[4],
+		}
+
+		menus = append(menus, m)
+	}
+
+	db := config.InitDB()
+	db.Exec(createMenuTable)
+	sqlDB, err := db.DB()
+	defer sqlDB.Close()
+
+	result := db.CreateInBatches(menus, 50)
+	if result.Error != nil {
+		log.Fatalf("Error inserting data into database: %v", result.Error)
+	} else {
+		log.Printf("Rows affected (inserted or updated): %d", result.RowsAffected)
+	}
+}
+
 func main() {
-	ConverterMenuCSVtoJSON()
-	ConverterRestaurantCSVtoJSON()
+	//ConverterMenuCSVtoJSON()
+	//ConverterRestaurantCSVtoJSON()
 	initConfig()
 	ConverterRestaurantCSVtoDB()
+	ConverterMenuCSVtoDB()
 }

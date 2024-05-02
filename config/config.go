@@ -4,6 +4,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/menu"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -39,7 +40,7 @@ func InitDB() *gorm.DB {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	//db.AutoMigrate(&domain.Restaurant{})
+	db.AutoMigrate(&menu.Menu{})
 
 	return db
 }

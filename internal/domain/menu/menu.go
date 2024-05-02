@@ -5,6 +5,7 @@ import "gorm.io/gorm"
 // A Menu represents menu entity which is a menu of the restaurant
 type Menu struct {
 	gorm.Model
+	MenuID       uint   `gorm:"primaryKey;autoIncrement:true"`
 	RestaurantID int64  `json:"restaurant_id" `
 	Category     string `json:"category"`
 	Name         string `json:"name"`
