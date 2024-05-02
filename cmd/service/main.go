@@ -16,6 +16,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// TODO make is as a singleton
 func initConfig() {
 	viper.AddConfigPath("./config")
 	viper.SetConfigName("config.dev")

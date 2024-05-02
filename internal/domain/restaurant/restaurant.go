@@ -2,11 +2,13 @@ package restaurant
 
 import (
 	"errors"
+	"gorm.io/gorm"
 	"regexp"
 )
 
 // A Restaurant represents information about the restaurant entity
 type Restaurant struct {
+	gorm.Model
 	ID          int64   `json:"id"`
 	Position    string  `json:"position"`
 	Name        string  `json:"name"`

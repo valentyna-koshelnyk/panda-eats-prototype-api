@@ -1,4 +1,4 @@
-package repository
+package restaurant
 
 import (
 	"encoding/json"
