@@ -14,6 +14,10 @@ var (
 	err error
 )
 
+func GetDB() *gorm.DB {
+	return db
+}
+
 func InitDB() *gorm.DB {
 	// Use viper to read config
 	viper.AddConfigPath("./config")

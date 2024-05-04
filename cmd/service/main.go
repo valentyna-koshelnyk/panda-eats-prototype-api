@@ -6,7 +6,10 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
 	v1 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1"
+	restaurant2 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/restaurant"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/restaurant"
 	"net/http"
 	"os"
 	"os/signal"
@@ -39,6 +42,10 @@ func init() {
 
 func main() {
 	initConfig()
+	db := config.InitDB()
+	repo := restaurant.NewRestaurantRepository(db)
+	service := restaurant.NewRestaurantService(repo)
+	restaurant2.NewRestaurantController(service)
 	// Set a router
 	r := chi.NewRouter()
 	// Generate a unique identifier for every incoming HTTP request

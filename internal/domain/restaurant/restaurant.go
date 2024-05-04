@@ -9,7 +9,7 @@ import (
 // A Restaurant represents information about the restaurant entity
 type Restaurant struct {
 	gorm.Model
-	ID          int64   `json:"id"`
+	ID          int64   `json:"ID""`
 	Position    string  `json:"position"`
 	Name        string  `json:"name"`
 	Score       float64 `json:"score"`
