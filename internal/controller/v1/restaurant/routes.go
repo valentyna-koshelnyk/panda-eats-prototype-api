@@ -4,21 +4,24 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/menu"
+	menu2 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/menu"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/restaurant"
 )
-
-var db = config.GetDB()
 
 // Routes is a router for restaurants
 func Routes() chi.Router {
 	r := chi.NewRouter()
-	restaurantService := restaurant.NewRestaurantService(restaurant.NewRestaurantRepository(db))
+	db := config.GetDB()
+	repo := restaurant.NewRepository(db)
+	service := restaurant.NewRestaurantService(repo)
+	controller := NewRestaurantController(service)
 
-	controller := NewRestaurantController(restaurantService)
+	repoM := menu2.NewRepository(db)
+	serviceM := menu2.NewService(repoM)
+	controllerM := menu.NewController(serviceM)
 
 	r.Get("/", controller.GetAll)
-	r.Get("/{restaurant_id}/items", menu.GetMenuByRestaurant)
-	r.Get("/", controller.GetSelected)
+	r.Get("/{restaurant_id}/items", controllerM.GetMenuByRestaurant)
 	r.Post("/", controller.Post)
 	r.Delete("/{restaurant_id}", controller.Delete)
 	r.Put("/", controller.Update)

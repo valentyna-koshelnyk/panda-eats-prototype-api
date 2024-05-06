@@ -8,8 +8,6 @@ import (
 	"github.com/spf13/viper"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
 	v1 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1"
-	restaurant2 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/restaurant"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/restaurant"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,15 +16,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 )
-
-// TODO make is as a singleton
-func initConfig() {
-	viper.AddConfigPath("./config")
-	viper.SetConfigName("config.dev")
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("Error reading config file, %s", err)
-	}
-}
 
 var version string
 
@@ -41,11 +30,8 @@ func init() {
 }
 
 func main() {
-	initConfig()
-	db := config.InitDB()
-	repo := restaurant.NewRestaurantRepository(db)
-	service := restaurant.NewRestaurantService(repo)
-	restaurant2.NewRestaurantController(service)
+	//	config.InitViperConfig()
+	config.InitDB()
 	// Set a router
 	r := chi.NewRouter()
 	// Generate a unique identifier for every incoming HTTP request

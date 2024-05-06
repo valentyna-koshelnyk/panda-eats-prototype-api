@@ -9,5 +9,6 @@ import (
 func Routes() chi.Router {
 	r := chi.NewRouter()
 	r.Mount("/restaurants", restaurant.Routes())
+
 	return r
 }

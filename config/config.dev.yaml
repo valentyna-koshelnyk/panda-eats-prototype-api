@@ -7,3 +7,12 @@ paths:
   menu: "./internal/data/menus.json"
   menu_csv: "./internal/data/restaurant-menus.csv"
   restaurant_csv: "./internal/data/restaurants.csv"
+database:
+  name: "postgres"
+  user: "v.koshelnyk"
+  password: "panda-eats!"
+  host: "localhost"
+  port: "5432"
+  db-address: "jdbc:postgresql://localhost:5432/postgres"
+
+

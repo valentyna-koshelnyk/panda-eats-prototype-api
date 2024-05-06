@@ -2,6 +2,7 @@ package restaurant
 
 import (
 	"errors"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
 	"gorm.io/gorm"
 	"regexp"
 )
@@ -10,7 +11,7 @@ import (
 type Restaurant struct {
 	gorm.Model
 	ID          int64   `json:"ID"`
-	Position    int64   `json:"position"`
+	Position    string  `json:"position"`
 	Name        string  `json:"name"`
 	Score       float64 `json:"score"`
 	Ratings     int64   `json:"ratings"`
@@ -57,4 +58,12 @@ func ValidateRestaurant(restaurant *Restaurant) []error {
 		errs = append(errs, errors.New("invalid price_range"))
 	}
 	return errs
+}
+
+func init() {
+	db := config.GetDB()
+	err := db.AutoMigrate(&Restaurant{})
+	if err != nil {
+		return
+	}
 }

@@ -3,26 +3,45 @@ package menu
 import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
+	log "github.com/sirupsen/logrus"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/menu"
+
 	"net/http"
 	"strconv"
 )
 
-// GetMenuByRestaurant is a handler for getting dish fetched by restaurant Id
-func GetMenuByRestaurant(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "restaurant_id")
-	service := menu.Service{}
-	id, err := strconv.ParseInt(idStr, 10, 64)
+// Controller datatype for menu controller layer
+type Controller struct {
+	service menu.Service
+}
 
-	m, err := service.FindByRestaurantID(id)
+// NewController constructor for controller layer
+func NewController(service menu.Service) *Controller {
+	return &Controller{
+		service: service,
+	}
+}
+
+// GetMenuByRestaurant is a handler for getting dish fetched by restaurant Id
+func (c *Controller) GetMenuByRestaurant(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "restaurant_id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid restaurant ID", http.StatusBadRequest)
+		return
+	}
+	m, err := c.service.GetMenu(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(m)
+	w.WriteHeader(http.StatusOK)
+	menuJSON, _ := json.Marshal(m)
+	_, err = w.Write([]byte(menuJSON))
 	if err != nil {
+		log.WithError(err).Error("Failed to encode restaurants into JSON")
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
 }

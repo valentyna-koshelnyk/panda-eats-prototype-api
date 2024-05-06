@@ -10,36 +10,18 @@ import (
 	"strconv"
 )
 
+// Controller datatype for controller layer
 type Controller struct {
 	service restaurant.Service
 }
 
+// NewRestaurantController constructor for controller layer
 func NewRestaurantController(service restaurant.Service) Controller {
 	return Controller{service: service}
 }
 
+// GetAll retrieves all restaurants list OR filters restaurants by category/ price range/ zip code
 func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
-	//	service := restaurant.NewRestaurantService()
-	restaurants, err := c.service.GetAllRestaurants()
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		log.WithError(err).Error("Failed to fetch restaurants")
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	restaurantsJSON, _ := json.Marshal(restaurants)
-	w.Write(restaurantsJSON)
-	if err != nil {
-		return
-	}
-	{
-		log.WithError(err).Error("Failed to encode restaurants into JSON")
-		return
-	}
-}
-
-func (c *Controller) GetSelected(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
 	priceRange := r.URL.Query().Get("price_range")
 	zipCode := r.URL.Query().Get("zip_code")
@@ -52,14 +34,15 @@ func (c *Controller) GetSelected(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	restaurantsJSON, _ := json.Marshal(restaurants)
-	w.Write(restaurantsJSON)
-	{
+	_, err = w.Write([]byte(restaurantsJSON))
+	if err != nil {
 		log.WithError(err).Error("Failed to encode restaurants into JSON")
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
 }
 
+// Post handler for adding restaurant record
 func (c *Controller) Post(w http.ResponseWriter, r *http.Request) {
 	var res restaurant.Restaurant
 	err := c.service.CreateRestaurant(res)
@@ -72,13 +55,10 @@ func (c *Controller) Post(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	//TODO: to update formatting of the output
 	fmt.Fprintf(w, "Restaurant %v", res)
-	if err != nil {
-		return
-	}
 }
 
+// Update handler for update restaurant record
 func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
 	var res restaurant.Restaurant
 	err := c.service.UpdateRestaurant(res)
@@ -86,11 +66,10 @@ func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	err = json.NewDecoder(r.Body).Decode(&res)
-	if err != nil {
-	}
-	return
+
 }
 
+// Delete handler for delete restaurant record
 func (c *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "restaurant_id")
 	id, _ := strconv.ParseInt(idStr, 10, 64)

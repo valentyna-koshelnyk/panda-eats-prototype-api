@@ -14,35 +14,6 @@ import (
 	"strconv"
 )
 
-const createRestaurantTable = "CREATE TABLE IF NOT EXISTS restaurants(" +
-	"CREATE TABLE Restaurants (restaurant_id SERIAL PRIMARY KEY," +
-	" position INT," +
-	" name VARCHAR(255)," +
-	" score DECIMAL, " +
-	" ratings INT, " +
-	" category VARCHAR(255)," +
-	" price_range VARCHAR(255), " +
-	" full_address VARCHAR(255) NOT NULL," +
-	" zip_code VARCHAR(50) NOT NULL," +
-	" lat DECIMAL(7,2) NOT NULL, " +
-	" lng DECIMAL(7,2) NOT NULL "
-
-const createMenuTable = "CREATE TABLE Menus (" +
-	" restaurant_id INT," +
-	" dish_id SERIAL PRIMARY KEY," +
-	" category VARCHAR(255)," +
-	" name VARCHAR(255)," +
-	" description VARCHAR(255)," +
-	" FOREIGN KEY (restaurant_id) REFERENCES Restaurants(restaurant_id));"
-
-func initConfig() {
-	viper.AddConfigPath("./config")
-	viper.SetConfigName("config.dev")
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("Error reading config file, %s", err)
-	}
-}
-
 // ConverterRestaurantCSVtoJSON converts the CSV file to JSON, using mapping for Restaurant entity
 func ConverterRestaurantCSVtoJSON() {
 	x := viper.GetString("paths.restaurant_csv")
@@ -93,8 +64,11 @@ func ConverterRestaurantCSVtoJSON() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	jsonFile.Write(jsonData)
-	jsonFile.Close()
+	_, err = jsonFile.Write(jsonData)
+	err = jsonFile.Close()
+	if err != nil {
+		return
+	}
 }
 
 // ConverterMenuCSVtoJSON converts menu csv file to json
@@ -143,8 +117,14 @@ func ConverterMenuCSVtoJSON() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	jsonFile.Write(jsonData)
-	jsonFile.Close()
+	_, err = jsonFile.Write(jsonData)
+	if err != nil {
+		return
+	}
+	err = jsonFile.Close()
+	if err != nil {
+		return
+	}
 }
 
 // ConverterRestaurantCSVtoDB parses data from csv dataset to database
@@ -190,8 +170,7 @@ func ConverterRestaurantCSVtoDB() {
 		restaurants = append(restaurants, restaurant)
 	}
 
-	db := config.InitDB()
-	db.Exec(createRestaurantTable)
+	db := config.GetDB()
 	sqlDB, err := db.DB()
 	defer sqlDB.Close()
 
@@ -242,8 +221,7 @@ func ConverterMenuCSVtoDB() {
 		menus = append(menus, m)
 	}
 
-	db := config.InitDB()
-	db.Exec(createMenuTable)
+	db := config.GetDB()
 	sqlDB, err := db.DB()
 	defer sqlDB.Close()
 
@@ -258,7 +236,6 @@ func ConverterMenuCSVtoDB() {
 func main() {
 	//ConverterMenuCSVtoJSON()
 	//ConverterRestaurantCSVtoJSON()
-	initConfig()
 	ConverterRestaurantCSVtoDB()
 	ConverterMenuCSVtoDB()
 }
