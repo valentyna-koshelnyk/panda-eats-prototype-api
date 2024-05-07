@@ -25,7 +25,7 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
 	priceRange := r.URL.Query().Get("price_range")
 	zipCode := r.URL.Query().Get("zip_code")
-	restaurants, err := c.service.FilterRestaurants(category, priceRange, zipCode)
+	restaurants, err := c.service.FilterRestaurants(category, zipCode, priceRange)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.WithError(err).Error("Failed to fetch restaurants")

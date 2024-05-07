@@ -8,7 +8,7 @@ import (
 // A Menu represents menu entity which is a menu of the restaurant
 type Menu struct {
 	ID           int64     `gorm:"primaryKey;autoIncrement:true"`
-	RestaurantID int64     `json:"restaurant_id" `
+	RestaurantID int64     `json:"restaurant_id" gorm:"index:idx_restaurant_id"`
 	Category     string    `json:"category"`
 	Name         string    `json:"name"`
 	Description  string    `json:"description"`

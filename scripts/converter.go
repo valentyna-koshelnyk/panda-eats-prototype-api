@@ -41,7 +41,7 @@ func ConverterRestaurantCSVtoJSON() {
 			continue
 		}
 		restaurant.ID, _ = strconv.ParseInt(each[0], 10, 64)
-		restaurant.Position = each[1]
+		restaurant.Position, _ = strconv.ParseInt(each[1], 10, 64)
 		restaurant.Name = each[2]
 		restaurant.Score, _ = strconv.ParseFloat(each[3], 64)
 		restaurant.Ratings, _ = strconv.ParseInt(each[4], 10, 64)
@@ -154,8 +154,9 @@ func ConverterRestaurantCSVtoDB() {
 
 		score, _ := strconv.ParseFloat(each[3], 64)
 		ratings, _ := strconv.ParseInt(each[4], 10, 64)
+		position, _ := strconv.ParseInt(each[5], 10, 64)
 		restaurant := domain.Restaurant{
-			Position:    each[1],
+			Position:    position,
 			Name:        each[2],
 			Score:       score,
 			Ratings:     ratings,
@@ -171,8 +172,6 @@ func ConverterRestaurantCSVtoDB() {
 	}
 
 	db := config.GetDB()
-	sqlDB, err := db.DB()
-	defer sqlDB.Close()
 
 	result := db.Clauses(clause.OnConflict{
 		UpdateAll: true,
@@ -222,8 +221,6 @@ func ConverterMenuCSVtoDB() {
 	}
 
 	db := config.GetDB()
-	sqlDB, err := db.DB()
-	defer sqlDB.Close()
 
 	result := db.CreateInBatches(menus, 50)
 	if result.Error != nil {
