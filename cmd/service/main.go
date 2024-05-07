@@ -7,6 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
+	_ "github.com/valentyna-koshelnyk/panda-eats-prototype-api/docs"
 	v1 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1"
 	"net/http"
 	"os"

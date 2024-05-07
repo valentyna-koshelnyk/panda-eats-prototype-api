@@ -22,14 +22,14 @@ func NewController(service menu.Service) *Controller {
 	}
 }
 
-// @Summary Get all restaurants
-// @Description Retrieves the list of all restaurants from the database
-// @Produce  application/json
-// @Success 200 {Object} Restaurant
-// @Failure 404 {Object} HTTPError "Restaurants not found"
-// @Router /restaurants [get]
-
-// GetMenuByRestaurant is a handler for getting dish fetched by restaurant Id
+// @Summary List menu of the restaurant
+// @Description get menu by restaurantID
+// @ID restaurant_id
+// @Accept  json
+// @Produce  json
+// @Param id path int true "restaurant_id"
+// @Success 200 {array} Menu
+// @Router /restaurants/{restaurant_id}/items [get]
 func (c *Controller) GetMenuByRestaurant(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "restaurant_id")
 	id, err := strconv.ParseInt(idStr, 10, 64)

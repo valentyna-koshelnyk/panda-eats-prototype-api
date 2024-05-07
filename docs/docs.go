@@ -14,7 +14,119 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/restaurants/{restaurant_id}/items": {
+            "get": {
+                "description": "get menu by restaurantID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "List menu of the restaurant",
+                "operationId": "restaurant_id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "restaurant_id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/menu.Menu"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "menu.Menu": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "string"
+                },
+                "restaurant_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "restaurant.Restaurant": {
+            "type": "object",
+            "properties": {
+                "ID": {
+                    "type": "integer"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "full_address": {
+                    "type": "string"
+                },
+                "lat": {
+                    "description": "JS might not handle very large integers or high-precision floating numbers accurately\nTODO: add validation",
+                    "type": "string"
+                },
+                "lng": {
+                    "description": "TODO: add validation",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "price_range": {
+                    "type": "string"
+                },
+                "ratings": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "zip_code": {
+                    "description": "TODO: Add additional validation for the zip range",
+                    "type": "string"
+                }
+            }
+        }
+    }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

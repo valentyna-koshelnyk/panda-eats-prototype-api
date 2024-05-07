@@ -3,14 +3,13 @@ package restaurant
 import (
 	"errors"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
-	"gorm.io/gorm"
 	"regexp"
+	"time"
 )
 
 // A Restaurant represents information about the restaurant entity
 type Restaurant struct {
-	gorm.Model
-	ID          int64   `json:"ID"`
+	ID          int64   `json:"id"`
 	Position    int64   `json:"position"`
 	Name        string  `json:"name"`
 	Score       float64 `json:"score"`
@@ -24,7 +23,9 @@ type Restaurant struct {
 	// TODO: add validation
 	Lat string `json:"lat"`
 	// TODO: add validation
-	Lng string `json:"lng"`
+	Lng       string    `json:"lng"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // Regular expressions validating input, e.g. if price range consists just of '$' sign or category doesn't have any digits

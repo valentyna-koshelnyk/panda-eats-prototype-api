@@ -20,7 +20,9 @@ func NewRestaurantController(service restaurant.Service) Controller {
 	return Controller{service: service}
 }
 
-// GetAll retrieves all restaurants list OR filters restaurants by category/ price range/ zip code
+// @Summary Get all restaurants
+// @Description Retrieves the list of all restaurants from the database
+// @Produce  json
 func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
 	priceRange := r.URL.Query().Get("price_range")
@@ -42,8 +44,12 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Post handler for adding restaurant record
-func (c *Controller) Post(w http.ResponseWriter, r *http.Request) {
+// @Summary Adds a new restaurant
+// @Description Adds a new restaurant to the restaurants table
+// @Accept  json
+// @Produce  json
+// @Param restaurant body restaurant.Restaurant true "Restaurant"
+func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
 	var res restaurant.Restaurant
 	err := c.service.CreateRestaurant(res)
 	if err != nil {
@@ -58,7 +64,11 @@ func (c *Controller) Post(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Restaurant %v", res)
 }
 
-// Update handler for update restaurant record
+// @Summary Updates a restaurant information
+// @Description Updates info about the restaurant
+// @Accept  json
+// @Produce  json
+// @Param restaurant body restaurant.Restaurant true "Restaurant"
 func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
 	var res restaurant.Restaurant
 	err := c.service.UpdateRestaurant(res)
@@ -69,7 +79,10 @@ func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Delete handler for delete restaurant record
+// @Summary Deletes a restaurant record
+// @Description Deletes the restaurant
+// @Accept  json
+// @Produce  json
 func (c *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "restaurant_id")
 	id, _ := strconv.ParseInt(idStr, 10, 64)

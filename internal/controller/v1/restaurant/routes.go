@@ -8,6 +8,11 @@ import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/restaurant"
 )
 
+// @title PandaEats API
+// @version 1.0
+// @description This is a demo for PandaEats API app
+// @host https://localhost
+// @BasePath /v1
 // Routes is a router for restaurants
 func Routes() chi.Router {
 	r := chi.NewRouter()
@@ -22,7 +27,7 @@ func Routes() chi.Router {
 
 	r.Get("/", controller.GetAll)
 	r.Get("/{restaurant_id}/items", controllerM.GetMenuByRestaurant)
-	r.Post("/", controller.Post)
+	r.Post("/", controller.Create)
 	r.Delete("/{restaurant_id}", controller.Delete)
 	r.Put("/", controller.Update)
 	return r
