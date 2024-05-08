@@ -7,7 +7,6 @@ import (
 
 // Service defines an API for restaurant service to be used by presentation layer
 type RestaurantService interface {
-	AllRestaurants() ([]e.Restaurant, error)
 	FilterRestaurants(category string, zip string, priceRange string) ([]e.Restaurant, error)
 	CreateRestaurant(restaurant e.Restaurant) error
 	UpdateRestaurant(restaurant e.Restaurant) error
@@ -22,10 +21,6 @@ type restaurantService struct {
 // NewRestaurantService is a constructor with pointer to service struct which returned as instance of the interface
 func NewRestaurantService(r r.RestaurantRepository) RestaurantService {
 	return &restaurantService{repository: r}
-}
-
-func (s *restaurantService) AllRestaurants() ([]e.Restaurant, error) {
-	return s.repository.All()
 }
 
 func (s *restaurantService) FilterRestaurants(category string, zip string, priceRange string) ([]e.Restaurant, error) {

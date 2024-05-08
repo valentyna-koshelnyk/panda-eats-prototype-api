@@ -24,7 +24,7 @@ func NewRestaurantController(service s.RestaurantService) Controller {
 // @Summary Get all restaurants
 // @Description Retrieves the list of all restaurants from the database
 // @Produce  json
-func (c *Controller) All(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
 	priceRange := r.URL.Query().Get("price_range")
 	zipCode := r.URL.Query().Get("zip_code")
