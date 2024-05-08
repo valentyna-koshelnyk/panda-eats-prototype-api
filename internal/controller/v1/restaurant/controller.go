@@ -6,18 +6,18 @@ import (
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	e "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
-	s "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 	"net/http"
 	"strconv"
 )
 
 // Controller datatype for controller layer
 type Controller struct {
-	service s.RestaurantService
+	service service.RestaurantService
 }
 
 // NewRestaurantController constructor for controller layer
-func NewRestaurantController(service s.RestaurantService) Controller {
+func NewRestaurantController(service service.RestaurantService) Controller {
 	return Controller{service: service}
 }
 
