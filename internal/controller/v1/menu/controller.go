@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/menu"
+	//	m "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/menu"
+	s "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 
 	"net/http"
 	"strconv"
@@ -12,11 +13,11 @@ import (
 
 // Controller datatype for menu controller layer
 type Controller struct {
-	service menu.Service
+	service s.MenuService
 }
 
 // NewController constructor for controller layer
-func NewController(service menu.Service) *Controller {
+func NewController(service s.MenuService) *Controller {
 	return &Controller{
 		service: service,
 	}
@@ -30,7 +31,7 @@ func NewController(service menu.Service) *Controller {
 // @Param id path int true "restaurant_id"
 // @Success 200 {array} Menu
 // @Router /restaurants/{restaurant_id}/items [get]
-func (c *Controller) GetMenuByRestaurant(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) MenuByRestaurant(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "restaurant_id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {

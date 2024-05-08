@@ -1,4 +1,4 @@
-package restaurant
+package entity
 
 import (
 	"errors"
@@ -19,7 +19,6 @@ type Restaurant struct {
 	FullAddress string  `json:"full_address"`
 	//TODO: Add additional validation for the zip range
 	ZipCode string `json:"zip_code"`
-	// JS might not handle very large integers or high-precision floating numbers accurately
 	// TODO: add validation
 	Lat string `json:"lat"`
 	// TODO: add validation

@@ -5,36 +5,41 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/restaurant"
+	e "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
+	s "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 	"net/http"
 	"strconv"
 )
 
 // Controller datatype for controller layer
 type Controller struct {
-	service restaurant.Service
+	service s.RestaurantService
 }
 
 // NewRestaurantController constructor for controller layer
-func NewRestaurantController(service restaurant.Service) Controller {
+func NewRestaurantController(service s.RestaurantService) Controller {
 	return Controller{service: service}
 }
 
 // @Summary Get all restaurants
 // @Description Retrieves the list of all restaurants from the database
 // @Produce  json
-func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) All(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
 	priceRange := r.URL.Query().Get("price_range")
 	zipCode := r.URL.Query().Get("zip_code")
+
 	restaurants, err := c.service.FilterRestaurants(category, zipCode, priceRange)
+
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.WithError(err).Error("Failed to fetch restaurants")
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+
 	restaurantsJSON, _ := json.Marshal(restaurants)
 	_, err = w.Write([]byte(restaurantsJSON))
 	if err != nil {
@@ -50,7 +55,7 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 // @Produce  json
 // @Param restaurant body restaurant.Restaurant true "Restaurant"
 func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
-	var res restaurant.Restaurant
+	var res e.Restaurant
 	err := c.service.CreateRestaurant(res)
 	if err != nil {
 		return
@@ -70,7 +75,7 @@ func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
 // @Produce  json
 // @Param restaurant body restaurant.Restaurant true "Restaurant"
 func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
-	var res restaurant.Restaurant
+	var res e.Restaurant
 	err := c.service.UpdateRestaurant(res)
 	if err != nil {
 		return

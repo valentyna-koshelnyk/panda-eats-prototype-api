@@ -2,133 +2,17 @@ package main
 
 import (
 	"encoding/csv"
-	"encoding/json"
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/menu"
-	domain "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/restaurant"
+	e "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"gorm.io/gorm/clause"
 	"os"
 	"strconv"
 )
 
-// ConverterRestaurantCSVtoJSON converts the CSV file to JSON, using mapping for Restaurant entity
-func ConverterRestaurantCSVtoJSON() {
-	x := viper.GetString("paths.restaurant_csv")
-	csvFile, err := os.Open(x)
-	if err != nil {
-		log.Fatalf("Error opening CSV file: %v", err)
-	}
-
-	reader := csv.NewReader(csvFile)
-	// No check for expected field per record
-	reader.FieldsPerRecord = -1
-	reader.LazyQuotes = true
-
-	csvData, err := reader.ReadAll()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	restaurant := domain.Restaurant{}
-	var restaurants []domain.Restaurant
-	for _, each := range csvData {
-		if len(each) < 11 {
-			fmt.Println("Encountered a row with insufficient fields")
-			continue
-		}
-		restaurant.ID, _ = strconv.ParseInt(each[0], 10, 64)
-		restaurant.Position, _ = strconv.ParseInt(each[1], 10, 64)
-		restaurant.Name = each[2]
-		restaurant.Score, _ = strconv.ParseFloat(each[3], 64)
-		restaurant.Ratings, _ = strconv.ParseInt(each[4], 10, 64)
-		restaurant.Category = each[5]
-		restaurant.PriceRange = each[6]
-		restaurant.FullAddress = each[7]
-		restaurant.ZipCode = each[8]
-		restaurant.Lat = each[9]
-		restaurant.Lng = each[10]
-		restaurants = append(restaurants, restaurant)
-	}
-
-	jsonData, err := json.Marshal(restaurants)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	prJSON := viper.GetString("paths.restaurants")
-	jsonFile, err := os.Create(prJSON)
-	if err != nil {
-		fmt.Println(err)
-	}
-	_, err = jsonFile.Write(jsonData)
-	err = jsonFile.Close()
-	if err != nil {
-		return
-	}
-}
-
-// ConverterMenuCSVtoJSON converts menu csv file to json
-func ConverterMenuCSVtoJSON() {
-	x := viper.GetString("paths.menu_csv")
-	csvFile, err := os.Open(x)
-	if err != nil {
-		log.Fatalf("Error opening CSV file: %v", err)
-	}
-
-	reader := csv.NewReader(csvFile)
-	// No check for expected field per record
-	reader.FieldsPerRecord = -1
-	// Put quotes for unquoted fields
-	reader.LazyQuotes = true
-
-	csvData, err := reader.ReadAll()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	m := menu.Menu{}
-	var menus []menu.Menu
-	for _, each := range csvData {
-		if len(each) < 5 {
-			fmt.Println("Encountered a row with insufficient fields")
-			continue
-		}
-		m.RestaurantID, _ = strconv.ParseInt(each[0], 10, 64)
-		m.Category = each[1]
-		m.Name = each[2]
-		m.Description = each[3]
-		m.Price = each[4]
-
-		menus = append(menus, m)
-	}
-
-	jsonData, err := json.Marshal(menus)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	pmJSON := viper.GetString("paths.menu")
-	jsonFile, err := os.Create(pmJSON)
-	if err != nil {
-		fmt.Println(err)
-	}
-	_, err = jsonFile.Write(jsonData)
-	if err != nil {
-		return
-	}
-	err = jsonFile.Close()
-	if err != nil {
-		return
-	}
-}
-
-// ConverterRestaurantCSVtoDB parses data from csv dataset to database
-func ConverterRestaurantCSVtoDB() {
+// ParseRestaurantCSV parses data from csv dataset to database
+func ParseRestaurantCSV() {
 	x := viper.GetString("paths.restaurant_csv")
 	csvFile, err := os.Open(x)
 	if err != nil {
@@ -145,7 +29,7 @@ func ConverterRestaurantCSVtoDB() {
 		log.Fatalf("Error reading CSV file: %v", err)
 	}
 
-	var restaurants []domain.Restaurant
+	var restaurants []e.Restaurant
 	for _, each := range csvData {
 		if len(each) < 11 {
 			log.Printf("Encountered a row with insufficient fields: %v", each)
@@ -155,7 +39,7 @@ func ConverterRestaurantCSVtoDB() {
 		score, _ := strconv.ParseFloat(each[3], 64)
 		ratings, _ := strconv.ParseInt(each[4], 10, 64)
 		position, _ := strconv.ParseInt(each[5], 10, 64)
-		restaurant := domain.Restaurant{
+		restaurant := e.Restaurant{
 			Position:    position,
 			Name:        each[2],
 			Score:       score,
@@ -183,8 +67,8 @@ func ConverterRestaurantCSVtoDB() {
 	}
 }
 
-// ConverterMenuCSVtoDB parses data from csv dataset to database
-func ConverterMenuCSVtoDB() {
+// ParseMenuCSV parses data from csv dataset to database
+func ParseMenuCSV() {
 	x := viper.GetString("paths.menu_csv")
 	csvFile, err := os.Open(x)
 	if err != nil {
@@ -201,7 +85,7 @@ func ConverterMenuCSVtoDB() {
 		log.Fatalf("Error reading CSV file: %v", err)
 	}
 
-	var menus []menu.Menu
+	var menus []e.Menu
 	for _, each := range csvData {
 		if len(each) < 5 {
 			log.Printf("Encountered a row with insufficient fields: %v", each)
@@ -209,7 +93,7 @@ func ConverterMenuCSVtoDB() {
 		}
 
 		restaurantID, _ := strconv.ParseInt(each[0], 10, 64)
-		m := menu.Menu{
+		m := e.Menu{
 			RestaurantID: restaurantID,
 			Category:     each[1],
 			Name:         each[2],
@@ -231,8 +115,6 @@ func ConverterMenuCSVtoDB() {
 }
 
 func main() {
-	//ConverterMenuCSVtoJSON()
-	//ConverterRestaurantCSVtoJSON()
-	ConverterRestaurantCSVtoDB()
-	ConverterMenuCSVtoDB()
+	ParseRestaurantCSV()
+	ParseMenuCSV()
 }
