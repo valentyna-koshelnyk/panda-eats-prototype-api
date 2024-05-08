@@ -6,6 +6,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
+	_ "github.com/valentyna-koshelnyk/panda-eats-prototype-api/docs"
 	v1 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1"
 	"net/http"
 	"os"
@@ -15,14 +17,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 )
-
-func initConfig() {
-	viper.AddConfigPath("./config")
-	viper.SetConfigName("config.dev")
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("Error reading config file, %s", err)
-	}
-}
 
 var version string
 
@@ -37,7 +31,8 @@ func init() {
 }
 
 func main() {
-	initConfig()
+	//	config.InitViperConfig()
+	config.InitDB()
 	// Set a router
 	r := chi.NewRouter()
 	// Generate a unique identifier for every incoming HTTP request

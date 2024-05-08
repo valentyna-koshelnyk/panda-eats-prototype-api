@@ -1,0 +1,80 @@
+definitions:
+  menu.Menu:
+    properties:
+      category:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: string
+      restaurant_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  restaurant.Restaurant:
+    properties:
+      ID:
+        type: integer
+      category:
+        type: string
+      created_at:
+        type: string
+      full_address:
+        type: string
+      lat:
+        description: |-
+          JS might not handle very large integers or high-precision floating numbers accurately
+          TODO: add validation
+        type: string
+      lng:
+        description: 'TODO: add validation'
+        type: string
+      name:
+        type: string
+      position:
+        type: integer
+      price_range:
+        type: string
+      ratings:
+        type: integer
+      score:
+        type: number
+      updated_at:
+        type: string
+      zip_code:
+        description: 'TODO: Add additional validation for the zip range'
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /restaurants/{restaurant_id}/items:
+    get:
+      consumes:
+      - application/json
+      description: get menu by restaurantID
+      operationId: restaurant_id
+      parameters:
+      - description: restaurant_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/menu.Menu'
+            type: array
+      summary: List menu of the restaurant
+swagger: "2.0"

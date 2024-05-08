@@ -1,47 +1,16 @@
 package menu
 
-import (
-	"encoding/json"
-	"fmt"
-	"github.com/spf13/viper"
-	"os"
-)
-
-// Service Cache menus list after the first load
+// Service  layer for menu
 type Service struct {
-	Menus []Menu
+	repository Repository
 }
 
-// FindByRestaurantID fetches menu of the restaurant by restaurant Id and returns the list of dishes
-func (service *Service) FindByRestaurantID(id int64) ([]Menu, error) {
-	if service.Menus == nil {
-		if err := service.loadMenus(); err != nil {
-			return nil, err
-		}
-	}
-	var menus []Menu
-	for _, menu := range service.Menus {
-		if id == menu.RestaurantID {
-			menus = append(menus, menu)
-		}
-	}
-	if len(menus) == 0 {
-		return nil, fmt.Errorf("no menu found for restaurant with ID %d", id)
-	}
-	return menus, nil
+// NewService is a constructor for service layer of menu
+func NewService(r Repository) Service {
+	return Service{repository: r}
 }
 
-// loadMenus reads and deserializes the menus from JSON file
-func (service *Service) loadMenus() error {
-	x := viper.GetString("paths.menu")
-	data, err := os.ReadFile(x)
-
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(data, &service.Menus)
-	if err != nil {
-		return err
-	}
-	return nil
+// GetMenu retrieves menu of the specific restaurant
+func (s *Service) GetMenu(id int64) (*[]Menu, error) {
+	return s.repository.GetMenu(id)
 }

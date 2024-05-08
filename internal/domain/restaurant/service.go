@@ -1,77 +1,52 @@
 package restaurant
 
-import (
-	"encoding/json"
-	"github.com/spf13/viper"
-	"os"
-	"strings"
-)
-
 // Service defines an API for restaurant service to be used by presentation layer
 type Service interface {
-	// FindAll fetches all restaurants list
-	FindAll() ([]Restaurant, error)
-	//FilterByCategoryPriceZip retrieves restaurants by category, price and zip
-	FilterByCategoryPriceZip(category string, priceRange string, zip string) []Restaurant
+	GetAllRestaurants() ([]Restaurant, error)
+	FilterRestaurants(category string, zip string, priceRange string) ([]Restaurant, error)
+	CreateRestaurant(restaurant Restaurant) error
+	UpdateRestaurant(restaurant Restaurant) error
+	DeleteRestaurant(id int64) error
 }
 
-// service Cache restaurant list after the first load
+// service gets repository
 type service struct {
-	Restaurants []Restaurant
+	repository Repository
 }
 
 // NewRestaurantService is a constructor with pointer to service struct which returned as instance of the interface
-func NewRestaurantService() Service {
-	return &service{}
+func NewRestaurantService(r Repository) Service {
+	return &service{repository: r}
 }
 
-var restaurantJSON = viper.GetString("paths.restaurants")
+func (s *service) GetAllRestaurants() ([]Restaurant, error) {
+	return s.repository.GetAll()
+}
 
-// loadRestaurants returns list of restaurants
-func (service *service) loadRestaurants() error {
-	x := viper.GetString("paths.restaurants")
+func (s *service) FilterRestaurants(category string, zip string, priceRange string) ([]Restaurant, error) {
+	return s.repository.FilterRestaurants(category, zip, priceRange)
+}
 
-	data, err := os.ReadFile(x)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(data, &service.Restaurants)
+func (s *service) CreateRestaurant(restaurant Restaurant) error {
+	err := s.repository.Create(restaurant)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// FindAll gets the list of all restaurants
-func (service service) FindAll() ([]Restaurant, error) {
-	if service.Restaurants == nil {
-		if err := service.loadRestaurants(); err != nil {
-			return nil, err
-		}
+func (s *service) UpdateRestaurant(restaurant Restaurant) error {
+	err := s.repository.Update(restaurant)
+	if err != nil {
+		return err
 	}
-	return service.Restaurants, nil
+	return nil
 }
 
-// FilterByCategoryPriceZip filters restaurants by category, price range or zip
-func (service *service) FilterByCategoryPriceZip(category string, priceRange string, zipCode string) []Restaurant {
-	if service.Restaurants == nil {
-		if err := service.loadRestaurants(); err != nil {
-			return nil
-		}
+func (s *service) DeleteRestaurant(id int64) error {
+	err := s.repository.Delete(id)
+	if err != nil {
+		return err
 	}
-	var restaurants []Restaurant
-	for _, restaurant := range service.Restaurants {
-		matchCategory := category == "" || strings.Contains(restaurant.Category, category)
-		matchZipCode := zipCode == "" || restaurant.ZipCode == zipCode
-		matchPriceRange := priceRange == "" || restaurant.PriceRange == priceRange
-
-		if matchCategory || matchZipCode || matchPriceRange {
-			restaurants = append(restaurants, restaurant)
-		}
-	}
-
-	if len(restaurants) == 0 {
-		return nil
-	}
-	return restaurants
+	return nil
 }
