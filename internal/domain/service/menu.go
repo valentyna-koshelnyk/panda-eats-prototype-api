@@ -19,7 +19,3 @@ func NewMenuService(r r.MenuRepository) MenuService {
 func (s *MenuService) GetMenu(id int64) (*[]e.Menu, error) {
 	return s.repository.GetMenu(id)
 }
-
-//func (s *restaurantService) FindRestaurantByItem(item string) (*[] e.Restaurant, error) {
-//	err := s.repository.
-//}
