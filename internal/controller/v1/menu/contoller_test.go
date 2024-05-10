@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
-	mocks "github.com/valentyna-koshelnyk/panda-eats-prototype-api/mocks/internal_/domain/service"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
