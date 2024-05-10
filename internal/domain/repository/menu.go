@@ -31,7 +31,3 @@ func (r *menuRepository) GetMenu(id int64) (*[]e.Menu, error) {
 	}
 	return &result, nil
 }
-
-//func (r *menuRepository) GetRestaurantByDishName(name string) (*[]e.Menu, error) {
-//
-//}
