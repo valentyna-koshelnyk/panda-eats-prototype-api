@@ -2,16 +2,16 @@ package repository
 
 import (
 	log "github.com/sirupsen/logrus"
-	e "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"gorm.io/gorm"
 )
 
-// Repository interface shows functions for interacting with DB
+// RestaurantRepository interface shows functions for interacting with DB
 type RestaurantRepository interface {
-	Create(restaurant e.Restaurant) error
-	All() ([]e.Restaurant, error)
-	FilterRestaurants(category string, zip string, priceRange string) ([]e.Restaurant, error)
-	Update(res e.Restaurant) error
+	Create(restaurant entity.Restaurant) error
+	GetAll() ([]entity.Restaurant, error)
+	FilterRestaurants(category string, zip string, priceRange string) ([]entity.Restaurant, error)
+	Update(res entity.Restaurant) error
 	Delete(id int64) error
 }
 
@@ -20,7 +20,7 @@ type restaurantRepository struct {
 	db *gorm.DB
 }
 
-// NewRepository constructor for repository layer
+// NewRestaurantRepository constructor for repository layer
 func NewRestaurantRepository(db *gorm.DB) RestaurantRepository {
 	return &restaurantRepository{
 		db: db,
@@ -29,7 +29,7 @@ func NewRestaurantRepository(db *gorm.DB) RestaurantRepository {
 
 // Create TODO: to add dto for restaurant object
 // Create inserts a new record into the database
-func (r *restaurantRepository) Create(restaurant e.Restaurant) error {
+func (r *restaurantRepository) Create(restaurant entity.Restaurant) error {
 	result := r.db.Create(&restaurant)
 	if result.Error != nil {
 		log.Error(result.Error)
@@ -38,15 +38,15 @@ func (r *restaurantRepository) Create(restaurant e.Restaurant) error {
 }
 
 // GetAll retrieves all restaurants
-func (r *restaurantRepository) All() ([]e.Restaurant, error) {
-	var restaurants []e.Restaurant
+func (r *restaurantRepository) GetAll() ([]entity.Restaurant, error) {
+	var restaurants []entity.Restaurant
 	result := r.db.Find(&restaurants)
 	return restaurants, result.Error
 }
 
 // FilterRestaurants gets the list of restaurants filtered by category, zip and price range
-func (r *restaurantRepository) FilterRestaurants(category string, zip string, priceRange string) ([]e.Restaurant, error) {
-	var restaurants []e.Restaurant
+func (r *restaurantRepository) FilterRestaurants(category string, zip string, priceRange string) ([]entity.Restaurant, error) {
+	var restaurants []entity.Restaurant
 	query := r.db
 	if category != "" {
 		query = query.Where("category = ?", category)
@@ -67,7 +67,7 @@ func (r *restaurantRepository) FilterRestaurants(category string, zip string, pr
 }
 
 // Update restaurant information or save new restaurant
-func (r *restaurantRepository) Update(res e.Restaurant) error {
+func (r *restaurantRepository) Update(res entity.Restaurant) error {
 	result := r.db.Save(&res)
 	if result.Error != nil {
 		log.Error(result.Error)
@@ -77,7 +77,7 @@ func (r *restaurantRepository) Update(res e.Restaurant) error {
 
 // Delete restaurant record
 func (r *restaurantRepository) Delete(id int64) error {
-	r.db.Delete(&e.Restaurant{}, id)
+	r.db.Delete(&entity.Restaurant{}, id)
 	if r.db.Error != nil {
 		return r.db.Error
 	}

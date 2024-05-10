@@ -5,7 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
-	e "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"gorm.io/gorm/clause"
 	"os"
 	"strconv"
@@ -29,7 +29,7 @@ func ParseRestaurantCSV() {
 		log.Fatalf("Error reading CSV file: %v", err)
 	}
 
-	var restaurants []e.Restaurant
+	var restaurants []entity.Restaurant
 	for _, each := range csvData {
 		if len(each) < 11 {
 			log.Printf("Encountered a row with insufficient fields: %v", each)
@@ -39,7 +39,7 @@ func ParseRestaurantCSV() {
 		score, _ := strconv.ParseFloat(each[3], 64)
 		ratings, _ := strconv.ParseInt(each[4], 10, 64)
 		position, _ := strconv.ParseInt(each[5], 10, 64)
-		restaurant := e.Restaurant{
+		restaurant := entity.Restaurant{
 			Position:    position,
 			Name:        each[2],
 			Score:       score,
@@ -85,7 +85,7 @@ func ParseMenuCSV() {
 		log.Fatalf("Error reading CSV file: %v", err)
 	}
 
-	var menus []e.Menu
+	var menus []entity.Menu
 	for _, each := range csvData {
 		if len(each) < 5 {
 			log.Printf("Encountered a row with insufficient fields: %v", each)
@@ -93,7 +93,7 @@ func ParseMenuCSV() {
 		}
 
 		restaurantID, _ := strconv.ParseInt(each[0], 10, 64)
-		m := e.Menu{
+		m := entity.Menu{
 			RestaurantID: restaurantID,
 			Category:     each[1],
 			Name:         each[2],

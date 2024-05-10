@@ -1,33 +1,33 @@
 package service
 
 import (
-	e "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
-	r "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
 )
 
-// Service defines an API for restaurant service to be used by presentation layer
+// RestaurantService defines an API for restaurant service to be used by presentation layer
 type RestaurantService interface {
-	FilterRestaurants(category string, zip string, priceRange string) ([]e.Restaurant, error)
-	CreateRestaurant(restaurant e.Restaurant) error
-	UpdateRestaurant(restaurant e.Restaurant) error
+	FilterRestaurants(category string, zip string, priceRange string) ([]entity.Restaurant, error)
+	CreateRestaurant(restaurant entity.Restaurant) error
+	UpdateRestaurant(restaurant entity.Restaurant) error
 	DeleteRestaurant(id int64) error
 }
 
-// service gets repository
+// restaurantService gets repository
 type restaurantService struct {
-	repository r.RestaurantRepository
+	repository repository.RestaurantRepository
 }
 
 // NewRestaurantService is a constructor with pointer to service struct which returned as instance of the interface
-func NewRestaurantService(r r.RestaurantRepository) RestaurantService {
+func NewRestaurantService(r repository.RestaurantRepository) RestaurantService {
 	return &restaurantService{repository: r}
 }
 
-func (s *restaurantService) FilterRestaurants(category string, zip string, priceRange string) ([]e.Restaurant, error) {
+func (s *restaurantService) FilterRestaurants(category string, zip string, priceRange string) ([]entity.Restaurant, error) {
 	return s.repository.FilterRestaurants(category, zip, priceRange)
 }
 
-func (s *restaurantService) CreateRestaurant(restaurant e.Restaurant) error {
+func (s *restaurantService) CreateRestaurant(restaurant entity.Restaurant) error {
 	err := s.repository.Create(restaurant)
 	if err != nil {
 		return err
@@ -35,7 +35,7 @@ func (s *restaurantService) CreateRestaurant(restaurant e.Restaurant) error {
 	return nil
 }
 
-func (s *restaurantService) UpdateRestaurant(restaurant e.Restaurant) error {
+func (s *restaurantService) UpdateRestaurant(restaurant entity.Restaurant) error {
 	err := s.repository.Update(restaurant)
 	if err != nil {
 		return err
