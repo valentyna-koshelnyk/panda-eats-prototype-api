@@ -27,7 +27,7 @@ import (
 // http (server and route, and api client
 
 func TestGetMenuByRestaurant(t *testing.T) {
-	t.Run("GetMenuByRestaurant", func(t *testing.T) {
+	t.Run("should return menu", func(t *testing.T) {
 		r := chi.NewRouter()
 		server := &http.Server{
 			Addr:    ":" + "3000",
