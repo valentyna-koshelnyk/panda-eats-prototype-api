@@ -51,9 +51,6 @@ func GetDB() *gorm.DB {
 // InitDB initializes DB
 func InitDB() *gorm.DB {
 	// Use viper to read config
-	viper.AddConfigPath("./config")
-	viper.SetConfigName("config.dev")
-	viper.SetConfigType("yaml")
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file: %s", err)
 	}

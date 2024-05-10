@@ -4,8 +4,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/menu"
-	menu2 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/menu"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/restaurant"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 )
 
 // @title PandaEats API
@@ -17,18 +17,19 @@ import (
 func Routes() chi.Router {
 	r := chi.NewRouter()
 	db := config.GetDB()
-	repo := restaurant.NewRepository(db)
-	service := restaurant.NewRestaurantService(repo)
-	controller := NewRestaurantController(service)
 
-	repoM := menu2.NewRepository(db)
-	serviceM := menu2.NewService(repoM)
-	controllerM := menu.NewController(serviceM)
+	restaurantRepository := repository.NewRestaurantRepository(db)
+	restaurantService := service.NewRestaurantService(restaurantRepository)
+	restaurantController := NewRestaurantController(restaurantService)
 
-	r.Get("/", controller.GetAll)
-	r.Get("/{restaurant_id}/items", controllerM.GetMenuByRestaurant)
-	r.Post("/", controller.Create)
-	r.Delete("/{restaurant_id}", controller.Delete)
-	r.Put("/", controller.Update)
+	menuRepository := repository.NewMenuRepository(db)
+	menuService := service.NewMenuService(menuRepository)
+	menuController := menu.NewController(menuService)
+
+	r.Get("/", restaurantController.GetAll)
+	r.Get("/{restaurant_id}/items", menuController.MenuByRestaurant)
+	r.Post("/", restaurantController.Create)
+	r.Delete("/{restaurant_id}", restaurantController.Delete)
+	r.Put("/", restaurantController.Update)
 	return r
 }

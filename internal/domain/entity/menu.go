@@ -1,4 +1,4 @@
-package menu
+package entity
 
 import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"

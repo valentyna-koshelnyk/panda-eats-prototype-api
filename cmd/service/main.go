@@ -31,7 +31,7 @@ func init() {
 }
 
 func main() {
-	//	config.InitViperConfig()
+	config.InitViperConfig()
 	config.InitDB()
 	// Set a router
 	r := chi.NewRouter()
