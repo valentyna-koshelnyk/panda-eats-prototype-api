@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
-	v "github.com/spf13/viper"
+	"github.com/spf13/viper"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
 	_ "github.com/valentyna-koshelnyk/panda-eats-prototype-api/docs"
 	v1 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1"
@@ -31,7 +31,7 @@ func init() {
 }
 
 func main() {
-	//	config.InitViperConfig()
+	config.InitViperConfig()
 	config.InitDB()
 	// Set a router
 	r := chi.NewRouter()
@@ -44,7 +44,7 @@ func main() {
 
 	// Initiate a server
 	server := &http.Server{
-		Addr:    ":" + v.GetString("server.port"),
+		Addr:    ":" + viper.GetString("server.port"),
 		Handler: r,
 	}
 
@@ -62,7 +62,7 @@ func main() {
 	})
 
 	go func() {
-		log.Info("Starting server on port :", v.GetString("server.port"))
+		log.Info("Starting server on port :", viper.GetString("server.port"))
 		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("HTTP server error: %v", err)
 		}

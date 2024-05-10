@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
-	e "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 	"net/http"
 	"strconv"
@@ -55,7 +55,7 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 // @Produce  json
 // @Param restaurant body restaurant.Restaurant true "Restaurant"
 func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
-	var res e.Restaurant
+	var res entity.Restaurant
 	err := c.service.CreateRestaurant(res)
 	if err != nil {
 		return
@@ -75,7 +75,7 @@ func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
 // @Produce  json
 // @Param restaurant body restaurant.Restaurant true "Restaurant"
 func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
-	var res e.Restaurant
+	var res entity.Restaurant
 	err := c.service.UpdateRestaurant(res)
 	if err != nil {
 		return

@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
-	//	m "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/menu"
-	s "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 
 	"net/http"
 	"strconv"
@@ -13,11 +12,11 @@ import (
 
 // Controller datatype for menu controller layer
 type Controller struct {
-	service s.MenuService
+	service service.MenuService
 }
 
 // NewController constructor for controller layer
-func NewController(service s.MenuService) *Controller {
+func NewController(service service.MenuService) *Controller {
 	return &Controller{
 		service: service,
 	}
