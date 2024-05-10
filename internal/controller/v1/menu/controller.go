@@ -30,7 +30,7 @@ func NewController(service service.MenuService) *Controller {
 // @Param id path int true "restaurant_id"
 // @Success 200 {array} Menu
 // @Router /restaurants/{restaurant_id}/items [get]
-func (c *Controller) MenuByRestaurant(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) GetMenuByRestaurant(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "restaurant_id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {

@@ -21,7 +21,7 @@ type ViperConfig struct {
 }
 
 // getViper() gets instance of Viper
-func getViper() *ViperConfig {
+func GetViper() *ViperConfig {
 	if viperConfig == nil {
 		once.Do(func() {
 			fmt.Println("Creating Viper Config")
