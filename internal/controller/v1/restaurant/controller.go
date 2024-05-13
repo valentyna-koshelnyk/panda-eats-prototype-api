@@ -2,7 +2,6 @@ package restaurant
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
@@ -30,22 +29,27 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	zipCode := r.URL.Query().Get("zip_code")
 
 	restaurants, err := c.service.FilterRestaurants(category, zipCode, priceRange)
-
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		log.WithError(err).Error("Failed to fetch restaurants")
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	restaurantsJSON, _ := json.Marshal(restaurants)
-	_, err = w.Write([]byte(restaurantsJSON))
 	if err != nil {
-		log.WithError(err).Error("Failed to encode restaurants into JSON")
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-		return
+		log.Errorf("Error getting restaurants: %s", err.Error())
+	} else if len(restaurants) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		_, err := w.Write([]byte(""))
+		if err != nil {
+			log.Errorf("Error getting restaurants: %s", err.Error())
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+	} else {
+		w.WriteHeader(http.StatusOK)
+		restaurantsJSON, _ := json.Marshal(restaurants)
+		_, err = w.Write([]byte(restaurantsJSON))
+		if err != nil {
+			log.WithError(err).Error("Failed to encode restaurants into JSON")
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
@@ -56,17 +60,21 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 // @Param restaurant body restaurant.Restaurant true "Restaurant"
 func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
 	var res entity.Restaurant
-	err := c.service.CreateRestaurant(res)
+	err := json.NewDecoder(r.Body).Decode(&res)
+	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
-		return
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		log.Error("Error decoding restaurant")
 	}
-
-	err = json.NewDecoder(r.Body).Decode(&res)
+	err = c.service.CreateRestaurant(res)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		log.Error("Error creating restaurant")
 	}
-	fmt.Fprintf(w, "Restaurant %v", res)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode("Restaurant created")
 }
 
 // @Summary Updates a restaurant information
@@ -75,13 +83,21 @@ func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
 // @Produce  json
 // @Param restaurant body restaurant.Restaurant true "Restaurant"
 func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
-	var res entity.Restaurant
-	err := c.service.UpdateRestaurant(res)
+	var restaurant entity.Restaurant
+	err := json.NewDecoder(r.Body).Decode(&restaurant)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err = json.NewDecoder(r.Body).Decode(&res)
-
+	err = c.service.UpdateRestaurant(restaurant)
+	if err != nil {
+		log.Errorf("Error updating restaurant: %s", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode("Restaurant updated successfully")
 }
 
 // @Summary Deletes a restaurant record
@@ -93,6 +109,11 @@ func (c *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(idStr, 10, 64)
 	err := c.service.DeleteRestaurant(id)
 	if err != nil {
+		log.Errorf("Error deleting restaurant: %s", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 		return
 	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode("Restaurant deleted successfully")
 }
