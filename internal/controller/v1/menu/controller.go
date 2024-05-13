@@ -38,17 +38,20 @@ func (c *Controller) GetMenuByRestaurant(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	m, err := c.service.GetMenu(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
+	if m == nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		_, err = w.Write([]byte(""))
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		menuJSON, _ := json.Marshal(m)
+
+		_, err = w.Write([]byte(menuJSON))
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	menuJSON, _ := json.Marshal(m)
-	_, err = w.Write([]byte(menuJSON))
 	if err != nil {
 		log.WithError(err).Error("Failed to encode restaurants into JSON")
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
+
 }
