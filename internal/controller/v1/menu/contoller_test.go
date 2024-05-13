@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service/mocks"
 	"net/http"
@@ -85,7 +84,7 @@ func TestGetMenuByRestaurant(t *testing.T) {
 			{RestaurantID: 1, Category: "Extra Large Pizza", Name: "Extra Large Supreme Slice", Description: "Slice.", Price: "3.99 USD"},
 		}
 
-		mockService.On("GetMenu", mock.AnythingOfType("int64")).Return(&menus, nil)
+		mockService.On("GetMenu", 1).Return(&menus, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/restaurants/1/items", nil)
 		rec := httptest.NewRecorder()

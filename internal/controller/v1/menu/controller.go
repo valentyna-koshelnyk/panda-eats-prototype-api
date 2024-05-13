@@ -38,15 +38,17 @@ func (c *Controller) GetMenuByRestaurant(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	m, err := c.service.GetMenu(id)
+	w.Header().Set("Content-Type", "application/json")
+	// if service returns null since menu doesn't exist in db
 	if m == nil {
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		_, err = w.Write([]byte(""))
+	} else if err != nil {
+		log.Errorf("Error while writing response: %s", err)
+		return
 	} else {
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		menuJSON, _ := json.Marshal(m)
-
 		_, err = w.Write([]byte(menuJSON))
 	}
 	if err != nil {
