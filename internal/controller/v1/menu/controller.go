@@ -43,7 +43,8 @@ func (c *Controller) GetMenuByRestaurant(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "Error retrieving menu", http.StatusInternalServerError)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
-	} else if menuList == nil || len(*menuList) == 0 {
+	}
+	if menuList == nil || len(*menuList) == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		_, err = w.Write([]byte(""))
 		return
