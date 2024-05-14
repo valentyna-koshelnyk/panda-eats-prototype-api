@@ -12,12 +12,12 @@ import (
 
 // Controller datatype for controller layer
 type Controller struct {
-	service service.RestaurantService
+	s service.RestaurantService
 }
 
 // NewRestaurantController constructor for controller layer
 func NewRestaurantController(service service.RestaurantService) Controller {
-	return Controller{service: service}
+	return Controller{s: service}
 }
 
 // @Summary Get all restaurants
@@ -28,11 +28,13 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	priceRange := r.URL.Query().Get("price_range")
 	zipCode := r.URL.Query().Get("zip_code")
 
-	restaurants, err := c.service.FilterRestaurants(category, zipCode, priceRange)
 	w.Header().Set("Content-Type", "application/json")
+
+	restaurants, err := c.s.FilterRestaurants(category, zipCode, priceRange)
+
 	if err != nil {
 		log.Errorf("Error getting restaurants: %s", err.Error())
-	} else if len(restaurants) == 0 {
+	} else if len(restaurants) == 0 || restaurants == nil {
 		w.WriteHeader(http.StatusNotFound)
 		_, err := w.Write([]byte(""))
 		if err != nil {
@@ -67,7 +69,7 @@ func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 		log.Error("Error decoding restaurant")
 	}
-	err = c.service.CreateRestaurant(res)
+	err = c.s.CreateRestaurant(res)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
@@ -89,7 +91,7 @@ func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err = c.service.UpdateRestaurant(restaurant)
+	err = c.s.UpdateRestaurant(restaurant)
 	if err != nil {
 		log.Errorf("Error updating restaurant: %s", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -107,7 +109,7 @@ func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "restaurant_id")
 	id, _ := strconv.ParseInt(idStr, 10, 64)
-	err := c.service.DeleteRestaurant(id)
+	err := c.s.DeleteRestaurant(id)
 	if err != nil {
 		log.Errorf("Error deleting restaurant: %s", err.Error())
 		w.WriteHeader(http.StatusBadRequest)

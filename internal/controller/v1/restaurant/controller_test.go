@@ -14,7 +14,8 @@ import (
 	"testing"
 )
 
-func TestGetAll(t *testing.T) {
+func TestController(t *testing.T) {
+	// Arrange
 	restaurants := []entity.Restaurant{
 
 		{ID: 2,
@@ -29,6 +30,7 @@ func TestGetAll(t *testing.T) {
 			Lat:         "33.43098",
 			Lng:         "-86.8565464"},
 	}
+
 	restaurant := entity.Restaurant{
 		ID:          2,
 		Position:    5,
@@ -47,14 +49,12 @@ func TestGetAll(t *testing.T) {
 
 		mockService := new(mocks.RestaurantService)
 		controller := Controller{
-			service: mockService,
+			s: mockService,
 		}
 
 		r.Get("/api/v1/restaurants", controller.GetAll)
-
-		//category string, zip string, priceRange
+		// Act
 		mockService.On("FilterRestaurants", "pizza", "23204", "$").Return(restaurants, nil)
-
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/restaurants?category=pizza&price_range=$&zip_code=23204", nil)
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
@@ -62,6 +62,7 @@ func TestGetAll(t *testing.T) {
 		var result []entity.Restaurant
 		_ = json.Unmarshal(respBody, &result)
 
+		// Assert
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.Equal(t, "Pizza", result[0].Category)
 	})
@@ -69,17 +70,19 @@ func TestGetAll(t *testing.T) {
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
 		controller := Controller{
-			service: mockService,
+			s: mockService,
 		}
 		r.Get("/api/v1/restaurants", controller.GetAll)
 
+		// Act
 		mockService.On("FilterRestaurants", "pizza", "23204", "$").Return(nil, nil)
-
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/restaurants?category=pizza&price_range=$&zip_code=23204", nil)
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
 
 		respBody := rec.Body.Bytes()
+
+		// Assert
 		assert.Equal(t, http.StatusNotFound, rec.Code)
 		assert.Equal(t, "", string(respBody))
 	})
@@ -88,17 +91,16 @@ func TestGetAll(t *testing.T) {
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
 		controller := Controller{
-			service: mockService,
+			s: mockService,
 		}
+		r.Post("/api/v1/restaurants", controller.Create)
 
+		//Act
+		mockService.On("CreateRestaurant", mock.AnythingOfType("entity.Restaurant")).Return(nil)
 		reqBody, _ := json.Marshal(restaurant)
 		req, _ := http.NewRequest(http.MethodPost, "/api/v1/restaurants", bytes.NewBuffer(reqBody))
 		req.Header.Set("Content-Type", "application/json")
 		response := httptest.NewRecorder()
-
-		mockService.On("CreateRestaurant", mock.AnythingOfType("entity.Restaurant")).Return(nil)
-
-		r.Post("/api/v1/restaurants", controller.Create)
 		r.ServeHTTP(response, req)
 
 		// Assert
@@ -110,31 +112,31 @@ func TestGetAll(t *testing.T) {
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
 		controller := Controller{
-			service: mockService,
+			s: mockService,
 		}
+		r.Post("/api/v1/restaurants", controller.Create)
 
 		wrongJSON := []byte(`{
 				"ID": 1,
-	"Position": 6,
-	"Name": "Restaurant",
-	"Score": 0.0,
-	"Ratings": 0,
-	"Category": "American, Cheesesteak, Sandwiches, Alcohol",
-	"PriceRange": "$",
-	"FullAddress": "541-B Graymont Ave, Birmingham, AL, 35204",
-	"ZipCode": "35204",
-	"Lat": 33.5098,
-	"Lng": -86.85464
-
-		}`)
+				"Position": 6,
+				"Name": "Restaurant",
+				"Score": 0.0,
+				"Ratings": 0,
+				"Category": "American, Cheesesteak, Sandwiches, Alcohol",
+				"PriceRange": "$",
+				"FullAddress": "541-B Graymont Ave, Birmingham, AL, 35204",
+				"ZipCode": "35204",
+				"Lat": 33.5098,
+				"Lng": -86.85464
+}`)
+		// Act
+		mockService.On("CreateRestaurant", mock.AnythingOfType("entity.Restaurant")).Return(nil)
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/restaurants", bytes.NewBuffer(wrongJSON))
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
-		mockService.On("CreateRestaurant", mock.AnythingOfType("entity.Restaurant")).Return(nil)
-
-		r.Post("/api/v1/restaurants", controller.Create)
 		r.ServeHTTP(rec, req)
 
+		// Assert
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 		assert.Errorf(t, errors.New("Error decoding restaurant"), rec.Body.String())
 	})
@@ -142,12 +144,12 @@ func TestGetAll(t *testing.T) {
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
 		controller := Controller{
-			service: mockService,
+			s: mockService,
 		}
-
-		mockService.On("UpdateRestaurant", restaurant).Return(nil)
-
 		r.Put("/api/v1/restaurants", controller.Update)
+
+		// Act
+		mockService.On("UpdateRestaurant", restaurant).Return(nil)
 		reqBody, _ := json.Marshal(restaurant)
 		req := httptest.NewRequest(http.MethodPut, "/api/v1/restaurants", bytes.NewBuffer(reqBody))
 		req.Header.Set("Content-Type", "application/json")
@@ -160,23 +162,26 @@ func TestGetAll(t *testing.T) {
 	})
 
 	t.Run("should return error updating restaurant", func(t *testing.T) {
+		// Arrange
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
 		controller := Controller{
-			service: mockService,
+			s: mockService,
 		}
-		mockService.On("UpdateRestaurant", restaurant).Return(errors.New("error"))
 		r.Put("/api/v1/restaurants", controller.Update)
 
+		// Act
+		mockService.On("UpdateRestaurant", restaurant).Return(errors.New("error"))
 		reqBody, _ := json.Marshal(restaurant)
 		req := httptest.NewRequest(http.MethodPut, "/api/v1/restaurants", bytes.NewBuffer(reqBody))
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
 
+		// Assert
 		var errorResponse map[string]string
 		err := json.Unmarshal(rec.Body.Bytes(), &errorResponse)
 		assert.NoError(t, err)
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
 		assert.Equal(t, "error", errorResponse["error"])
 	})
 
@@ -184,15 +189,17 @@ func TestGetAll(t *testing.T) {
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
 		controller := Controller{
-			service: mockService,
+			s: mockService,
 		}
 		r.Delete("/api/v1/restaurants/{restaurant_id}", controller.Delete)
-		mockService.On("DeleteRestaurant", int64(1)).Return(nil)
 
+		// Act
+		mockService.On("DeleteRestaurant", int64(1)).Return(nil)
 		req := httptest.NewRequest(http.MethodDelete, "/api/v1/restaurants/1", nil)
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
 
+		// Assert
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.JSONEq(t, `"Restaurant deleted successfully"`, rec.Body.String())
 	})
@@ -201,15 +208,17 @@ func TestGetAll(t *testing.T) {
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
 		controller := Controller{
-			service: mockService,
+			s: mockService,
 		}
-		mockService.On("DeleteRestaurant", int64(13)).Return(errors.New("Error deleting restaurant"))
-
 		r.Delete("/api/v1/restaurants/{restaurant_id}", controller.Delete)
 
+		// Act
+		mockService.On("DeleteRestaurant", int64(13)).Return(errors.New("Error deleting restaurant"))
 		req := httptest.NewRequest(http.MethodDelete, "/api/v1/restaurants/13", nil)
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
+
+		// Assert
 		var errorResponse map[string]string
 		err := json.Unmarshal(rec.Body.Bytes(), &errorResponse)
 		assert.NoError(t, err)
