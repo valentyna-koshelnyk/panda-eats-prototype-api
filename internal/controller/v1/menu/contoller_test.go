@@ -18,7 +18,7 @@ func TestGetMenuByRestaurant(t *testing.T) {
 
 		mockService := new(mocks.MenuService)
 		controller := Controller{
-			service: mockService,
+			s: mockService,
 		}
 
 		r.Get("/api/v1/restaurants/{restaurant_id}/items", controller.GetMenuByRestaurant)
@@ -48,7 +48,7 @@ func TestGetMenuByRestaurant(t *testing.T) {
 		r := chi.NewRouter()
 
 		mockService := new(mocks.MenuService)
-		controller := Controller{service: mockService}
+		controller := Controller{s: mockService}
 		r.Get("/api/v1/restaurants/{restaurant_id}/items", controller.GetMenuByRestaurant)
 
 		mockService.On("GetMenu", int64(2)).Return(nil, nil)

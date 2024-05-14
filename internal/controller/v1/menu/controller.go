@@ -5,21 +5,19 @@ import (
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
-	"reflect"
-
 	"net/http"
 	"strconv"
 )
 
 // Controller datatype for menu controller layer
 type Controller struct {
-	service service.MenuService
+	s service.MenuService
 }
 
 // NewController constructor for controller layer
-func NewController(service service.MenuService) *Controller {
+func NewController(s service.MenuService) *Controller {
 	return &Controller{
-		service: service,
+		s: s,
 	}
 }
 
@@ -39,13 +37,13 @@ func (c *Controller) GetMenuByRestaurant(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "Invalid restaurant ID", http.StatusBadRequest)
 		return
 	}
-	menuList, err := c.service.GetMenu(id)
+	menuList, err := c.s.GetMenu(id)
 	if err != nil {
 		log.Errorf("Error while writing response: %s", err)
 		http.Error(w, "Error retrieving menu", http.StatusInternalServerError)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
-	} else if menuList == nil || reflect.ValueOf(menuList).IsZero() {
+	} else if menuList == nil || len(*menuList) == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		_, err = w.Write([]byte(""))
 		return
