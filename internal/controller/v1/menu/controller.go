@@ -5,20 +5,19 @@ import (
 	"github.com/go-chi/chi/v5"
 	log "github.com/sirupsen/logrus"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
-
 	"net/http"
 	"strconv"
 )
 
 // Controller datatype for menu controller layer
 type Controller struct {
-	service service.MenuService
+	s service.MenuService
 }
 
 // NewController constructor for controller layer
-func NewController(service service.MenuService) *Controller {
+func NewController(s service.MenuService) *Controller {
 	return &Controller{
-		service: service,
+		s: s,
 	}
 }
 
@@ -30,25 +29,31 @@ func NewController(service service.MenuService) *Controller {
 // @Param id path int true "restaurant_id"
 // @Success 200 {array} Menu
 // @Router /restaurants/{restaurant_id}/items [get]
-func (c *Controller) MenuByRestaurant(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) GetMenuByRestaurant(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "restaurant_id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
+	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
 		http.Error(w, "Invalid restaurant ID", http.StatusBadRequest)
 		return
 	}
-	m, err := c.service.GetMenu(id)
+	menuList, err := c.s.GetMenu(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		log.Errorf("Error while writing response: %s", err)
+		http.Error(w, "Error retrieving menu", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+	if menuList == nil || len(*menuList) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		_, err = w.Write([]byte(""))
+		return
+	}
 	w.WriteHeader(http.StatusOK)
-	menuJSON, _ := json.Marshal(m)
+	menuJSON, _ := json.Marshal(menuList)
 	_, err = w.Write([]byte(menuJSON))
 	if err != nil {
 		log.WithError(err).Error("Failed to encode restaurants into JSON")
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
 }

@@ -43,6 +43,7 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	// Initiate a server
+
 	server := &http.Server{
 		Addr:    ":" + viper.GetString("server.port"),
 		Handler: r,

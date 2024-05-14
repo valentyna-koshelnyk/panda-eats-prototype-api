@@ -19,7 +19,6 @@
 .env*
 .idea/
 .netrc
-mocks
 .conf.env.swp
 # Go workspace file
 go.work
