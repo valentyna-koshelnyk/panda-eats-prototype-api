@@ -6,21 +6,26 @@ import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
 )
 
+// MenuService interface layer for menu service
 type MenuService interface {
 	GetMenu(id int64) (*[]entity.Menu, error)
 }
 
-// Service  layer for menu
+// menuService  layer for menu
 type menuService struct {
 	repository repository.MenuRepository
 }
 
-// NewService is a constructor for service layer of menu
+// NewMenuService is a constructor for service layer of menu
 func NewMenuService(r repository.MenuRepository) MenuService {
 	return &menuService{repository: r}
 }
 
 // GetMenu retrieves menu of the specific restaurant
 func (s *menuService) GetMenu(id int64) (*[]entity.Menu, error) {
-	return s.repository.GetMenu(id)
+	menu, err := s.repository.GetMenu(id)
+	if err != nil {
+		return nil, err
+	}
+	return menu, nil
 }
