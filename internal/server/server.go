@@ -9,6 +9,7 @@ import (
 	v1 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1"
 )
 
+// Server represents a chi router and HTTP server
 type Server struct {
 	Router     *chi.Mux
 	httpServer *http.Server
