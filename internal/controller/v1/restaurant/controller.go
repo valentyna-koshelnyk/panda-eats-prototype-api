@@ -5,9 +5,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
-	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom_errors"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
+	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/errors"
 	"io"
 	"net/http"
 	"strconv"
@@ -39,14 +39,15 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 		log.Errorf("Error getting restaurants: %s", err.Error())
 		ce.RespondWithError(w, r, "error getting restaurants")
 		return
-	} else if len(restaurants) == 0 || restaurants == nil {
+	}
+	if len(restaurants) == 0 || restaurants == nil {
 		w.WriteHeader(http.StatusNotFound)
 		log.Errorf("Restaurant not found: %s", err.Error())
 		ce.RespondWithError(w, r, "restaurant data not found")
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	render.Respond(w, r, restaurants)
+	render.JSON(w, r, restaurants)
 	return
 }
 
@@ -82,7 +83,7 @@ func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
-	render.Respond(w, r, "restaurant created")
+	render.JSON(w, r, "restaurant created")
 	return
 }
 
@@ -112,7 +113,7 @@ func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
-	render.Respond(w, r, "successfully updated the restaurant")
+	render.JSON(w, r, "successfully updated the restaurant")
 	return
 }
 
@@ -135,6 +136,6 @@ func (c *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
-	render.Respond(w, r, "Restaurant deleted successfully")
+	render.JSON(w, r, "Restaurant deleted successfully")
 	return
 }
