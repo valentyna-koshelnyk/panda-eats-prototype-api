@@ -13,23 +13,8 @@ import (
 	"testing"
 )
 
-func TestController(t *testing.T) {
-	// Arrange
-	restaurants := []entity.Restaurant{
-		{ID: 2,
-			Position:    5,
-			Name:        "Philly Fresh Cheesesteaks (541-B Graymont Ave)",
-			Score:       0,
-			Ratings:     0,
-			Category:    "Pizza",
-			PriceRange:  "$",
-			FullAddress: "541-B Graymont Ave, Birmingham, AL, 23204",
-			ZipCode:     "23204",
-			Lat:         "33.43098",
-			Lng:         "-86.8565464"},
-	}
-
-	restaurant := entity.Restaurant{
+var (
+	restaurant = entity.Restaurant{
 		ID:          2,
 		Position:    5,
 		Name:        "Philly Fresh Cheesesteaks (541-B Graymont Ave)",
@@ -43,6 +28,23 @@ func TestController(t *testing.T) {
 		Lng:         "-86.8565464",
 	}
 
+	restaurants = []entity.Restaurant{
+		{ID: 2,
+			Position:    5,
+			Name:        "Philly Fresh Cheesesteaks (541-B Graymont Ave)",
+			Score:       0,
+			Ratings:     0,
+			Category:    "Pizza",
+			PriceRange:  "$",
+			FullAddress: "541-B Graymont Ave, Birmingham, AL, 23204",
+			ZipCode:     "23204",
+			Lat:         "33.43098",
+			Lng:         "-86.8565464"},
+	}
+)
+
+func TestController_GetAll(t *testing.T) {
+	// Arrange
 	t.Run("on get all, return OK", func(t *testing.T) {
 		r := chi.NewRouter()
 
@@ -83,6 +85,9 @@ func TestController(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 		assert.JSONEq(t, "{\"error\":\"error getting restaurants\"}\n", rec.Body.String())
 	})
+}
+
+func TestController_Create(t *testing.T) {
 	t.Run("on create, return Created", func(t *testing.T) {
 		// Arrange
 		r := chi.NewRouter()
@@ -93,8 +98,8 @@ func TestController(t *testing.T) {
 		r.Post("/api/v1/restaurants", controller.Create)
 
 		//Act
-		mockService.On("CreateRestaurant", restaurant).Return(nil)
-		reqBody, _ := json.Marshal(restaurant)
+		mockService.On("CreateRestaurant", entity.Restaurant{}).Return(nil)
+		reqBody, _ := json.Marshal(entity.Restaurant{})
 		req, _ := http.NewRequest(http.MethodPost, "/api/v1/restaurants", bytes.NewBuffer(reqBody))
 		req.Header.Set("Content-Type", "application/json")
 		response := httptest.NewRecorder()
@@ -135,7 +140,10 @@ func TestController(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 		assert.JSONEq(t, "{\"error\":\"error creating restaurant\"}\n", rec.Body.String())
 	})
+}
+func TestController_Update(t *testing.T) {
 	t.Run("on update, return NoContent", func(t *testing.T) {
+		// Arrange
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
 		controller := Controller{
@@ -152,6 +160,7 @@ func TestController(t *testing.T) {
 
 		r.ServeHTTP(rec, req)
 
+		// Assert
 		assert.Equal(t, http.StatusNoContent, rec.Code)
 		assert.JSONEq(t, `"successfully updated the restaurant"`, rec.Body.String())
 	})
@@ -178,8 +187,11 @@ func TestController(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 		assert.JSONEq(t, "{\"error\":\"Error updating restaurant\"}\n", rec.Body.String())
 	})
+}
 
+func TestController_Delete(t *testing.T) {
 	t.Run("on delete, return NoContent", func(t *testing.T) {
+		// Arrange
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
 		controller := Controller{
@@ -199,6 +211,7 @@ func TestController(t *testing.T) {
 	})
 
 	t.Run("on delete, return error", func(t *testing.T) {
+		// Arrange
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
 		controller := Controller{
