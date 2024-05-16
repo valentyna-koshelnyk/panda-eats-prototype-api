@@ -2,7 +2,7 @@ package restaurant
 
 import (
 	"github.com/go-chi/chi/v5"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/config"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/menu"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
@@ -28,7 +28,7 @@ func Routes() chi.Router {
 
 	r.Get("/", restaurantController.GetAll)
 	r.Get("/{restaurant_id}/items", menuController.GetMenuByRestaurant)
-	r.Post("/", restaurantController.Create)
+	//r.Post("/", restaurantController.Create)
 	r.Delete("/{restaurant_id}", restaurantController.Delete)
 	r.Put("/", restaurantController.Update)
 	return r
