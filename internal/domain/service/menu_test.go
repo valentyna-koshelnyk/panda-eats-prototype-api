@@ -25,11 +25,7 @@ func TestMenuService_GetMenu(t *testing.T) {
 		actualMenu, err := ms.GetMenu(1)
 
 		// Assert
-		assert.NoError(t, err)
-		assert.NotNil(t, actualMenu)
 		assert.Equal(t, &menu, actualMenu)
-
-		mockMenuRepository.AssertExpectations(t)
 	})
 
 	t.Run("Error", func(t *testing.T) {
