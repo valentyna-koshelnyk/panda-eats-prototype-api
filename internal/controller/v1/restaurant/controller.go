@@ -2,51 +2,53 @@ package restaurant
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
+	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/errors"
+	"io"
 	"net/http"
 	"strconv"
 )
 
 // Controller datatype for controller layer
 type Controller struct {
-	service service.RestaurantService
+	s service.RestaurantService
 }
 
 // NewRestaurantController constructor for controller layer
 func NewRestaurantController(service service.RestaurantService) Controller {
-	return Controller{service: service}
+	return Controller{s: service}
 }
 
 // @Summary Get all restaurants
 // @Description Retrieves the list of all restaurants from the database
 // @Produce  json
 func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	category := r.URL.Query().Get("category")
 	priceRange := r.URL.Query().Get("price_range")
 	zipCode := r.URL.Query().Get("zip_code")
 
-	restaurants, err := c.service.FilterRestaurants(category, zipCode, priceRange)
-
+	restaurants, err := c.s.FilterRestaurants(category, zipCode, priceRange)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		log.WithError(err).Error("Failed to fetch restaurants")
+		w.WriteHeader(http.StatusBadRequest)
+		log.Errorf("Error getting restaurants: %s", err.Error())
+		ce.RespondWithError(w, r, "error getting restaurants")
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
+	if len(restaurants) == 0 || restaurants == nil {
+		w.WriteHeader(http.StatusNotFound)
+		log.Errorf("Restaurant not found: %s", err.Error())
+		ce.RespondWithError(w, r, "restaurant data not found")
+		return
+	}
 	w.WriteHeader(http.StatusOK)
-
-	restaurantsJSON, _ := json.Marshal(restaurants)
-	_, err = w.Write([]byte(restaurantsJSON))
-	if err != nil {
-		log.WithError(err).Error("Failed to encode restaurants into JSON")
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-		return
-	}
+	render.JSON(w, r, restaurants)
+	return
 }
 
 // @Summary Adds a new restaurant
@@ -55,18 +57,34 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 // @Produce  json
 // @Param restaurant body restaurant.Restaurant true "Restaurant"
 func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
-	var res entity.Restaurant
-	err := c.service.CreateRestaurant(res)
+	w.Header().Set("Content-Type", "application/json")
+
+	var restaurant entity.Restaurant
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Errorf("Error reading request body: %s", err.Error())
+		ce.RespondWithError(w, r, "invalid request body")
+		return
+	}
+	err = json.Unmarshal(data, &restaurant)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Error("Error decoding restaurant", err.Error())
+		ce.RespondWithError(w, r, "error creating restaurant")
 		return
 	}
 
-	err = json.NewDecoder(r.Body).Decode(&res)
+	err = c.s.CreateRestaurant(restaurant)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		log.Error("Error creating restaurant", err.Error())
+		ce.RespondWithError(w, r, "error creating restaurant")
 		return
 	}
-	fmt.Fprintf(w, "Restaurant %v", res)
+	w.WriteHeader(http.StatusCreated)
+	render.JSON(w, r, "restaurant created")
+	return
 }
 
 // @Summary Updates a restaurant information
@@ -75,13 +93,28 @@ func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
 // @Produce  json
 // @Param restaurant body restaurant.Restaurant true "Restaurant"
 func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
-	var res entity.Restaurant
-	err := c.service.UpdateRestaurant(res)
+	w.Header().Set("Content-Type", "application/json")
+
+	var restaurant entity.Restaurant
+	data, err := io.ReadAll(r.Body)
+	err = json.Unmarshal(data, &restaurant)
 	if err != nil {
+		w.WriteHeader(http.StatusConflict)
+		log.Error("Error decoding restaurant", err.Error())
+		ce.RespondWithError(w, r, "error updating restaurant")
 		return
 	}
-	err = json.NewDecoder(r.Body).Decode(&res)
 
+	err = c.s.UpdateRestaurant(restaurant)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Errorf("Error updating restaurant: %s", err.Error())
+		ce.RespondWithError(w, r, "Error updating restaurant")
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+	render.JSON(w, r, "successfully updated the restaurant")
+	return
 }
 
 // @Summary Deletes a restaurant record
@@ -89,10 +122,20 @@ func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 func (c *Controller) Delete(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	idStr := chi.URLParam(r, "restaurant_id")
 	id, _ := strconv.ParseInt(idStr, 10, 64)
-	err := c.service.DeleteRestaurant(id)
+
+	err := c.s.DeleteRestaurant(id)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Errorf("Error deleting restaurant: %s", err.Error())
+		ce.RespondWithError(w, r, "error deleting restaurant")
 		return
 	}
+
+	w.WriteHeader(http.StatusNoContent)
+	render.JSON(w, r, "Restaurant deleted successfully")
+	return
 }
