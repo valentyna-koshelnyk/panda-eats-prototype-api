@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository/mocks"
@@ -51,6 +52,7 @@ var (
 			Lng:         "-86.8565464"},
 	}
 	emptyRestaurant = entity.Restaurant{}
+
 )
 
 func TestRestaurantService_FilterRestaurants(t *testing.T) {
@@ -177,4 +179,6 @@ func TestRestaurantService_DeleteRestaurant(t *testing.T) {
 		// Assert
 		assert.Equal(t, "failed to delete restaurant", err.Error())
 	})
+
+
 }
