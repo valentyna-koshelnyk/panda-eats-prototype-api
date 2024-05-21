@@ -16,16 +16,16 @@ var (
 	once sync.Once
 )
 
-// Initialize viper and load configuration
+// InitViperConfig Initialize viper and load configuration
 func InitViperConfig() {
-	viper.AddConfigPath("./config")
+	viper.AddConfigPath("./internal/config")
 	viper.SetConfigName("config.dev")
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file: %s", err)
 	}
 }
 
-// Initialize and return the database instance
+// GetDB Initialize and return the database instance
 func GetDB() *gorm.DB {
 	once.Do(func() {
 		db = initDB()
@@ -33,7 +33,7 @@ func GetDB() *gorm.DB {
 	return db
 }
 
-// Private function to initialize the database
+// initDB private function to initialize the database
 func initDB() *gorm.DB {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=disable",
 		viper.GetString("database.host"),
@@ -47,7 +47,7 @@ func initDB() *gorm.DB {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	if err = db.AutoMigrate(&entity.Menu{}, &entity.Restaurant{}); err != nil {
+	if err = db.AutoMigrate(&entity.Menu{}, &entity.Restaurant{}, &entity.User{}); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
 
