@@ -24,7 +24,11 @@ func NewRestaurantService(r repository.RestaurantRepository) RestaurantService {
 }
 
 func (s *restaurantService) FilterRestaurants(category string, zip string, priceRange string) ([]entity.Restaurant, error) {
-	return s.repository.FilterRestaurants(category, zip, priceRange)
+	restaurants, err := s.repository.FilterRestaurants(category, zip, priceRange)
+	if err != nil {
+		return nil, err
+	}
+	return restaurants, nil
 }
 
 func (s *restaurantService) CreateRestaurant(restaurant entity.Restaurant) error {
