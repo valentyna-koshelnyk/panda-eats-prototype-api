@@ -28,7 +28,7 @@ func Routes() chi.Router {
 
 	r.Get("/", restaurantController.GetAll)
 	r.Get("/{restaurant_id}/items", menuController.GetMenuByRestaurant)
-	r.Post("/", restaurantController.Create)
+	//r.Post("/", restaurantController.Create)
 	r.Delete("/{restaurant_id}", restaurantController.Delete)
 	r.Put("/", restaurantController.Update)
 	return r
