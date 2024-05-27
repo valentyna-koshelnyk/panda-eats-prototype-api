@@ -59,6 +59,13 @@ func (c *Controller) RegistrationUser(next http.Handler) http.Handler {
 			return
 		}
 		user.Password = hashedPassword
+		existingUser, err := c.s.GetUser(user.ID, user.Username, user.Email)
+		if existingUser != nil {
+			w.WriteHeader(http.StatusConflict)
+			log.Error("user already exists")
+			ce.RespondWithError(w, r, "user already exists")
+			return
+		}
 		_, err = c.s.CreateUser(*user)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

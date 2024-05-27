@@ -8,7 +8,7 @@ import (
 
 // UserRepository interface for interacting with db
 type UserRepository interface {
-	GetUser(id int64) (*entity.User, error)
+	GetUser(id int64, username string, email string) (*entity.User, error)
 	CreateUser(u *entity.User) error
 	UpdateUser(u *entity.User) error
 	DeleteUser(id int64) error
@@ -24,10 +24,26 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{db: db}
 }
 
-func (r *userRepository) GetUser(id int64) (*entity.User, error) {
+func (r *userRepository) GetUser(id int64, username string, email string) (*entity.User, error) {
 	var u entity.User
 	result := r.db.First(&u, id)
-	return &u, result.Error
+	query := r.db
+	if id != 0 {
+		query = query.Where("id = ?", id)
+	}
+	if username != "" {
+		query = query.Where("username = ?", username)
+	}
+	if email != "" {
+		query = query.Where("email = ?", email)
+	}
+
+	result = query.First(&u)
+	if result.Error != nil {
+		log.Error("No user found: ", result.Error)
+		return nil, result.Error
+	}
+	return &u, nil
 }
 
 func (r *userRepository) CreateUser(u *entity.User) error {

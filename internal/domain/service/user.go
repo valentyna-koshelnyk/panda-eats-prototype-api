@@ -7,7 +7,7 @@ import (
 
 type UserService interface {
 	CreateUser(user entity.User) (entity.User, error)
-	GetUserById(id int64) (entity.User, error)
+	GetUser(id int64, username string, email string) (*entity.User, error)
 	UpdateUser(user entity.User) (entity.User, error)
 	DeleteUser(id int64) error
 }
@@ -44,11 +44,10 @@ func (s *userService) DeleteUser(id int64) error {
 	return nil
 }
 
-func (s *userService) GetUserById(id int64) (entity.User, error) {
-	err, _ := s.repository.GetUser(id)
+func (s *userService) GetUser(id int64, username string, email string) (*entity.User, error) {
+	user, err := s.repository.GetUser(id, username, email)
 	if err != nil {
-		return entity.User{}, nil
+		return nil, err
 	}
-	return s.GetUserById(id)
-
+	return user, nil
 }
