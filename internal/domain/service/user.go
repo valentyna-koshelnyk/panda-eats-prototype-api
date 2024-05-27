@@ -1,6 +1,8 @@
 package service
 
 import (
+	log "github.com/sirupsen/logrus"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/auth"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
 )
@@ -23,7 +25,24 @@ func NewUserService(repository repository.UserRepository) UserService {
 
 // CreateUser presentation layer for adding user to repository
 func (s *userService) CreateUser(u entity.User) (entity.User, error) {
-	err := s.repository.CreateUser(&u)
+	hashedPassword, err := auth.Hash(u.Password)
+	u.Password = hashedPassword
+
+	// For now keeping user as a role and keeping all registered users as "user" by default.
+	// TODO: to add admin as a role and all methods related to admin role make accessible just for admins
+	u.Role = "user"
+
+	existingUser, err := s.GetUser(u.Email)
+	if existingUser != nil {
+		log.Error("User already exists")
+	}
+
+	err = u.Validate()
+	if err != nil {
+		return entity.User{}, err
+	}
+
+	err = s.repository.CreateUser(&u)
 	if err != nil {
 		return entity.User{}, err
 	}

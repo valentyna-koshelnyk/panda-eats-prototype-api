@@ -2,13 +2,10 @@ package user
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/auth"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/errors"
@@ -25,55 +22,32 @@ func NewUserController(service service.UserService) Controller {
 }
 
 // RegistrationUser handles user registration by validating and creating a new user
-func (c *Controller) RegistrationUser(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		var user *entity.User
-		data, err := io.ReadAll(r.Body)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			log.Errorf("error reading body: %s", err)
-			ce.RespondWithError(w, r, "invalid request body")
-			return
-		}
-		err = json.Unmarshal(data, &user)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			log.Errorf("error unmarshalling body: %s", err)
-			ce.RespondWithError(w, r, "invalid request body")
-			return
-		}
-		validate := validator.New()
-		err = validate.Struct(user)
-		if err != nil {
-			var errs validator.ValidationErrors
-			errors.As(err, &errs)
-			http.Error(w, errs.Error(), http.StatusBadRequest)
-			return
-		}
-		hashedPassword, err := auth.Hash(user.Password)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			log.Errorf("error hashing password: %s", err)
-			ce.RespondWithError(w, r, "invalid request body")
-			return
-		}
-		user.Password = hashedPassword
-		user.Role = "user"
-		existingUser, err := c.s.GetUser(user.ID, user.Username, user.Email)
-		if existingUser != nil {
-			w.WriteHeader(http.StatusConflict)
-			log.Error("user already exists")
-			ce.RespondWithError(w, r, "user already exists")
-			return
-		}
-		_, err = c.s.CreateUser(*user)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.Errorf("error creating new user: %s", err)
-			ce.RespondWithError(w, r, "internal server error")
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
+func (c *Controller) RegistrationUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var user *entity.User
+
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Errorf("error reading body: %s", err)
+		ce.RespondWithError(w, r, "invalid request body")
+		return
+	}
+
+	err = json.Unmarshal(data, &user)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Errorf("error unmarshalling body: %s", err)
+		ce.RespondWithError(w, r, "invalid request body")
+		return
+	}
+
+	_, err = c.s.CreateUser(*user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Errorf("error creating new user: %s", err)
+		ce.RespondWithError(w, r, "error creating new user")
+		return
+	}
 }
