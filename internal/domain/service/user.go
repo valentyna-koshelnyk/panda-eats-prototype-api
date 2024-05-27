@@ -1,53 +1,74 @@
 package service
 
 import (
+	"errors"
+	log "github.com/sirupsen/logrus"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/auth"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
 )
 
+// UserService defines an API for user service to be used by presentation layer
 type UserService interface {
 	CreateUser(user entity.User) (entity.User, error)
-	GetUser(id int64, username string, email string) (*entity.User, error)
-	UpdateUser(user entity.User) (entity.User, error)
-	DeleteUser(id int64) error
+	GetUser(email string) (*entity.User, error)
+	VerifyUser(user entity.User) (bool, error)
 }
 
+// userService struct as a business layer between controller and repository
 type userService struct {
 	repository repository.UserRepository
 }
 
+// NewUserService a constructor for user service
 func NewUserService(repository repository.UserRepository) UserService {
 	return &userService{repository: repository}
 }
 
+// CreateUser presentation layer for adding user to repository
 func (s *userService) CreateUser(u entity.User) (entity.User, error) {
-	err := s.repository.CreateUser(&u)
+	hashedPassword, err := auth.Hash(u.Password)
+	u.Password = hashedPassword
+
+	// For now keeping user as a role and keeping all registered users as "user" by default.
+	// TODO: to add admin as a role and all methods related to admin role make accessible just for admins
+	u.Role = "user"
+
+	existingUser, err := s.GetUser(u.Email)
+	if existingUser != nil {
+		log.Error("User already exists")
+		return u, errors.New("user already exists")
+	}
+
+	err = u.Validate()
+	if err != nil {
+		return entity.User{}, errors.New("invalid user")
+	}
+
+	err = s.repository.CreateUser(&u)
 	if err != nil {
 		return entity.User{}, err
 	}
 	return u, nil
 }
 
-func (s *userService) UpdateUser(user entity.User) (entity.User, error) {
-	err := s.repository.UpdateUser(&user)
-	if err != nil {
-		return entity.User{}, err
-	}
-	return user, nil
-}
-
-func (s *userService) DeleteUser(id int64) error {
-	err := s.repository.DeleteUser(id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *userService) GetUser(id int64, username string, email string) (*entity.User, error) {
-	user, err := s.repository.GetUser(id, username, email)
+// GetUser retrieves the user based on his id, username and/or email
+func (s *userService) GetUser(email string) (*entity.User, error) {
+	user, err := s.repository.GetUser(email)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
+}
+
+// VerifyUser verifies if login and password are
+func (s *userService) VerifyUser(u entity.User) (bool, error) {
+	existingUser, err := s.GetUser(u.Email)
+	if err != nil {
+		return false, errors.New("invalid user")
+	}
+	if auth.VerifyPassword(u.Password, existingUser.Password) {
+		return true, nil
+	}
+	return false, errors.New("invalid password")
 }

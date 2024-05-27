@@ -73,10 +73,11 @@ func (c *Controller) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(data, &user)
 
-	if !c.s.VerifyUser(*user) {
+	_, err = c.s.VerifyUser(*user)
+	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		log.Errorf("invalid user: %s", err)
-		ce.RespondWithError(w, r, "invalid user")
+		log.Errorf("invalid : %s", err)
+		ce.RespondWithError(w, r, err.Error())
 		return
 	}
 	stringID := strconv.Itoa(int(user.ID))
