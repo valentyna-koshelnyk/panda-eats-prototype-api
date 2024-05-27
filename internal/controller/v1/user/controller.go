@@ -59,6 +59,7 @@ func (c *Controller) RegistrationUser(next http.Handler) http.Handler {
 			return
 		}
 		user.Password = hashedPassword
+		user.Role = "user"
 		existingUser, err := c.s.GetUser(user.ID, user.Username, user.Email)
 		if existingUser != nil {
 			w.WriteHeader(http.StatusConflict)
