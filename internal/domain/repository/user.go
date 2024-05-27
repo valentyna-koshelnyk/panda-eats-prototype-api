@@ -41,3 +41,4 @@ func (r *userRepository) CreateUser(u *entity.User) error {
 	}
 	return nil
 }
+
