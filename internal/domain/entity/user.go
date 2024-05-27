@@ -58,3 +58,4 @@ func (user *User) Validate() error {
 
 	return nil
 }
+

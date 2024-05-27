@@ -53,3 +53,4 @@ func (r *userRepository) DeleteUser(id int64) error {
 	}
 	return nil
 }
+
