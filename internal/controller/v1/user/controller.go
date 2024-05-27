@@ -2,6 +2,7 @@ package user
 
 import (
 	"encoding/json"
+	"github.com/go-chi/render"
 	"io"
 	"net/http"
 
@@ -47,7 +48,10 @@ func (c *Controller) RegistrationUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Errorf("error creating new user: %s", err)
-		ce.RespondWithError(w, r, "error creating new user")
+		ce.RespondWithError(w, r, err.Error())
 		return
 	}
+	w.WriteHeader(http.StatusCreated)
+	render.JSON(w, r, "User registered successfully")
+	return
 }

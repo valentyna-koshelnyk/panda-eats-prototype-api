@@ -25,10 +25,10 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 // GetUser checks if user with the input email exists
 func (r *userRepository) GetUser(email string) (*entity.User, error) {
 	var u entity.User
-	result := r.db.First(&u, email)
+	result := r.db.Where("email = ?", email).First(&u)
 
 	if result.Error != nil {
-		log.Error("No user found: ", result.Error)
+		log.Error("user not found: ", result.Error)
 		return nil, result.Error
 	}
 	return &u, nil
