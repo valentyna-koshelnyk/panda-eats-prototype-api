@@ -12,11 +12,6 @@ type UserService struct {
 	mock.Mock
 }
 
-func (_m *UserService) VerifyUser(user entity.User) (bool, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 // CreateUser provides a mock function with given fields: user
 func (_m *UserService) CreateUser(user entity.User) (entity.User, error) {
 	ret := _m.Called(user)
@@ -60,6 +55,30 @@ func (_m *UserService) GetUser(email string) (*entity.User, error) {
 
 	if rf, ok := ret.Get(1).(func(string) error); ok {
 		r1 = rf(email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// VerifyUser provides a mock function with given fields: user
+func (_m *UserService) VerifyUser(user entity.User) (bool, error) {
+	ret := _m.Called(user)
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(entity.User) (bool, error)); ok {
+		return rf(user)
+	}
+	if rf, ok := ret.Get(0).(func(entity.User) bool); ok {
+		r0 = rf(user)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(entity.User) error); ok {
+		r1 = rf(user)
 	} else {
 		r1 = ret.Error(1)
 	}
