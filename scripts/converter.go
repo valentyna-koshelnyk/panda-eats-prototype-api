@@ -4,7 +4,7 @@ import (
 	"encoding/csv"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/config"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"gorm.io/gorm/clause"
 	"os"
