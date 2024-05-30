@@ -8,7 +8,7 @@ import (
 
 // MenuService interface layer for menu service
 type MenuService interface {
-	GetMenu(id int64) (*[]entity.Menu, error)
+	GetMenu(id int64) (*entity.Response, error)
 }
 
 // menuService  layer for menu
@@ -22,10 +22,20 @@ func NewMenuService(r repository.MenuRepository) MenuService {
 }
 
 // GetMenu retrieves menu of the specific restaurant
-func (s *menuService) GetMenu(id int64) (*[]entity.Menu, error) {
-	menu, err := s.repository.GetMenu(id)
+func (s *menuService) GetMenu(id int64) (*entity.Response, error) {
+	menus, err := s.repository.GetMenu(id)
 	if err != nil {
 		return nil, err
 	}
-	return menu, nil
+
+	if len(menus) == 0 {
+		return entity.NewResponse([]entity.Item{}), nil
+	}
+
+	var items []entity.Item
+	for _, menu := range menus {
+		items = append(items, menu)
+	}
+	response := entity.NewResponse(items)
+	return response, nil
 }

@@ -5,9 +5,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
+	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
-	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/errors"
 	"io"
 	"net/http"
 	"strconv"
@@ -33,21 +33,22 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	priceRange := r.URL.Query().Get("price_range")
 	zipCode := r.URL.Query().Get("zip_code")
 
-	restaurants, err := c.s.FilterRestaurants(category, zipCode, priceRange)
+	response, err := c.s.FilterRestaurants(category, zipCode, priceRange)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("Error getting restaurants: %s", err.Error())
 		ce.RespondWithError(w, r, "error getting restaurants")
 		return
 	}
-	if len(restaurants) == 0 || restaurants == nil {
+	if response == nil || len(response.Data.Items) == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		log.Errorf("Restaurant not found: %s", err.Error())
 		ce.RespondWithError(w, r, "restaurant data not found")
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	render.JSON(w, r, restaurants)
+
+	render.JSON(w, r, response)
 	return
 }
 

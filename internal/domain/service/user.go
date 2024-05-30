@@ -9,25 +9,39 @@ import (
 )
 
 // UserService defines an API for user service to be used by presentation layer
+//
+//go:generate mockery --name=UserService
 type UserService interface {
 	CreateUser(user entity.User) (entity.User, error)
 	GetUser(email string) (*entity.User, error)
 	VerifyUser(user entity.User) (bool, error)
+	GenerateTokenResponse(u entity.User) (*entity.Response, error)
 }
+
+var (
+	token string
+	items []entity.Item
+)
 
 // userService struct as a business layer between controller and repository
 type userService struct {
 	repository repository.UserRepository
+	auth       auth.AuthService
+	token      auth.TokenService
 }
 
 // NewUserService a constructor for user service
-func NewUserService(repository repository.UserRepository) UserService {
-	return &userService{repository: repository}
+func NewUserService(repository repository.UserRepository, auth auth.AuthService, token auth.TokenService) UserService {
+	return &userService{
+		repository: repository,
+		auth:       auth,
+		token:      token,
+	}
 }
 
 // CreateUser presentation layer for adding user to repository
 func (s *userService) CreateUser(u entity.User) (entity.User, error) {
-	hashedPassword, err := auth.Hash(u.Password)
+	hashedPassword, err := s.auth.Hash(u.Password)
 	u.Password = hashedPassword
 
 	// For now keeping user as a role and keeping all registered users as "user" by default.
@@ -67,8 +81,24 @@ func (s *userService) VerifyUser(u entity.User) (bool, error) {
 	if err != nil {
 		return false, errors.New("invalid user")
 	}
-	if auth.VerifyPassword(u.Password, existingUser.Password) {
+	if s.auth.VerifyPassword(u.Password, existingUser.Password) {
 		return true, nil
 	}
 	return false, errors.New("invalid password")
+}
+
+func (s *userService) GenerateTokenResponse(u entity.User) (*entity.Response, error) {
+	verified, err := s.VerifyUser(u)
+
+	if verified {
+		token, err = s.token.GenerateToken(u.ID, u.Email, u.Role)
+		if err != nil {
+			return nil, errors.New("invalid user")
+		}
+		items = append(items, token)
+		response := entity.NewResponse(items)
+		return response, nil
+	}
+
+	return nil, errors.New("invalid user")
 }

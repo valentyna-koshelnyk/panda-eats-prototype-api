@@ -12,7 +12,7 @@ func Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Mount("/restaurants", restaurant.Routes())
-	r.Mount("/user", user.Routes())
+	r.Mount("/auth", user.Routes())
 	r.Get("/swagger/*", httpSwagger.Handler(
 		httpSwagger.URL("doc.json"),
 	))

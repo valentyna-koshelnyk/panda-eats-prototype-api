@@ -16,7 +16,7 @@ func TestMenuService_GetMenu(t *testing.T) {
 		}
 
 		mockMenuRepository := new(mocks.MenuRepository)
-		mockMenuRepository.On("GetMenu", int64(1)).Return(&menu, nil)
+		mockMenuRepository.On("GetMenu", int64(1)).Return(menu, nil)
 		ms := menuService{
 			repository: mockMenuRepository,
 		}

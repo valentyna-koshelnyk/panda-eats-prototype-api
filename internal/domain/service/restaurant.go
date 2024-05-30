@@ -5,9 +5,11 @@ import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
 )
 
+//go:generate mockery --name=RestaurantService
+
 // RestaurantService defines an API for restaurant service to be used by presentation layer
 type RestaurantService interface {
-	FilterRestaurants(category string, zip string, priceRange string) ([]entity.Restaurant, error)
+	FilterRestaurants(category string, zip string, priceRange string) (*entity.Response, error)
 	CreateRestaurant(restaurant entity.Restaurant) error
 	UpdateRestaurant(restaurant entity.Restaurant) error
 	DeleteRestaurant(id int64) error
@@ -23,12 +25,21 @@ func NewRestaurantService(r repository.RestaurantRepository) RestaurantService {
 	return &restaurantService{repository: r}
 }
 
-func (s *restaurantService) FilterRestaurants(category string, zip string, priceRange string) ([]entity.Restaurant, error) {
+func (s *restaurantService) FilterRestaurants(category, zip, priceRange string) (*entity.Response, error) {
 	restaurants, err := s.repository.FilterRestaurants(category, zip, priceRange)
 	if err != nil {
 		return nil, err
 	}
-	return restaurants, nil
+	var items []entity.Item
+	for _, r := range restaurants {
+		items = append(items, &r)
+	}
+	if len(restaurants) == 0 {
+		return entity.NewResponse([]entity.Item{}), nil
+	}
+	response := entity.NewResponse(items)
+
+	return response, nil
 }
 
 func (s *restaurantService) CreateRestaurant(restaurant entity.Restaurant) error {

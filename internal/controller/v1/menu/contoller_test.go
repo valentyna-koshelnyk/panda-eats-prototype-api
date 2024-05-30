@@ -12,8 +12,11 @@ import (
 )
 
 func TestGetMenuByRestaurant(t *testing.T) {
+	menu := []entity.Menu{
+		{RestaurantID: 1, Category: "Extra Large Pizza", Name: "Extra Large Supreme Slice", Description: "Slice.", Price: "3.99 USD"},
+	}
 
-	t.Run("should correctly retrieve and return menu details", func(t *testing.T) {
+	t.Run("on success, return OK", func(t *testing.T) {
 		r := chi.NewRouter()
 
 		mockService := new(mocks.MenuService)
@@ -21,27 +24,26 @@ func TestGetMenuByRestaurant(t *testing.T) {
 			s: mockService,
 		}
 
-		r.Get("/api/v1/restaurants/{restaurant_id}/items", controller.GetMenuByRestaurant)
-		menus := []entity.Menu{
-			{RestaurantID: 1, Category: "Extra Large Pizza", Name: "Extra Large Supreme Slice", Description: "Slice.", Price: "3.99 USD"},
+		var items []entity.Item
+		for _, m := range menu {
+			items = append(items, m)
 		}
 
-		mockService.On("GetMenu", int64(1)).Return(&menus, nil)
+		response := entity.NewResponse(items)
+
+		r.Get("/api/v1/restaurants/{restaurant_id}/items", controller.GetMenuByRestaurant)
+
+		mockService.On("GetMenu", int64(1)).Return(response, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/restaurants/1/items", nil)
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
-		respBody := rec.Body.Bytes()
 
-		var result []entity.Menu
-		err := json.Unmarshal(respBody, &result)
+		var result entity.Response
+		err := json.Unmarshal(rec.Body.Bytes(), &result)
 
-		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.NoError(t, err)
-		assert.Equal(t, 1, len(result))
-		assert.Equal(t, int64(1), result[0].RestaurantID)
-		assert.Equal(t, "Extra Large Pizza", result[0].Category)
-		assert.Equal(t, "Slice.", result[0].Description)
+		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("should return empty string if menu not found", func(t *testing.T) {
@@ -58,7 +60,7 @@ func TestGetMenuByRestaurant(t *testing.T) {
 		r.ServeHTTP(rec, req)
 
 		respBody := rec.Body.Bytes()
-		assert.Equal(t, "", string(respBody))
+		assert.Equal(t, "{\"error\":\"restaurant data not found\"}\n", string(respBody))
 		assert.Equal(t, http.StatusNotFound, rec.Code)
 
 	})

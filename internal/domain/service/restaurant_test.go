@@ -52,7 +52,6 @@ var (
 			Lng:         "-86.8565464"},
 	}
 	emptyRestaurant = entity.Restaurant{}
-
 )
 
 func TestRestaurantService_FilterRestaurants(t *testing.T) {
@@ -65,11 +64,26 @@ func TestRestaurantService_FilterRestaurants(t *testing.T) {
 			repository: mockedRepository,
 		}
 
+		var items []entity.Item
+		for _, m := range restaurants {
+			items = append(items, m)
+		}
+
+		expectedResponse := &entity.Response{
+			APIVersion: "1.0",
+			Data: entity.Data{
+				StartIndex:   1,
+				ItemsCount:   len(items),
+				ItemsPerPage: len(items),
+				Items:        items,
+			},
+		}
+
 		// Act
-		actualRestaurants, _ := rs.FilterRestaurants("Pizza", "23204", "$")
+		response, _ := rs.FilterRestaurants("Pizza", "23204", "$")
 
 		// Assert
-		assert.Equal(t, restaurants, actualRestaurants)
+		assert.Equal(t, expectedResponse, response)
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -179,6 +193,5 @@ func TestRestaurantService_DeleteRestaurant(t *testing.T) {
 		// Assert
 		assert.Equal(t, "failed to delete restaurant", err.Error())
 	})
-
 
 }

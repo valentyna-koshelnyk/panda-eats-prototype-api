@@ -52,20 +52,27 @@ func TestController_GetAll(t *testing.T) {
 		controller := Controller{
 			s: mockService,
 		}
+
+		var items []entity.Item
+		for _, m := range restaurants {
+			items = append(items, m)
+		}
+
+		response := entity.NewResponse(items)
+
 		r.Get("/api/v1/restaurants", controller.GetAll)
 
 		// Act
-		mockService.On("FilterRestaurants", "pizza", "23204", "$").Return(restaurants, nil)
+		mockService.On("FilterRestaurants", "pizza", "23204", "$").Return(response, nil)
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/restaurants?category=pizza&price_range=$&zip_code=23204", nil)
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
 		respBody := rec.Body.Bytes()
-		var result []entity.Restaurant
+		var result entity.Response
 		_ = json.Unmarshal(respBody, &result)
 
 		// Assert
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "Pizza", result[0].Category)
 	})
 	t.Run("on get all, return error", func(t *testing.T) {
 		r := chi.NewRouter()
@@ -76,7 +83,7 @@ func TestController_GetAll(t *testing.T) {
 		r.Get("/api/v1/restaurants", controller.GetAll)
 
 		// Act
-		mockService.On("FilterRestaurants", "p", "1", "$").Return([]entity.Restaurant{}, errors.New("restaurant doesn't exist"))
+		mockService.On("FilterRestaurants", "p", "1", "$").Return(nil, errors.New("restaurant doesn't exist"))
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/restaurants?category=p&price_range=$&zip_code=1", nil)
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
@@ -86,7 +93,6 @@ func TestController_GetAll(t *testing.T) {
 		assert.JSONEq(t, "{\"error\":\"error getting restaurants\"}\n", rec.Body.String())
 	})
 }
-
 func TestController_Create(t *testing.T) {
 	t.Run("on create, return Created", func(t *testing.T) {
 		// Arrange

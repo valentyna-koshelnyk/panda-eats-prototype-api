@@ -5,7 +5,7 @@ import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"gorm.io/gorm"
 )
-
+//go:generate mockery --name=RestaurantRepository
 // RestaurantRepository interface shows functions for interacting with DB
 type RestaurantRepository interface {
 	Create(restaurant entity.Restaurant) error
@@ -45,7 +45,7 @@ func (r *restaurantRepository) GetAll() ([]entity.Restaurant, error) {
 }
 
 // FilterRestaurants gets the list of restaurants filtered by category, zip and price range
-func (r *restaurantRepository) FilterRestaurants(category string, zip string, priceRange string) ([]entity.Restaurant, error) {
+func (r *restaurantRepository) FilterRestaurants(category, zip, priceRange string) ([]entity.Restaurant, error) {
 	var restaurants []entity.Restaurant
 	query := r.db
 	if category != "" {

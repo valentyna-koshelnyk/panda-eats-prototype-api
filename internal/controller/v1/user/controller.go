@@ -3,16 +3,12 @@ package user
 import (
 	"encoding/json"
 	"github.com/go-chi/render"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/auth"
-	"io"
-	"net/http"
-	"strconv"
-	"time"
-
 	log "github.com/sirupsen/logrus"
+	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
-	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/errors"
+	"io"
+	"net/http"
 )
 
 // Controller handles user-related requests
@@ -49,12 +45,13 @@ func (c *Controller) RegistrationUser(w http.ResponseWriter, r *http.Request) {
 
 	_, err = c.s.CreateUser(*user)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error creating new user: %s", err)
 		ce.RespondWithError(w, r, err.Error())
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
+
 	render.JSON(w, r, "User registered successfully")
 	return
 }
@@ -73,35 +70,14 @@ func (c *Controller) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(data, &user)
 
-	_, err = c.s.VerifyUser(*user)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		log.Errorf("invalid : %s", err)
-		ce.RespondWithError(w, r, err.Error())
-		return
-	}
-	stringID := strconv.Itoa(int(user.ID))
-	token, err := auth.GenerateToken(user.Email, user.Role, stringID)
+	response, err := c.s.GenerateTokenResponse(*user)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		log.Errorf("error generating token: %s", err)
-		ce.RespondWithError(w, r, "invalid user")
-		return
-
+		log.Errorf("error generating response: %s", err)
+		ce.RespondWithError(w, r, err.Error())
 	}
-	cookie := &http.Cookie{
-		Name:     "AuthToken",
-		Value:    token,
-		Expires:  time.Now().Add(24 * time.Hour),
-		HttpOnly: true,
-		Path:     "/",
-		Secure:   true,
-		SameSite: http.SameSiteStrictMode,
-	}
-
-	http.SetCookie(w, cookie)
 
 	w.WriteHeader(http.StatusOK)
-	render.JSON(w, r, "User logged in successfully")
+	render.JSON(w, r, response)
 	return
 }
