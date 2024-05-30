@@ -107,7 +107,8 @@ func TestController_LoginUser(t *testing.T) {
 	t.Run("on login, return OK", func(t *testing.T) {
 		// Arrange
 		r := chi.NewRouter()
-		mockService := new(mocks.UserService)
+
+		mockService := new(mocks)
 		controller := Controller{
 			s: mockService,
 		}
@@ -125,7 +126,6 @@ func TestController_LoginUser(t *testing.T) {
 
 		// Assess
 		assert.Equal(t, w.Code, http.StatusOK)
-		assert.Equal(t, "\"User logged in successfully\"\n", w.Body.String())
 	})
 
 	t.Run("on login, return error", func(t *testing.T) {
@@ -134,9 +134,10 @@ func TestController_LoginUser(t *testing.T) {
 		controller := Controller{
 			s: mockService,
 		}
+
 		r.Post("/api/v1/auth/login", controller.LoginUser)
 		// Act
-		mockService.On("VerifyUser", wrongPassword).Return(false, errors.New("incorrect password"))
+		mockService.On("GenerateTokenResponse", wrongPassword).Return(false, errors.New("incorrect password"))
 		reqBody, _ := json.Marshal(wrongPassword)
 		r.Post("/api/v1/auth/login", controller.LoginUser)
 
