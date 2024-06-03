@@ -2,13 +2,13 @@ package service
 
 //go:generate mockery --name=MenuService
 import (
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
 )
 
 // MenuService interface layer for menu service
 type MenuService interface {
-	GetMenu(id int64) (*entity.Response, error)
+	GetMenu(id int64) (*utils.PaginatedResponse, error)
 }
 
 // menuService  layer for menu
@@ -22,20 +22,20 @@ func NewMenuService(r repository.MenuRepository) MenuService {
 }
 
 // GetMenu retrieves menu of the specific restaurant
-func (s *menuService) GetMenu(id int64) (*entity.Response, error) {
+func (s *menuService) GetMenu(id int64) (*utils.PaginatedResponse, error) {
 	menus, err := s.repository.GetMenu(id)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(menus) == 0 {
-		return entity.NewResponse([]entity.Item{}), nil
+		return utils.NewPaginatedResponse([]utils.Item{}), nil
 	}
 
-	var items []entity.Item
+	var items []utils.Item
 	for _, menu := range menus {
 		items = append(items, menu)
 	}
-	response := entity.NewResponse(items)
+	response := utils.NewPaginatedResponse(items)
 	return response, nil
 }

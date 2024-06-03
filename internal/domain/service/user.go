@@ -6,6 +6,7 @@ import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/auth"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
 )
 
 // UserService defines an API for user service to be used by presentation layer
@@ -15,12 +16,12 @@ type UserService interface {
 	CreateUser(user entity.User) (entity.User, error)
 	GetUser(email string) (*entity.User, error)
 	VerifyUser(user entity.User) (bool, error)
-	GenerateTokenResponse(u entity.User) (*entity.Response, error)
+	GenerateTokenResponse(u entity.User) (string, error)
 }
 
 var (
 	token string
-	items []entity.Item
+	items []utils.Item
 )
 
 // userService struct as a business layer between controller and repository
@@ -87,18 +88,17 @@ func (s *userService) VerifyUser(u entity.User) (bool, error) {
 	return false, errors.New("invalid password")
 }
 
-func (s *userService) GenerateTokenResponse(u entity.User) (*entity.Response, error) {
+func (s *userService) GenerateTokenResponse(u entity.User) (string, error) {
 	verified, err := s.VerifyUser(u)
 
 	if verified {
 		token, err = s.token.GenerateToken(u.ID, u.Email, u.Role)
 		if err != nil {
-			return nil, errors.New("invalid user")
+			return "", errors.New("invalid user")
 		}
-		items = append(items, token)
-		response := entity.NewResponse(items)
-		return response, nil
+
+		return token, nil
 	}
 
-	return nil, errors.New("invalid user")
+	return "", errors.New("invalid user")
 }

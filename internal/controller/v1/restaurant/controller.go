@@ -5,9 +5,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
-	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
 	"io"
 	"net/http"
 	"strconv"
@@ -37,13 +37,13 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("Error getting restaurants: %s", err.Error())
-		ce.RespondWithError(w, r, "error getting restaurants")
+		utils.RespondWithJSON(w, r, "", "error getting restaurants")
 		return
 	}
 	if response == nil || len(response.Data.Items) == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		log.Errorf("Restaurant not found: %s", err.Error())
-		ce.RespondWithError(w, r, "restaurant data not found")
+		utils.RespondWithJSON(w, r, "", "restaurant not found")
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -65,14 +65,14 @@ func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("Error reading request body: %s", err.Error())
-		ce.RespondWithError(w, r, "invalid request body")
+		utils.RespondWithJSON(w, r, "", "error reading request body")
 		return
 	}
 	err = json.Unmarshal(data, &restaurant)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Error("Error decoding restaurant", err.Error())
-		ce.RespondWithError(w, r, "error creating restaurant")
+		utils.RespondWithJSON(w, r, "", "error decoding restaurant")
 		return
 	}
 
@@ -80,11 +80,11 @@ func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		log.Error("Error creating restaurant", err.Error())
-		ce.RespondWithError(w, r, "error creating restaurant")
+		utils.RespondWithJSON(w, r, "", "error creating restaurant")
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
-	render.JSON(w, r, "restaurant created")
+	utils.RespondWithJSON(w, r, "restaurant created", "")
 	return
 }
 
@@ -102,7 +102,7 @@ func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusConflict)
 		log.Error("Error decoding restaurant", err.Error())
-		ce.RespondWithError(w, r, "error updating restaurant")
+		utils.RespondWithJSON(w, r, "", "error decoding restaurant")
 		return
 	}
 
@@ -110,11 +110,11 @@ func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("Error updating restaurant: %s", err.Error())
-		ce.RespondWithError(w, r, "Error updating restaurant")
+		utils.RespondWithJSON(w, r, "", "error updating restaurant")
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
-	render.JSON(w, r, "successfully updated the restaurant")
+	utils.RespondWithJSON(w, r, "successfully updated restaurant", "")
 	return
 }
 
@@ -132,11 +132,11 @@ func (c *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("Error deleting restaurant: %s", err.Error())
-		ce.RespondWithError(w, r, "error deleting restaurant")
+		utils.RespondWithJSON(w, r, "", "error deleting restaurant")
 		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)
-	render.JSON(w, r, "Restaurant deleted successfully")
+	utils.RespondWithJSON(w, r, "Restaurant deleted successfully", "restaurant deleted")
 	return
 }

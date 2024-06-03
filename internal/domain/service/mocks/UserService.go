@@ -41,24 +41,22 @@ func (_m *UserService) CreateUser(user entity.User) (entity.User, error) {
 }
 
 // GenerateTokenResponse provides a mock function with given fields: u
-func (_m *UserService) GenerateTokenResponse(u entity.User) (*entity.Response, error) {
+func (_m *UserService) GenerateTokenResponse(u entity.User) (string, error) {
 	ret := _m.Called(u)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GenerateTokenResponse")
 	}
 
-	var r0 *entity.Response
+	var r0 string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(entity.User) (*entity.Response, error)); ok {
+	if rf, ok := ret.Get(0).(func(entity.User) (string, error)); ok {
 		return rf(u)
 	}
-	if rf, ok := ret.Get(0).(func(entity.User) *entity.Response); ok {
+	if rf, ok := ret.Get(0).(func(entity.User) string); ok {
 		r0 = rf(u)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*entity.Response)
-		}
+		r0 = ret.Get(0).(string)
 	}
 
 	if rf, ok := ret.Get(1).(func(entity.User) error); ok {
