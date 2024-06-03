@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
 	"time"
 )
 
@@ -13,16 +12,6 @@ type Menu struct {
 	Name         string    `json:"name"`
 	Description  string    `json:"description"`
 	Price        string    `json:"price"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-}
-
-//TODO: to add validators to menu
-
-func init() {
-	db := config.GetDB()
-	err := db.AutoMigrate(&Menu{})
-	if err != nil {
-		return
-	}
+	CreatedAt    time.Time `json:"-"`
+	UpdatedAt    time.Time `json:"-"`
 }

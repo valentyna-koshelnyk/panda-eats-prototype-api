@@ -2,7 +2,6 @@ package entity
 
 import (
 	"errors"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/config"
 	"regexp"
 	"time"
 )
@@ -23,8 +22,8 @@ type Restaurant struct {
 	Lat string `json:"lat"`
 	// TODO: add validation
 	Lng       string    `json:"lng"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 }
 
 // Regular expressions validating input, e.g. if price range consists just of '$' sign or category doesn't have any digits
@@ -58,12 +57,4 @@ func ValidateRestaurant(restaurant *Restaurant) []error {
 		errs = append(errs, errors.New("invalid price_range"))
 	}
 	return errs
-}
-
-func init() {
-	db := config.GetDB()
-	err := db.AutoMigrate(&Restaurant{})
-	if err != nil {
-		return
-	}
 }

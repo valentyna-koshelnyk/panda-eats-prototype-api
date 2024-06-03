@@ -2,14 +2,12 @@ package user
 
 import (
 	"encoding/json"
-	"github.com/go-chi/render"
-	"io"
-	"net/http"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
-	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/errors"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
+	"io"
+	"net/http"
 )
 
 // Controller handles user-related requests
@@ -32,7 +30,7 @@ func (c *Controller) RegistrationUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error reading body: %s", err)
-		ce.RespondWithError(w, r, "invalid request body")
+		utils.RespondWithJSON(w, r, "", "error creating new user")
 		return
 	}
 
@@ -40,18 +38,45 @@ func (c *Controller) RegistrationUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error unmarshalling body: %s", err)
-		ce.RespondWithError(w, r, "invalid request body")
+		utils.RespondWithJSON(w, r, "", "error creating new user")
 		return
 	}
 
 	_, err = c.s.CreateUser(*user)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error creating new user: %s", err)
-		ce.RespondWithError(w, r, err.Error())
+		utils.RespondWithJSON(w, r, "", "error creating new user")
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
-	render.JSON(w, r, "User registered successfully")
+
+	utils.RespondWithJSON(w, r, "User registered successfully", "")
+	return
+}
+
+func (c *Controller) LoginUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var user *entity.User
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Errorf("error reading body: %s", err)
+		utils.RespondWithJSON(w, r, "", "user not found")
+		return
+	}
+
+	err = json.Unmarshal(data, &user)
+
+	response, err := c.s.GenerateTokenResponse(*user)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Errorf("error generating response: %s", err)
+		utils.RespondWithJSON(w, r, "", "error with formatting")
+	}
+
+	w.WriteHeader(http.StatusOK)
+	utils.RespondWithJSON(w, r, response, "")
 	return
 }
