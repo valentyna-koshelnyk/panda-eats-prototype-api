@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service/mocks"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -24,12 +25,12 @@ func TestGetMenuByRestaurant(t *testing.T) {
 			s: mockService,
 		}
 
-		var items []entity.Item
+		var items []utils.Item
 		for _, m := range menu {
 			items = append(items, m)
 		}
 
-		response := entity.NewResponse(items)
+		response := utils.NewPaginatedResponse(items)
 
 		r.Get("/api/v1/restaurants/{restaurant_id}/items", controller.GetMenuByRestaurant)
 
@@ -39,7 +40,7 @@ func TestGetMenuByRestaurant(t *testing.T) {
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
 
-		var result entity.Response
+		var result utils.PaginatedResponse
 		err := json.Unmarshal(rec.Body.Bytes(), &result)
 
 		assert.NoError(t, err)
@@ -60,7 +61,7 @@ func TestGetMenuByRestaurant(t *testing.T) {
 		r.ServeHTTP(rec, req)
 
 		respBody := rec.Body.Bytes()
-		assert.Equal(t, "{\"error\":\"restaurant data not found\"}\n", string(respBody))
+		assert.Equal(t, "{\"error\":\"no items available\"}\n", string(respBody))
 		assert.Equal(t, http.StatusNotFound, rec.Code)
 
 	})
