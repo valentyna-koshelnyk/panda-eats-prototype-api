@@ -3,16 +3,17 @@ package user
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/go-chi/chi/v5"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
-	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service/mocks"
-
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+
+	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service/mocks"
 )
 
 var (

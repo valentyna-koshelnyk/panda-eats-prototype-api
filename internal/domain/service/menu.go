@@ -1,10 +1,11 @@
 package service
 
-//go:generate mockery --name=MenuService
 import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
 )
+
+//go:generate mockery --name=MenuService
 
 // MenuService interface layer for menu service
 type MenuService interface {
@@ -29,7 +30,7 @@ func (s *menuService) GetMenu(id int64) (*utils.PaginatedResponse, error) {
 	}
 
 	if len(menus) == 0 {
-		return utils.NewPaginatedResponse([]utils.Item{}), nil
+		return nil, nil
 	}
 
 	var items []utils.Item

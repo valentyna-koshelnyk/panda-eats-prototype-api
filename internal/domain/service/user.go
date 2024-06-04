@@ -2,16 +2,17 @@ package service
 
 import (
 	"errors"
+
 	log "github.com/sirupsen/logrus"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/auth"
+
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
 )
 
-// UserService defines an API for user service to be used by presentation layer
-//
 //go:generate mockery --name=UserService
+
+// UserService defines an API for user service to be used by presentation layer
 type UserService interface {
 	CreateUser(user entity.User) (entity.User, error)
 	GetUser(email string) (*entity.User, error)
@@ -27,12 +28,12 @@ var (
 // userService struct as a business layer between controller and repository
 type userService struct {
 	repository repository.UserRepository
-	auth       auth.AuthService
-	token      auth.TokenService
+	auth       AuthService
+	token      TokenService
 }
 
 // NewUserService a constructor for user service
-func NewUserService(repository repository.UserRepository, auth auth.AuthService, token auth.TokenService) UserService {
+func NewUserService(repository repository.UserRepository, auth AuthService, token TokenService) UserService {
 	return &userService{
 		repository: repository,
 		auth:       auth,

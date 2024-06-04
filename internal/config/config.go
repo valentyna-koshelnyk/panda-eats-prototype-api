@@ -6,9 +6,10 @@ import (
 	"sync"
 
 	"github.com/spf13/viper"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 )
 
 var (

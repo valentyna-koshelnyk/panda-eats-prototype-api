@@ -1,28 +1,19 @@
-package auth
+package service
 
 import (
 	"errors"
-	"github.com/golang-jwt/jwt/v4"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-	"golang.org/x/crypto/bcrypt"
 	"strconv"
 	"time"
+
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/spf13/viper"
+
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/auth"
 )
 
-//go:generate mockery --name=AuthService
-type AuthService interface {
-	Hash(s string) (string, error)
-	VerifyPassword(userPassword string, providedPassword string) bool
-}
-
-type authService struct{}
-
-func NewAuthService() AuthService {
-	return &authService{}
-}
-
 //go:generate mockery --name=TokenService
+
+// TokenService is an interface for the token service
 type TokenService interface {
 	GenerateToken(ID int64, email, role string) (string, error)
 	VerifyToken(tokenString string) (jwt.MapClaims, error)
@@ -30,38 +21,17 @@ type TokenService interface {
 
 type tokenService struct{}
 
+// NewTokenService creates a new instance of the TokenService
 func NewTokenService() TokenService {
 	return &tokenService{}
 }
 
 var secretKey = []byte(viper.GetString("secret.key"))
 
-// HashPassword is used to encrypt the password before it is stored in the DB
-func (a *authService) Hash(s string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(s), 14)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return string(bytes), nil
-}
-
-// VerifyPassword checks the input password while verifying it with the password in the DB.
-func (a *authService) VerifyPassword(userPassword string, providedPassword string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(providedPassword), []byte(userPassword))
-	check := true
-
-	if err != nil {
-		check = false
-		return check
-	}
-	return check
-}
-
 // GenerateToken generates JWT token from email, role, user ID and returns it as string
 func (t *tokenService) GenerateToken(ID int64, email, role string) (string, error) {
 	userID := strconv.FormatInt(ID, 10)
-	claims := &Claims{
+	claims := &auth.Claims{
 		Role:   role,
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{

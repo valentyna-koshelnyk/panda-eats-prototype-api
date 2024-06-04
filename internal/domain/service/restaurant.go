@@ -26,6 +26,7 @@ func NewRestaurantService(r repository.RestaurantRepository) RestaurantService {
 	return &restaurantService{repository: r}
 }
 
+// FilterRestaurants filters restaurants by category, zip and price range
 func (s *restaurantService) FilterRestaurants(category, zip, priceRange string) (*utils.PaginatedResponse, error) {
 	restaurants, err := s.repository.FilterRestaurants(category, zip, priceRange)
 	if err != nil {
@@ -43,6 +44,7 @@ func (s *restaurantService) FilterRestaurants(category, zip, priceRange string) 
 	return response, nil
 }
 
+// CreateRestaurant creates a new restaurant
 func (s *restaurantService) CreateRestaurant(restaurant entity.Restaurant) error {
 	err := s.repository.Create(restaurant)
 	if err != nil {
@@ -51,6 +53,7 @@ func (s *restaurantService) CreateRestaurant(restaurant entity.Restaurant) error
 	return nil
 }
 
+// UpdateRestaurant updates a restaurant
 func (s *restaurantService) UpdateRestaurant(restaurant entity.Restaurant) error {
 	err := s.repository.Update(restaurant)
 	if err != nil {
@@ -59,6 +62,7 @@ func (s *restaurantService) UpdateRestaurant(restaurant entity.Restaurant) error
 	return nil
 }
 
+// DeleteRestaurant deletes a restaurant
 func (s *restaurantService) DeleteRestaurant(id int64) error {
 	err := s.repository.Delete(id)
 	if err != nil {

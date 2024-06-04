@@ -2,10 +2,12 @@ package service
 
 import (
 	"errors"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
+
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository/mocks"
-	"testing"
 )
 
 func TestMenuService_GetMenu(t *testing.T) {

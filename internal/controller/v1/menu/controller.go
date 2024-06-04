@@ -1,13 +1,15 @@
 package menu
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
+
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
-	"net/http"
-	"strconv"
 )
 
 // Controller type for menu controller layer

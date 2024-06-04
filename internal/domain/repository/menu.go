@@ -1,21 +1,24 @@
 package repository
-//go:generate mockery --name=MenuRepository
+
 import (
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"gorm.io/gorm"
+
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 )
 
-// Repository represents methods for interacting with db, menu entity
+//go:generate mockery --name=MenuRepository
+
+// MenuRepository represents methods for interacting with db, menu entity
 type MenuRepository interface {
 	GetMenu(id int64) ([]entity.Menu, error)
 }
 
-// repository layer for interacting with db
+// menuRepository layer for interacting with db
 type menuRepository struct {
 	db *gorm.DB
 }
 
-// NewRepository constructor for repository layer
+// NewMenuRepository constructor for repository layer
 func NewMenuRepository(db *gorm.DB) MenuRepository {
 	return &menuRepository{
 		db: db,

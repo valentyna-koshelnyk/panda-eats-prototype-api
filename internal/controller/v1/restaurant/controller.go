@@ -2,15 +2,17 @@ package restaurant
 
 import (
 	"encoding/json"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
-	log "github.com/sirupsen/logrus"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
 	"io"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
+	log "github.com/sirupsen/logrus"
+
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
 )
 
 // Controller datatype for controller layer
@@ -40,14 +42,15 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 		utils.RespondWithJSON(w, r, "", "error getting restaurants")
 		return
 	}
+
 	if response == nil || len(response.Data.Items) == 0 {
 		w.WriteHeader(http.StatusNotFound)
-		log.Errorf("Restaurant not found: %s", err.Error())
+		log.Errorf("Restaurant not found")
 		utils.RespondWithJSON(w, r, "", "restaurant not found")
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 
+	w.WriteHeader(http.StatusOK)
 	render.JSON(w, r, response)
 	return
 }

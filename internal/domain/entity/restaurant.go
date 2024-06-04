@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// A Restaurant represents information about the restaurant entity
+// Restaurant represents information about the restaurant entity
 type Restaurant struct {
 	ID          int64   `json:"id"`
 	Position    int64   `json:"position"`

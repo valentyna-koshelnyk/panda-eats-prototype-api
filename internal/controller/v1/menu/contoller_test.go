@@ -2,14 +2,16 @@ package menu
 
 import (
 	"encoding/json"
-	"github.com/go-chi/chi/v5"
-	"github.com/stretchr/testify/assert"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service/mocks"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service/mocks"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
 )
 
 func TestGetMenuByRestaurant(t *testing.T) {
