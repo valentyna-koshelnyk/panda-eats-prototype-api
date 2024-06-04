@@ -35,7 +35,7 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	priceRange := r.URL.Query().Get("price_range")
 	zipCode := r.URL.Query().Get("zip_code")
 
-	response, err := c.s.FilterRestaurants(category, zipCode, priceRange)
+	restaurants, err := c.s.FilterRestaurants(category, zipCode, priceRange)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("Error getting restaurants: %s", err.Error())
@@ -43,12 +43,14 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if response == nil || len(response.Data.Items) == 0 {
+	if len(restaurants) == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		log.Errorf("Restaurant not found")
 		utils.RespondWithJSON(w, r, "", "restaurant not found")
 		return
 	}
+
+	response := utils.CustomResponse{Data: restaurants}
 
 	w.WriteHeader(http.StatusOK)
 	render.JSON(w, r, response)

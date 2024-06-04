@@ -53,7 +53,7 @@ func TestController_RegistrationUser(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, w.Code, http.StatusCreated)
-		assert.Equal(t, "{\"message\":\"User registered successfully\"}\n", w.Body.String())
+		assert.Equal(t, "{\"data\":\"User registered successfully\"}\n", w.Body.String())
 	})
 
 	t.Run("on registration, return error", func(t *testing.T) {
@@ -77,7 +77,7 @@ func TestController_RegistrationUser(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, w.Code, http.StatusBadRequest)
-		assert.Equal(t, "{\"error\":\"error creating new user\"}\n", w.Body.String())
+		assert.Equal(t, "{\"error\":\"error creating new user\",\"data\":\"\"}\n", w.Body.String())
 	})
 
 	t.Run("on registration, return error", func(t *testing.T) {
@@ -99,7 +99,7 @@ func TestController_RegistrationUser(t *testing.T) {
 
 		//Assert
 		assert.Equal(t, w.Code, http.StatusBadRequest)
-		assert.Equal(t, "{\"error\":\"error creating new user\"}\n", w.Body.String())
+		assert.Equal(t, "{\"error\":\"error creating new user\",\"data\":\"\"}\n", w.Body.String())
 
 	})
 }
@@ -150,7 +150,7 @@ func TestController_LoginUser(t *testing.T) {
 		_ = json.Unmarshal(w.Body.Bytes(), &result)
 
 		assert.Equal(t, w.Code, http.StatusBadRequest)
-		assert.Equal(t, "{\"error\":\"error with formatting\"}\n{}\n", w.Body.String())
+		assert.Equal(t, "{\"error\":\"error with formatting\",\"data\":\"\"}\n{\"data\":\"\"}\n", w.Body.String())
 	})
 
 }

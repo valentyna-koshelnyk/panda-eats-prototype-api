@@ -8,7 +8,6 @@ import (
 
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository/mocks"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
 
 var (
@@ -66,26 +65,11 @@ func TestRestaurantService_FilterRestaurants(t *testing.T) {
 			repository: mockedRepository,
 		}
 
-		var items []utils.Item
-		for _, m := range restaurants {
-			items = append(items, m)
-		}
-
-		expectedResponse := &utils.PaginatedResponse{
-			APIVersion: "1.0",
-			Data: utils.Data{
-				StartIndex:   1,
-				ItemsCount:   len(items),
-				ItemsPerPage: len(items),
-				Items:        items,
-			},
-		}
-
 		// Act
 		response, _ := rs.FilterRestaurants("Pizza", "23204", "$")
 
 		// Assert
-		assert.Equal(t, expectedResponse, response)
+		assert.Equal(t, restaurants, response)
 	})
 
 	t.Run("Error", func(t *testing.T) {

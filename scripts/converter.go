@@ -94,7 +94,7 @@ func ParseMenuCSV() {
 			continue
 		}
 
-		restaurantID, _ := strconv.ParseInt(each[0], 10, 64)
+		restaurantID, _ := strconv.Atoi(each[0])
 		m := entity.Menu{
 			RestaurantID: restaurantID,
 			Category:     each[1],

@@ -11,25 +11,6 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_DB=postgres
-  localstack:
-    container_name: cart-localstack
-    hostname: 'localstack'
-    image: localstack/localstack:1.2.0
-    environment:
-      - DEBUG=${DEBUG- }
-      - EDGE_PORT=4566
-      - SERVICES=dynamodb
-      - DYNAMODB_IN_MEMORY=1
-      - DEFAULT_REGION=eu-central-1
-      - PORT_WEB_UI=9090
-      - DOCKER_HOST=unix:///var/run/docker.sock
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "4566:4566"
-      - "9090:9090"
-    networks:
-      - panda-eats-network
 
 volumes:
   pgdata:

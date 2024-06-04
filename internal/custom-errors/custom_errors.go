@@ -13,4 +13,6 @@ var (
 	ErrShortPassword = errors.New("password shorter than 8 characters")
 	//ErrInvalidEmail checks if email consists of valid characters.
 	ErrInvalidEmail = errors.New("invalid email address")
+	// ErrNotFound is used when the requested item is not found.
+	ErrNotFound = errors.New("items not found")
 )

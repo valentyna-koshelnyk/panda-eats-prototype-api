@@ -3,14 +3,13 @@ package service
 import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
 
 //go:generate mockery --name=RestaurantService
 
 // RestaurantService defines an API for restaurant service to be used by presentation layer
 type RestaurantService interface {
-	FilterRestaurants(category, zip, priceRange string) (*utils.PaginatedResponse, error)
+	FilterRestaurants(category, zip, priceRange string) ([]entity.Restaurant, error)
 	CreateRestaurant(restaurant entity.Restaurant) error
 	UpdateRestaurant(restaurant entity.Restaurant) error
 	DeleteRestaurant(id int64) error
@@ -27,21 +26,13 @@ func NewRestaurantService(r repository.RestaurantRepository) RestaurantService {
 }
 
 // FilterRestaurants filters restaurants by category, zip and price range
-func (s *restaurantService) FilterRestaurants(category, zip, priceRange string) (*utils.PaginatedResponse, error) {
+func (s *restaurantService) FilterRestaurants(category, zip, priceRange string) ([]entity.Restaurant, error) {
 	restaurants, err := s.repository.FilterRestaurants(category, zip, priceRange)
 	if err != nil {
 		return nil, err
 	}
-	var items []utils.Item
-	for _, r := range restaurants {
-		items = append(items, &r)
-	}
-	if len(restaurants) == 0 {
-		return utils.NewPaginatedResponse([]utils.Item{}), nil
-	}
-	response := utils.NewPaginatedResponse(items)
 
-	return response, nil
+	return restaurants, nil
 }
 
 // CreateRestaurant creates a new restaurant

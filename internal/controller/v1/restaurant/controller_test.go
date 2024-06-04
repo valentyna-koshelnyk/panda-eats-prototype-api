@@ -56,17 +56,10 @@ func TestController_GetAll(t *testing.T) {
 			s: mockService,
 		}
 
-		var items []utils.Item
-		for _, m := range restaurants {
-			items = append(items, m)
-		}
-
-		response := utils.NewPaginatedResponse(items)
-
 		r.Get("/api/v1/restaurants", controller.GetAll)
 
 		// Act
-		mockService.On("FilterRestaurants", "pizza", "23204", "$").Return(response, nil)
+		mockService.On("FilterRestaurants", "pizza", "23204", "$").Return(restaurants, nil)
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/restaurants?category=pizza&price_range=$&zip_code=23204", nil)
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
@@ -77,6 +70,7 @@ func TestController_GetAll(t *testing.T) {
 		// Assert
 		assert.Equal(t, http.StatusOK, rec.Code)
 	})
+
 	t.Run("on get all, return error", func(t *testing.T) {
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
@@ -93,9 +87,10 @@ func TestController_GetAll(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
-		assert.JSONEq(t, "{\"error\":\"error getting restaurants\"}\n", rec.Body.String())
+		assert.JSONEq(t, "{\"data\":\"\", \"error\":\"error getting restaurants\"}", rec.Body.String())
 	})
 }
+
 func TestController_Create(t *testing.T) {
 	t.Run("on create, return Created", func(t *testing.T) {
 		// Arrange
@@ -146,9 +141,10 @@ func TestController_Create(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
-		assert.JSONEq(t, "{\"error\":\"error decoding restaurant\"}\n", rec.Body.String())
+		assert.JSONEq(t, "{\"data\":\"\", \"error\":\"error decoding restaurant\"}", rec.Body.String())
 	})
 }
+
 func TestController_Update(t *testing.T) {
 	t.Run("on update, return NoContent", func(t *testing.T) {
 		// Arrange
@@ -192,7 +188,7 @@ func TestController_Update(t *testing.T) {
 		var restaurant entity.Restaurant
 		_ = json.Unmarshal(rec.Body.Bytes(), &restaurant)
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
-		assert.JSONEq(t, "{\"error\":\"error updating restaurant\"}\n", rec.Body.String())
+		assert.JSONEq(t, "{\"data\":\"\", \"error\":\"error updating restaurant\"}", rec.Body.String())
 	})
 }
 
@@ -233,6 +229,6 @@ func TestController_Delete(t *testing.T) {
 
 		// Assert
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
-		assert.JSONEq(t, "{\"error\":\"error deleting restaurant\"}\n", rec.Body.String())
+		assert.JSONEq(t, "{\"data\":\"\", \"error\":\"error deleting restaurant\"}", rec.Body.String())
 	})
 }

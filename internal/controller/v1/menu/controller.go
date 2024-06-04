@@ -1,6 +1,7 @@
 package menu
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
 
+	custom_errors "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
@@ -35,26 +37,43 @@ func NewController(s service.MenuService) *Controller {
 func (c *Controller) GetMenuByRestaurant(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	idStr := chi.URLParam(r, "restaurant_id")
-	id, err := strconv.ParseInt(idStr, 10, 64)
+
+	var err error
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		utils.RespondWithJSON(w, r, "", "no restaurant found")
 		http.Error(w, "Invalid restaurant ID", http.StatusBadRequest)
 		return
 	}
 
-	response, err := c.s.GetMenu(id)
+	queryParams := r.URL.Query()
+	limit, err := strconv.Atoi(queryParams.Get("limit"))
 	if err != nil {
+		limit = utils.DefaultLimit
+	}
+
+	offset, err := strconv.Atoi(queryParams.Get("offset"))
+	if err != nil {
+		offset = utils.DefaultOffset
+	}
+
+	pagedMenu, err := c.s.GetMenu(id, limit, offset)
+	if err != nil && !errors.Is(err, custom_errors.ErrNotFound) {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Errorf("Error getting menu: %s", err)
 		utils.RespondWithJSON(w, r, "", "error getting menu")
 		return
 	}
-	if response == nil || len(response.Data.Items) == 0 {
+
+	if errors.Is(err, custom_errors.ErrNotFound) {
 		w.WriteHeader(http.StatusNotFound)
 		log.Errorf("No items available")
 		utils.RespondWithJSON(w, r, "", "no items available")
 		return
 	}
+
+	response := utils.NewPaginatedResponse(pagedMenu)
+
 	w.WriteHeader(http.StatusOK)
 	render.JSON(w, r, response)
 }

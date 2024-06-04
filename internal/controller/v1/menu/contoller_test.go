@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 
+	custom_errors "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service/mocks"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
@@ -27,16 +28,17 @@ func TestGetMenuByRestaurant(t *testing.T) {
 			s: mockService,
 		}
 
-		var items []utils.Item
-		for _, m := range menu {
-			items = append(items, m)
+		pagination := &utils.Pagination{
+			Limit:      1,
+			Page:       1,
+			TotalRows:  1,
+			TotalPages: 1,
+			Rows:       menu,
 		}
-
-		response := utils.NewPaginatedResponse(items)
 
 		r.Get("/api/v1/restaurants/{restaurant_id}/items", controller.GetMenuByRestaurant)
 
-		mockService.On("GetMenu", int64(1)).Return(response, nil)
+		mockService.On("GetMenu", 1, 10, 0).Return(pagination, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/restaurants/1/items", nil)
 		rec := httptest.NewRecorder()
@@ -56,14 +58,14 @@ func TestGetMenuByRestaurant(t *testing.T) {
 		controller := Controller{s: mockService}
 		r.Get("/api/v1/restaurants/{restaurant_id}/items", controller.GetMenuByRestaurant)
 
-		mockService.On("GetMenu", int64(2)).Return(nil, nil)
+		mockService.On("GetMenu", 2, 10, 0).Return(nil, custom_errors.ErrNotFound)
 
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/restaurants/2/items", nil)
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
 
 		respBody := rec.Body.Bytes()
-		assert.Equal(t, "{\"error\":\"no items available\"}\n", string(respBody))
+		assert.JSONEq(t, "{\"error\":\"no items available\",\"data\":\"\"}", string(respBody))
 		assert.Equal(t, http.StatusNotFound, rec.Code)
 
 	})

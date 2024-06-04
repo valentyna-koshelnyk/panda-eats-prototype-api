@@ -7,7 +7,6 @@ import (
 
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
 
 //go:generate mockery --name=UserService
@@ -22,7 +21,6 @@ type UserService interface {
 
 var (
 	token string
-	items []utils.Item
 )
 
 // userService struct as a business layer between controller and repository
