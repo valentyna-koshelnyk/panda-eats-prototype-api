@@ -1,12 +1,15 @@
 package entity
 
 import (
-	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
-	"gorm.io/gorm"
 	"net/mail"
 	"time"
+
+	"gorm.io/gorm"
+
+	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
 )
 
+// User represents a user entity/
 type User struct {
 	gorm.Model
 	ID           int64     `json:"id"`
@@ -17,23 +20,6 @@ type User struct {
 	RefreshToken string    `json:"refresh_token"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
-}
-
-// NewUser creates a new user instance
-func NewUser(email, password, role string) (*User, error) {
-	user := &User{
-		Email:     email,
-		Password:  password,
-		Role:      string(role),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Time{},
-	}
-
-	if err := user.Validate(); err != nil {
-		return nil, err
-	}
-
-	return user, nil
 }
 
 // Validate validates the user entity.

@@ -2,12 +2,14 @@ package user
 
 import (
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
 	"io"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
+
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
 
 // Controller handles user-related requests

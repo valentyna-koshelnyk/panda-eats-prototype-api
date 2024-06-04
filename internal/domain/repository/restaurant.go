@@ -2,10 +2,13 @@ package repository
 
 import (
 	log "github.com/sirupsen/logrus"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"gorm.io/gorm"
+
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 )
+
 //go:generate mockery --name=RestaurantRepository
+
 // RestaurantRepository interface shows functions for interacting with DB
 type RestaurantRepository interface {
 	Create(restaurant entity.Restaurant) error

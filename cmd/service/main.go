@@ -3,16 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-	_ "github.com/valentyna-koshelnyk/panda-eats-prototype-api/docs"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/config"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/server"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+
+	_ "github.com/valentyna-koshelnyk/panda-eats-prototype-api/docs"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/config"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/server"
 )
 
 var version string

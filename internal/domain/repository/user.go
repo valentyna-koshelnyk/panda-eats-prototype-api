@@ -2,8 +2,9 @@ package repository
 
 import (
 	log "github.com/sirupsen/logrus"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"gorm.io/gorm"
+
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 )
 
 // UserRepository interface for interacting with db
@@ -34,6 +35,7 @@ func (r *userRepository) GetUser(email string) (*entity.User, error) {
 	return &u, nil
 }
 
+// CreateUser creates a new user
 func (r *userRepository) CreateUser(u *entity.User) error {
 	result := r.db.Create(&u)
 	if result.Error != nil {
@@ -41,4 +43,3 @@ func (r *userRepository) CreateUser(u *entity.User) error {
 	}
 	return nil
 }
-

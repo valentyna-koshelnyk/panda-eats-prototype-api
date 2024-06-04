@@ -2,11 +2,12 @@ package service
 
 import (
 	"errors"
+	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository/mocks"
-	"testing"
 )
 
 var (
@@ -64,26 +65,11 @@ func TestRestaurantService_FilterRestaurants(t *testing.T) {
 			repository: mockedRepository,
 		}
 
-		var items []entity.Item
-		for _, m := range restaurants {
-			items = append(items, m)
-		}
-
-		expectedResponse := &entity.Response{
-			APIVersion: "1.0",
-			Data: entity.Data{
-				StartIndex:   1,
-				ItemsCount:   len(items),
-				ItemsPerPage: len(items),
-				Items:        items,
-			},
-		}
-
 		// Act
 		response, _ := rs.FilterRestaurants("Pizza", "23204", "$")
 
 		// Assert
-		assert.Equal(t, expectedResponse, response)
+		assert.Equal(t, restaurants, response)
 	})
 
 	t.Run("Error", func(t *testing.T) {

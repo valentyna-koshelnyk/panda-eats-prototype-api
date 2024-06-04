@@ -2,13 +2,15 @@ package main
 
 import (
 	"encoding/csv"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/config"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
-	"gorm.io/gorm/clause"
 	"os"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	"gorm.io/gorm/clause"
+
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/config"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 )
 
 // ParseRestaurantCSV parses data from csv dataset to database
@@ -92,7 +94,7 @@ func ParseMenuCSV() {
 			continue
 		}
 
-		restaurantID, _ := strconv.ParseInt(each[0], 10, 64)
+		restaurantID, _ := strconv.Atoi(each[0])
 		m := entity.Menu{
 			RestaurantID: restaurantID,
 			Category:     each[1],

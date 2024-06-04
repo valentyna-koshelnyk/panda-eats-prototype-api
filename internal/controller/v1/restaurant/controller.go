@@ -2,15 +2,17 @@ package restaurant
 
 import (
 	"encoding/json"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
-	log "github.com/sirupsen/logrus"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
 	"io"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
+	log "github.com/sirupsen/logrus"
+
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
 
 // Controller datatype for controller layer
@@ -33,21 +35,24 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 	priceRange := r.URL.Query().Get("price_range")
 	zipCode := r.URL.Query().Get("zip_code")
 
-	response, err := c.s.FilterRestaurants(category, zipCode, priceRange)
+	restaurants, err := c.s.FilterRestaurants(category, zipCode, priceRange)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("Error getting restaurants: %s", err.Error())
 		utils.RespondWithJSON(w, r, "", "error getting restaurants")
 		return
 	}
-	if response == nil || len(response.Data.Items) == 0 {
+
+	if len(restaurants) == 0 {
 		w.WriteHeader(http.StatusNotFound)
-		log.Errorf("Restaurant not found: %s", err.Error())
+		log.Errorf("Restaurant not found")
 		utils.RespondWithJSON(w, r, "", "restaurant not found")
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 
+	response := utils.CustomResponse{Data: restaurants}
+
+	w.WriteHeader(http.StatusOK)
 	render.JSON(w, r, response)
 	return
 }
