@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
 
 // Controller type for menu controller layer

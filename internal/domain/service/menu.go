@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
 
 //go:generate mockery --name=MenuService

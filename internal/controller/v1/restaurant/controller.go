@@ -12,7 +12,7 @@ import (
 
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/utils"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
 
 // Controller datatype for controller layer
