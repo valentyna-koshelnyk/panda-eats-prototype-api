@@ -28,3 +28,8 @@ go.work
 
 # Configuration files
 config/config.dev.yaml
+
+# Terraform files
+**/.terraform
+**/.terraform.lock.hcl
+**/*.tfstate
