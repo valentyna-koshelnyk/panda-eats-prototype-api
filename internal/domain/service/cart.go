@@ -13,6 +13,7 @@ import (
 type CartService interface {
 	AddItem(userID, itemID string, quantity int64) error
 	isVerifiedUserItem(userID, itemID string) (bool, error)
+	GetItemsList(userID string) ([]entity.Cart, error)
 }
 
 // cartService is struct for cart
@@ -77,12 +78,23 @@ func (c *cartService) isVerifiedUserItem(userID, itemID string) (bool, error) {
 	return false, errors.New("not found")
 }
 
+// GetItemsList retrieves items list from the user's cart
+func (c *cartService) GetItemsList(userID string) ([]entity.Cart, error) {
+	items, err := c.r.GetCartItems(userID)
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+// parsePriceStringToFloat parses price string (removing USD) to float
 func parsePriceStringToFloat(price string) float64 {
 	s := strings.TrimSuffix(price, " USD")
 	f, _ := strconv.ParseFloat(s, 64)
 	return f
 }
 
+// calculateTotalPrice calculates total price of the order
 func calculateTotalPrice(price float64, quantity int64) float64 {
 	return price * float64(quantity)
 }

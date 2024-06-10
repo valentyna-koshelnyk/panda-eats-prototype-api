@@ -3,6 +3,8 @@ package cart
 import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
+	log "github.com/sirupsen/logrus"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 	"io"
@@ -48,5 +50,31 @@ func (c *Controller) AddItem(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusCreated)
 	utils.RespondWithJSON(w, r, "Item added", "")
+	return
+}
+
+// GetItem a handler for retrieval list of dishes from user's cart
+func (c *Controller) GetItem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	userID := chi.URLParam(r, "user_id")
+	items, err := c.s.GetItemsList(userID)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Errorf("Error getting items: %s", err.Error())
+		utils.RespondWithJSON(w, r, "", "error getting items")
+		return
+	}
+
+	if len(items) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		log.Errorf("Cart is empty")
+		utils.RespondWithJSON(w, r, "", "cart is empty")
+		return
+	}
+
+	response := utils.CustomResponse{Data: items}
+
+	w.WriteHeader(http.StatusOK)
+	render.JSON(w, r, response)
 	return
 }
