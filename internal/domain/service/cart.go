@@ -4,6 +4,8 @@ import (
 	"errors"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
+	"strconv"
+	"strings"
 )
 
 // CartService is interface for cart service having methods for adding item and verification of user/item
@@ -45,6 +47,10 @@ func (c *cartService) AddItem(userID, itemID string, quantity int64) error {
 			return err
 		}
 		cart.Item = *item
+
+		cart.PricePerUnit = ParsePriceStringToFloat(item.Price)
+		cart.TotalPrice = CalculateTotalPrice(cart.PricePerUnit, cart.Quantity)
+
 		err = c.r.AddItem(cart)
 		if err != nil {
 			return err
@@ -67,4 +73,14 @@ func (c *cartService) isVerifiedUserItem(userID, itemID string) (bool, error) {
 		return true, nil
 	}
 	return false, errors.New("not found")
+}
+
+func ParsePriceStringToFloat(price string) float64 {
+	s := strings.TrimSuffix(price, " USD")
+	f, _ := strconv.ParseFloat(s, 64)
+	return f
+}
+
+func CalculateTotalPrice(price float64, quantity int64) float64 {
+	return price * float64(quantity)
 }
