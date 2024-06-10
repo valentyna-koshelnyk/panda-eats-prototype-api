@@ -2,7 +2,10 @@ package service
 
 import (
 	"errors"
+	"fmt"
+	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -65,4 +68,36 @@ func (t *tokenService) VerifyToken(tokenString string) (jwt.MapClaims, error) {
 	}
 
 	return nil, errors.New("invalid token")
+}
+
+func (t *tokenService) ExtractIDFromToken(requestToken string, secret string) (string, error) {
+	token, err := jwt.Parse(requestToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(secret), nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if !ok && !token.Valid {
+		return "", fmt.Errorf("Invalid Token")
+	}
+
+	return claims["id"].(string), nil
+}
+
+// TokenFromHeader tries to retreive the token string from the
+// "Authorization" reqeust header: "Authorization: BEARER T".
+func (t *tokenService) TokenFromHeader(r *http.Request) string {
+	// Get token from authorization header.
+	bearer := r.Header.Get("Authorization")
+	if len(bearer) > 7 && strings.ToUpper(bearer[0:6]) == "BEARER" {
+		return bearer[7:]
+	}
+	return ""
 }

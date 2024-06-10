@@ -57,7 +57,7 @@ func (c *Controller) GetMenuByRestaurant(w http.ResponseWriter, r *http.Request)
 		offset = utils.DefaultOffset
 	}
 
-	pagedMenu, err := c.s.GetMenu(id, limit, offset)
+	pagedMenu, err := c.s.GetRestaurantMenu(id, limit, offset)
 	if err != nil && !errors.Is(err, custom_errors.ErrNotFound) {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Errorf("Error getting menu: %s", err)

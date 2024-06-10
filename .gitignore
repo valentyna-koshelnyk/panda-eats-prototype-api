@@ -28,6 +28,7 @@ go.work
 
 # Configuration files
 config/config.dev.yaml
+.terraform
 
 # Terraform files
 **/.terraform

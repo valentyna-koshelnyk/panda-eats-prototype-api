@@ -2,7 +2,12 @@ package config
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/guregu/dynamo"
 	"log"
+	"net/url"
 	"os"
 	"sync"
 	"time"
@@ -16,9 +21,14 @@ import (
 )
 
 var (
-	db   *gorm.DB
-	once sync.Once
+	db       *gorm.DB
+	once     sync.Once
+	dynamoDB *dynamodb.Client
 )
+
+type Resolver struct {
+	URL *url.URL
+}
 
 // InitViperConfig Initialize viper and load configuration
 func InitViperConfig() {
@@ -67,4 +77,14 @@ func initDB() *gorm.DB {
 	}
 
 	return db
+}
+
+func InitDynamoSession() dynamo.Table {
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		Config: aws.Config{Endpoint: aws.String("http://localhost:4566")},
+	}))
+	db := dynamo.New(sess, &aws.Config{Region: aws.String("eu-central-1")})
+
+	table := db.Table("cart")
+	return table
 }

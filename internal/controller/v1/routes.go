@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/go-chi/chi/v5"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/cart"
 
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/restaurant"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/user"
@@ -14,8 +15,7 @@ func Routes() chi.Router {
 
 	r.Mount("/restaurants", restaurant.Routes())
 	r.Mount("/auth", user.Routes())
-	r.Get("/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL("doc.json"),
-	))
+	r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL("doc.json")))
+	r.Mount("/", cart.Routes())
 	return r
 }
