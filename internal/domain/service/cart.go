@@ -6,6 +6,7 @@ import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // CartService is interface for cart service having methods for adding item and verification of user/item
@@ -50,6 +51,7 @@ func (c *cartService) AddItem(userID, itemID string, quantity int64) error {
 
 		cart.PricePerUnit = parsePriceStringToFloat(item.Price)
 		cart.TotalPrice = calculateTotalPrice(cart.PricePerUnit, cart.Quantity)
+		cart.AddedAt = time.Now()
 
 		err = c.r.AddItem(cart)
 		if err != nil {
