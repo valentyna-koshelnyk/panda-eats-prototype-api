@@ -48,8 +48,8 @@ func (c *cartService) AddItem(userID, itemID string, quantity int64) error {
 		}
 		cart.Item = *item
 
-		cart.PricePerUnit = ParsePriceStringToFloat(item.Price)
-		cart.TotalPrice = CalculateTotalPrice(cart.PricePerUnit, cart.Quantity)
+		cart.PricePerUnit = parsePriceStringToFloat(item.Price)
+		cart.TotalPrice = calculateTotalPrice(cart.PricePerUnit, cart.Quantity)
 
 		err = c.r.AddItem(cart)
 		if err != nil {
@@ -75,12 +75,12 @@ func (c *cartService) isVerifiedUserItem(userID, itemID string) (bool, error) {
 	return false, errors.New("not found")
 }
 
-func ParsePriceStringToFloat(price string) float64 {
+func parsePriceStringToFloat(price string) float64 {
 	s := strings.TrimSuffix(price, " USD")
 	f, _ := strconv.ParseFloat(s, 64)
 	return f
 }
 
-func CalculateTotalPrice(price float64, quantity int64) float64 {
+func calculateTotalPrice(price float64, quantity int64) float64 {
 	return price * float64(quantity)
 }
