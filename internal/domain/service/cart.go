@@ -20,14 +20,14 @@ type CartService interface {
 
 // cartService is struct for cart
 type cartService struct {
-	r           repository.CartRepository
-	userService UserService
-	menuService MenuService
+	cartRepository repository.CartRepository
+	userService    UserService
+	menuService    MenuService
 }
 
 // NewCartService constructor for cartservice with injected fields as repo, user service and menu service
-func NewCartService(r repository.CartRepository, userService UserService, menuService MenuService) CartService {
-	return &cartService{r: r,
+func NewCartService(cartRepository repository.CartRepository, userService UserService, menuService MenuService) CartService {
+	return &cartService{cartRepository: cartRepository,
 		userService: userService,
 		menuService: menuService,
 	}
@@ -56,7 +56,7 @@ func (c *cartService) AddItem(userID, itemID string, quantity int64) error {
 		cart.TotalPrice = calculateTotalPrice(cart.PricePerUnit, cart.Quantity)
 		cart.AddedAt = time.Now()
 
-		err = c.r.AddItem(cart)
+		err = c.cartRepository.AddItem(cart)
 		if err != nil {
 			return err
 		}
@@ -82,7 +82,7 @@ func (c *cartService) isVerifiedUserItem(userID, itemID string) (bool, error) {
 
 // GetItemsList retrieves items list from the user's cart
 func (c *cartService) GetItemsList(userID string) ([]entity.Cart, error) {
-	items, err := c.r.GetCartItems(userID)
+	items, err := c.cartRepository.GetCartItems(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (c *cartService) GetItemsList(userID string) ([]entity.Cart, error) {
 
 // RemoveItem removes entire item from user's cart
 func (c *cartService) RemoveItem(userID, itemID string) error {
-	err := c.r.RemoveItem(userID, itemID)
+	err := c.cartRepository.RemoveItem(userID, itemID)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (c *cartService) RemoveItem(userID, itemID string) error {
 
 // UpdateUserItem updates quantity of item in user's cart. if item doesn't exist, it saves it.
 func (c *cartService) UpdateUserItem(userID, itemID string, quantity int64) error {
-	item, _ := c.r.GetCartItem(userID, itemID)
+	item, _ := c.cartRepository.GetCartItem(userID, itemID)
 	if item == nil {
 		err := c.AddItem(userID, itemID, quantity)
 		if err != nil {
@@ -108,7 +108,7 @@ func (c *cartService) UpdateUserItem(userID, itemID string, quantity int64) erro
 		}
 	}
 	item.Quantity += quantity
-	err := c.r.UpdateCartItems(userID, itemID, item.Quantity)
+	err := c.cartRepository.UpdateCartItems(userID, itemID, item.Quantity)
 	if err != nil {
 		return err
 	}
