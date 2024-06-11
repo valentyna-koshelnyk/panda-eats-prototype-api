@@ -12,7 +12,7 @@ type CartRepository interface {
 	GetCartItems(UserID string) ([]entity.Cart, error)
 	GetCartItem(userID, itemID string) (*entity.Cart, error)
 	RemoveItem(itemID, userID string) error
-	UpdateCartItems(userID, itemID string, quantity int64) error
+	UpdateCartItems(userID string, item entity.Cart) error
 }
 
 // cartRepository struct which takes dynamo table as attribute (orm)
@@ -79,12 +79,12 @@ func (cartRepository *cartRepository) RemoveItem(userID, itemID string) error {
 }
 
 // UpdateCartItems updates quantity of item in the user's cart
-func (cartRepository *cartRepository) UpdateCartItems(userID, itemID string, quantity int64) error {
-	err := cartRepository.table.Update("user_id", userID).Range("product_id", itemID).Set("quantity", quantity).Run()
+func (cartRepository *cartRepository) UpdateCartItems(userID string, item entity.Cart) error {
+	err := cartRepository.table.Update("user_id", userID).Range("product_id", item.Item.ID).Set("quantity", item.Quantity).Set("total_price", item.TotalPrice).Run()
 	if err != nil {
-		log.Printf("Failed to update cart item %s for user %s: %v", itemID, userID, err)
+		log.Printf("Failed to update cart item %s for user %s: %v", item.ItemID, userID, err)
 		return err
 	}
-	log.Printf("Successfully updated cart item %s for user %s", itemID, userID)
+	log.Printf("Successfully updated cart item %s for user %s", item.ItemID, userID)
 	return nil
 }

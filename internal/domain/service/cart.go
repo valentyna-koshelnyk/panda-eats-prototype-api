@@ -47,6 +47,13 @@ func (c *cartService) AddItem(userID, itemID string, quantity int64) error {
 	if item == nil {
 		return errors.New("item not found")
 	}
+	existedCart, _ := c.cartRepository.GetCartItem(userID, itemID)
+	if existedCart != nil {
+		err := c.UpdateUserItem(userID, itemID, quantity)
+		if err != nil {
+			return err
+		}
+	}
 	cart.Item = *item
 	cart.UserID = userID
 	cart.ItemID = itemID
@@ -54,7 +61,6 @@ func (c *cartService) AddItem(userID, itemID string, quantity int64) error {
 	cart.PricePerUnit = parsePriceStringToFloat(item.Price)
 	cart.TotalPrice = calculateTotalPrice(cart.PricePerUnit, cart.Quantity)
 	cart.AddedAt = time.Now()
-
 	err = c.cartRepository.AddItem(cart)
 	if err != nil {
 		return err
@@ -90,7 +96,9 @@ func (c *cartService) UpdateUserItem(userID, itemID string, quantity int64) erro
 		}
 	}
 	item.Quantity += quantity
-	err := c.cartRepository.UpdateCartItems(userID, itemID, item.Quantity)
+	item.TotalPrice = calculateTotalPrice(item.PricePerUnit, item.Quantity)
+
+	err := c.cartRepository.UpdateCartItems(userID, *item)
 	if err != nil {
 		return err
 	}
