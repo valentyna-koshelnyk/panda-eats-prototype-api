@@ -10,7 +10,9 @@ import (
 type CartRepository interface {
 	AddItem(cart entity.Cart) error
 	GetCartItems(UserID string) ([]entity.Cart, error)
+	GetCartItem(userID, itemID string) (*entity.Cart, error)
 	RemoveItem(itemID, userID string) error
+	UpdateCartItems(userID, itemID string, quantity int64) error
 }
 
 // cartRepository struct which takes dynamo table as attribute (orm)
@@ -43,6 +45,16 @@ func (c *cartRepository) AddItem(cart entity.Cart) error {
 	return nil
 }
 
+// GetCartItem retrieves a single item added by user to his cart
+func (c *cartRepository) GetCartItem(userID, itemID string) (*entity.Cart, error) {
+	var cart entity.Cart
+	err := c.table.Get("user_id", userID).Range("product_id", dynamo.Equal, itemID).One(&cart)
+	if err != nil {
+		return nil, err
+	}
+	return &cart, nil
+}
+
 // GetCartItems retrieves dishes that were added to cart of the user
 func (c *cartRepository) GetCartItems(userID string) ([]entity.Cart, error) {
 	var cart []entity.Cart
@@ -63,5 +75,16 @@ func (c *cartRepository) RemoveItem(userID, itemID string) error {
 		return err
 	}
 	log.Printf("Successfully deleted cart item %s for user %s", itemID, userID)
+	return nil
+}
+
+// UpdateCartItems updates quantity of item in the user's cart
+func (c *cartRepository) UpdateCartItems(userID, itemID string, quantity int64) error {
+	err := c.table.Update("user_id", userID).Range("product_id", itemID).Set("quantity", quantity).Run()
+	if err != nil {
+		log.Printf("Failed to update cart item %s for user %s: %v", itemID, userID, err)
+		return err
+	}
+	log.Printf("Successfully updated cart item %s for user %s", itemID, userID)
 	return nil
 }

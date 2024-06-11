@@ -33,7 +33,7 @@ func (c *Controller) AddItem(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "user_id")
 	itemID := chi.URLParam(r, "item_id")
 
-	var request utils.AddItemRequest
+	var request utils.QuantityItemRequest
 
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -94,6 +94,30 @@ func (c *Controller) RemoveItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	render.JSON(w, r, "Item removed")
+	utils.RespondWithJSON(w, r, "Item removed", "")
+	return
+}
+
+// UpdateItem is a handler for updating item quantity
+func (c *Controller) UpdateItem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	userID := chi.URLParam(r, "user_id")
+	itemID := chi.URLParam(r, "item_id")
+
+	var request utils.QuantityItemRequest
+
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusBadRequest)
+		return
+	}
+	err = json.Unmarshal(data, &request)
+
+	if err = c.s.UpdateUserItem(userID, itemID, request.Quantity); err != nil {
+		utils.RespondWithJSON(w, r, "", err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	utils.RespondWithJSON(w, r, "Item updated", "")
 	return
 }

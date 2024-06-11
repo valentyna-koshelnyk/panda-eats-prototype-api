@@ -15,6 +15,7 @@ type CartService interface {
 	isVerifiedUserItem(userID, itemID string) (bool, error)
 	GetItemsList(userID string) ([]entity.Cart, error)
 	RemoveItem(userID, itemID string) error
+	UpdateUserItem(userID, itemID string, quantity int64) error
 }
 
 // cartService is struct for cart
@@ -91,6 +92,23 @@ func (c *cartService) GetItemsList(userID string) ([]entity.Cart, error) {
 // RemoveItem removes entire item from user's cart
 func (c *cartService) RemoveItem(userID, itemID string) error {
 	err := c.r.RemoveItem(userID, itemID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpdateUserItem updates quantity of item in user's cart. if item doesn't exist, it saves it.
+func (c *cartService) UpdateUserItem(userID, itemID string, quantity int64) error {
+	item, _ := c.r.GetCartItem(userID, itemID)
+	if item == nil {
+		err := c.AddItem(userID, itemID, quantity)
+		if err != nil {
+			return err
+		}
+	}
+	item.Quantity += quantity
+	err := c.r.UpdateCartItems(userID, itemID, item.Quantity)
 	if err != nil {
 		return err
 	}
