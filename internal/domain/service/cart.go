@@ -34,12 +34,12 @@ func NewCartService(cartRepository repository.CartRepository, userService UserSe
 
 // AddItem after validating user input (userId/itemId) adds item to cart using cart repository
 func (c *cartService) AddItem(userID, itemID string, quantity int64) error {
+	// TODO: to replace getUserById to bool isUserPresent, so we needn't to retrieve entire object but bool value
 	user, _ := c.userService.GetUserById(userID)
 	if user == nil {
 		return errors.New("user not found")
 	}
 
-	var cart entity.Cart
 	item, err := c.menuService.GetItem(itemID)
 	if err != nil {
 		return err
@@ -47,13 +47,13 @@ func (c *cartService) AddItem(userID, itemID string, quantity int64) error {
 	if item == nil {
 		return errors.New("item not found")
 	}
-	existedCart, _ := c.cartRepository.GetCartItem(userID, itemID)
-	if existedCart != nil {
-		err := c.UpdateUserItem(userID, itemID, quantity)
-		if err != nil {
-			return err
-		}
+
+	existingCartItem, _ := c.cartRepository.GetCartItem(userID, itemID)
+	if existingCartItem != nil {
+		return c.UpdateUserItem(userID, itemID, existingCartItem.Quantity)
 	}
+
+	var cart entity.Cart
 	cart.Item = *item
 	cart.UserID = userID
 	cart.ItemID = itemID
@@ -61,11 +61,8 @@ func (c *cartService) AddItem(userID, itemID string, quantity int64) error {
 	cart.PricePerUnit = parsePriceStringToFloat(item.Price)
 	cart.TotalPrice = calculateTotalPrice(cart.PricePerUnit, cart.Quantity)
 	cart.AddedAt = time.Now()
-	err = c.cartRepository.AddItem(cart)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return c.cartRepository.AddItem(cart)
 }
 
 // GetItemsList retrieves items list from the user's cart
