@@ -34,3 +34,4 @@ config/config.dev.yaml
 **/.terraform
 **/.terraform.lock.hcl
 **/*.tfstate
+config/.terraform.tfstate.lock.info
