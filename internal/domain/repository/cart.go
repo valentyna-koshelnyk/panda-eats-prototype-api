@@ -59,7 +59,7 @@ func (c *cartRepository) GetCartItem(userID, itemID string) (*entity.Cart, error
 func (c *cartRepository) GetCartItems(userID string) ([]entity.Cart, error) {
 	var cart []entity.Cart
 
-	err := c.table.Scan().Filter("'user_id' = ?", userID).All(&cart)
+	err := c.table.Get("user_id", userID).All(&cart)
 	if err != nil {
 		log.Printf("Failed to retrieve cart items for user %s: %v", userID, err)
 		return nil, err
