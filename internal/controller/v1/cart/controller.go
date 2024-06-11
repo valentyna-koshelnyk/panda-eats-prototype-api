@@ -68,7 +68,7 @@ func (c *Controller) GetCartItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(items) == 0 {
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusNoContent)
 		log.Errorf("Cart is empty")
 		utils.RespondWithJSON(w, r, "", "cart is empty")
 		return
