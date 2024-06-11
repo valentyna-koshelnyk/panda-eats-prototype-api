@@ -2,12 +2,15 @@ package repository
 
 import (
 	"github.com/guregu/dynamo"
+	log "github.com/sirupsen/logrus"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 )
 
 // CartRepository serves a repository for cart, layer for interaction with dynamoDB
 type CartRepository interface {
 	AddItem(cart entity.Cart) error
+	GetCartItems(UserID string) ([]entity.Cart, error)
+	RemoveItem(itemID, userID string) error
 }
 
 // cartRepository struct which takes dynamo table as attribute (orm)
@@ -37,5 +40,28 @@ func (c *cartRepository) AddItem(cart entity.Cart) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// GetCartItems retrieves dishes that were added to cart of the user
+func (c *cartRepository) GetCartItems(userID string) ([]entity.Cart, error) {
+	var cart []entity.Cart
+
+	err := c.table.Scan().Filter("'user_id' = ?", userID).All(&cart)
+	if err != nil {
+		log.Printf("Failed to retrieve cart items for user %s: %v", userID, err)
+		return nil, err
+	}
+	return cart, nil
+}
+
+// RemoveItem removes item from user's cart
+func (c *cartRepository) RemoveItem(userID, itemID string) error {
+	err := c.table.Delete("user_id", userID).Range("product_id", itemID).Run()
+	if err != nil {
+		log.Printf("Failed to delete cart item %s for user %s: %v", itemID, userID, err)
+		return err
+	}
+	log.Printf("Successfully deleted cart item %s for user %s", itemID, userID)
 	return nil
 }

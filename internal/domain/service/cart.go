@@ -14,6 +14,7 @@ type CartService interface {
 	AddItem(userID, itemID string, quantity int64) error
 	isVerifiedUserItem(userID, itemID string) (bool, error)
 	GetItemsList(userID string) ([]entity.Cart, error)
+	RemoveItem(userID, itemID string) error
 }
 
 // cartService is struct for cart
@@ -85,6 +86,15 @@ func (c *cartService) GetItemsList(userID string) ([]entity.Cart, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+// RemoveItem removes entire item from user's cart
+func (c *cartService) RemoveItem(userID, itemID string) error {
+	err := c.r.RemoveItem(userID, itemID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // parsePriceStringToFloat parses price string (removing USD) to float

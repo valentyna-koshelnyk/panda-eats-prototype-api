@@ -28,6 +28,7 @@ func Routes() chi.Router {
 
 	r.Post("/{user_id}/{item_id}", controller.AddItem)
 	r.Get("/items/{user_id}", controller.GetItem)
+	r.Delete("/{user_id}/{item_id}", controller.RemoveItem)
 
 	return r
 }

@@ -78,3 +78,22 @@ func (c *Controller) GetItem(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, response)
 	return
 }
+
+// RemoveItem is a handler for removing entire item from user's cart
+func (c *Controller) RemoveItem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	userID := chi.URLParam(r, "user_id")
+	itemID := chi.URLParam(r, "item_id")
+
+	err := c.s.RemoveItem(userID, itemID)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Errorf("Error removing item: %s", err.Error())
+		utils.RespondWithJSON(w, r, "", "error removing item")
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+	render.JSON(w, r, "Item removed")
+	return
+}
