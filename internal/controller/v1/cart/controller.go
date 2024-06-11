@@ -13,17 +13,19 @@ import (
 
 // Controller is struct for cart controller, which takes cart service as an attribute
 type Controller struct {
-	s service.CartService
+	cartService service.CartService
 }
 
 // CartController interface for handlers of different CRUD operations for cart
 type CartController interface {
 	AddItem(w http.ResponseWriter, r *http.Request)
+	GetItem(w http.ResponseWriter, r *http.Request)
+	RemoveItem(w http.ResponseWriter, r *http.Request)
 }
 
 // NewCartController is a contrsuctor for cart
 func NewCartController(s service.CartService) Controller {
-	return Controller{s: s}
+	return Controller{cartService: s}
 }
 
 // AddItem is a handler for adding item to user's cart
@@ -42,7 +44,7 @@ func (c *Controller) AddItem(w http.ResponseWriter, r *http.Request) {
 	}
 	err = json.Unmarshal(data, &request)
 
-	err = c.s.AddItem(userID, itemID, request.Quantity)
+	err = c.cartService.AddItem(userID, itemID, request.Quantity)
 	if err != nil {
 		utils.RespondWithJSON(w, r, "", err.Error())
 		http.Error(w, "", http.StatusNotFound)
@@ -57,7 +59,7 @@ func (c *Controller) AddItem(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) GetItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	userID := chi.URLParam(r, "user_id")
-	items, err := c.s.GetItemsList(userID)
+	items, err := c.cartService.GetItemsList(userID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("Error getting items: %s", err.Error())
@@ -86,7 +88,7 @@ func (c *Controller) RemoveItem(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "user_id")
 	itemID := chi.URLParam(r, "item_id")
 
-	err := c.s.RemoveItem(userID, itemID)
+	err := c.cartService.RemoveItem(userID, itemID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("Error removing item: %s", err.Error())
@@ -113,7 +115,7 @@ func (c *Controller) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	}
 	err = json.Unmarshal(data, &request)
 
-	if err = c.s.UpdateUserItem(userID, itemID, request.Quantity); err != nil {
+	if err = c.cartService.UpdateUserItem(userID, itemID, request.Quantity); err != nil {
 		utils.RespondWithJSON(w, r, "", err.Error())
 		return
 	}
