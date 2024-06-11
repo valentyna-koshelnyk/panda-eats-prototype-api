@@ -93,7 +93,7 @@ func (c *Controller) RemoveItem(w http.ResponseWriter, r *http.Request) {
 		utils.RespondWithJSON(w, r, "", "error removing item")
 		return
 	}
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusOK)
 	render.JSON(w, r, "Item removed")
 	return
 }
