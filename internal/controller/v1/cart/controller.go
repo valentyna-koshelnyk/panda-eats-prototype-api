@@ -19,7 +19,7 @@ type Controller struct {
 // CartController interface for handlers of different CRUD operations for cart
 type CartController interface {
 	AddItem(w http.ResponseWriter, r *http.Request)
-	GetItem(w http.ResponseWriter, r *http.Request)
+	GetCartItems(w http.ResponseWriter, r *http.Request)
 	RemoveItem(w http.ResponseWriter, r *http.Request)
 }
 
@@ -55,8 +55,8 @@ func (c *Controller) AddItem(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// GetItem a handler for retrieval list of dishes from user's cart
-func (c *Controller) GetItem(w http.ResponseWriter, r *http.Request) {
+// GetCartItems a handler for retrieval list of dishes from user's cart
+func (c *Controller) GetCartItems(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	userID := chi.URLParam(r, "user_id")
 	items, err := c.cartService.GetItemsList(userID)
