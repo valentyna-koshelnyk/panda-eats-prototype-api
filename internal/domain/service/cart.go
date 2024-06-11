@@ -12,7 +12,6 @@ import (
 // CartService is interface for cart service having methods for adding item and verification of user/item
 type CartService interface {
 	AddItem(userID, itemID string, quantity int64) error
-	isVerifiedUserItem(userID, itemID string) (bool, error)
 	GetItemsList(userID string) ([]entity.Cart, error)
 	RemoveItem(userID, itemID string) error
 	UpdateUserItem(userID, itemID string, quantity int64) error
@@ -35,49 +34,32 @@ func NewCartService(cartRepository repository.CartRepository, userService UserSe
 
 // AddItem after validating user input (userId/itemId) adds item to cart using cart repository
 func (c *cartService) AddItem(userID, itemID string, quantity int64) error {
-	isVerified, err := c.isVerifiedUserItem(userID, itemID)
+	user, _ := c.userService.GetUserById(userID)
+	if user == nil {
+		return errors.New("user not found")
+	}
+
+	var cart entity.Cart
+	item, err := c.menuService.GetItem(itemID)
 	if err != nil {
 		return err
 	}
-	if isVerified {
-		var cart entity.Cart
+	if item == nil {
+		return errors.New("item not found")
+	}
+	cart.Item = *item
+	cart.UserID = userID
+	cart.ItemID = itemID
+	cart.Quantity = quantity
+	cart.PricePerUnit = parsePriceStringToFloat(item.Price)
+	cart.TotalPrice = calculateTotalPrice(cart.PricePerUnit, cart.Quantity)
+	cart.AddedAt = time.Now()
 
-		cart.UserID = userID
-		cart.ItemID = itemID
-		cart.Quantity = quantity
-
-		item, err := c.menuService.GetItem(itemID)
-		if err != nil {
-			return err
-		}
-		cart.Item = *item
-
-		cart.PricePerUnit = parsePriceStringToFloat(item.Price)
-		cart.TotalPrice = calculateTotalPrice(cart.PricePerUnit, cart.Quantity)
-		cart.AddedAt = time.Now()
-
-		err = c.cartRepository.AddItem(cart)
-		if err != nil {
-			return err
-		}
+	err = c.cartRepository.AddItem(cart)
+	if err != nil {
+		return err
 	}
 	return nil
-}
-
-// isVerifiedUserItem verifies if user and dish exist in the respective tables
-func (c *cartService) isVerifiedUserItem(userID, itemID string) (bool, error) {
-	user, err := c.userService.GetUserById(userID)
-	if err != nil {
-		return false, err
-	}
-	item, err := c.menuService.GetItem(itemID)
-	if err != nil {
-		return false, err
-	}
-	if user.ID == userID && itemID == item.ID {
-		return true, nil
-	}
-	return false, errors.New("not found")
 }
 
 // GetItemsList retrieves items list from the user's cart
