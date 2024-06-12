@@ -11,7 +11,7 @@ import (
 func Routes() chi.Router {
 	r := chi.NewRouter()
 
-	table := config.InitDynamoSession()
+	table := config.InitDynamo()
 	db := config.GetDB()
 
 	userRepository := repository.NewUserRepository(db)
