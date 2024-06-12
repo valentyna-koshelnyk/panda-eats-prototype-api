@@ -22,6 +22,7 @@ type CartController interface {
 	AddItem(w http.ResponseWriter, r *http.Request)
 	GetCartItems(w http.ResponseWriter, r *http.Request)
 	RemoveItem(w http.ResponseWriter, r *http.Request)
+	UpdateItem(w http.ResponseWriter, r *http.Request)
 }
 
 // NewCartController is a contrsuctor for cart
