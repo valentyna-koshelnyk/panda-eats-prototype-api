@@ -13,7 +13,8 @@ import (
 
 // Controller is struct for cart controller, which takes cart service as an attribute
 type Controller struct {
-	cartService service.CartService
+	cartService  service.CartService
+	tokenService service.TokenService
 }
 
 // CartController interface for handlers of different CRUD operations for cart
@@ -24,15 +25,18 @@ type CartController interface {
 }
 
 // NewCartController is a contrsuctor for cart
-func NewCartController(s service.CartService) Controller {
-	return Controller{cartService: s}
+func NewCartController(cartService service.CartService, tokenService service.TokenService) Controller {
+	return Controller{
+		cartService:  cartService,
+		tokenService: tokenService,
+	}
 }
 
 // AddItem is a handler for adding item to user's cart
 func (c *Controller) AddItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
-	userID := chi.URLParam(r, "user_id")
+	// Using hardcoded value as 1 before authentication is implemented, then "userID := chi.URLParam(r, "user_id")"
+	userID := "1"
 	itemID := chi.URLParam(r, "item_id")
 
 	var request utils.QuantityItemRequest
@@ -58,34 +62,37 @@ func (c *Controller) AddItem(w http.ResponseWriter, r *http.Request) {
 // GetCartItems a handler for retrieval list of dishes from user's cart
 func (c *Controller) GetCartItems(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	userID := chi.URLParam(r, "user_id")
+	// Using hardcoded value as 1 before authentication is implemented, then "userID := chi.URLParam(r, "user_id")"
+	userID := "1"
+	// Get items from the cart
 	items, err := c.cartService.GetItemsList(userID)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Errorf("Error getting items: %s", err.Error())
 		utils.RespondWithJSON(w, r, "", "error getting items")
 		return
 	}
 
+	// Handle empty cart
 	if len(items) == 0 {
 		w.WriteHeader(http.StatusNoContent)
-		log.Errorf("Cart is empty")
+		log.Info("Cart is empty")
 		utils.RespondWithJSON(w, r, "", "cart is empty")
 		return
 	}
 
+	// Respond with cart items
 	response := utils.CustomResponse{Data: items}
-
 	w.WriteHeader(http.StatusOK)
 	render.JSON(w, r, response)
-	return
 }
 
 // RemoveItem is a handler for removing entire item from user's cart
 func (c *Controller) RemoveItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
-	userID := chi.URLParam(r, "user_id")
+	// Hardcoded 1 before authentication is implemented
+	//userID := chi.URLParam(r, "user_id")
+	userID := "1"
 	itemID := chi.URLParam(r, "item_id")
 
 	err := c.cartService.RemoveItem(userID, itemID)
@@ -103,7 +110,9 @@ func (c *Controller) RemoveItem(w http.ResponseWriter, r *http.Request) {
 // UpdateItem is a handler for updating item quantity
 func (c *Controller) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	userID := chi.URLParam(r, "user_id")
+	// Hardcoded 1 before authentication is implemented
+	//userID := chi.URLParam(r, "user_id")
+	userID := "1"
 	itemID := chi.URLParam(r, "item_id")
 
 	var request utils.QuantityItemRequest
