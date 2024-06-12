@@ -22,6 +22,7 @@ type CartController interface {
 	AddItem(w http.ResponseWriter, r *http.Request)
 	GetCartItems(w http.ResponseWriter, r *http.Request)
 	RemoveItem(w http.ResponseWriter, r *http.Request)
+	UpdateItem(w http.ResponseWriter, r *http.Request)
 }
 
 // NewCartController is a contrsuctor for cart
@@ -72,7 +73,6 @@ func (c *Controller) GetCartItems(w http.ResponseWriter, r *http.Request) {
 		utils.RespondWithJSON(w, r, "", "error getting items")
 		return
 	}
-
 	// Handle empty cart
 	if len(items) == 0 {
 		w.WriteHeader(http.StatusNoContent)
@@ -80,7 +80,6 @@ func (c *Controller) GetCartItems(w http.ResponseWriter, r *http.Request) {
 		utils.RespondWithJSON(w, r, "", "cart is empty")
 		return
 	}
-
 	// Respond with cart items
 	response := utils.CustomResponse{Data: items}
 	w.WriteHeader(http.StatusOK)
