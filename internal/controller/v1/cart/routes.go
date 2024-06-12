@@ -26,10 +26,10 @@ func Routes() chi.Router {
 	cartService := service.NewCartService(cartRepository, userService, menuService)
 	controller := NewCartController(cartService, userTokenService)
 
-	r.Post("/{item_id}", controller.AddItem)
+	r.Post("/item/{item_id}", controller.AddItem)
 	r.Get("/", controller.GetCartItems)
-	r.Delete("/{item_id}", controller.RemoveItem)
-	r.Patch("/{item_id}", controller.UpdateItem)
+	r.Delete("/item/{item_id}", controller.RemoveItem)
+	r.Patch("/item/{item_id}", controller.UpdateItem)
 
 	return r
 }
