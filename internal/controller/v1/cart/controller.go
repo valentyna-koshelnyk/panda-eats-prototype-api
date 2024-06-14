@@ -3,8 +3,10 @@ package cart
 import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 	"io"
@@ -35,9 +37,9 @@ func NewCartController(cartService service.CartService, tokenService service.Tok
 
 // AddItem is a handler for adding item to user's cart
 func (c *Controller) AddItem(w http.ResponseWriter, r *http.Request) {
+	token := jwtauth.TokenFromHeader(r)
+	userID, err := c.tokenService.ExtractIDFromToken(token, viper.GetString("secret.key"))
 	w.Header().Set("Content-Type", "application/json")
-	// Using hardcoded value as 1 before authentication is implemented, then "userID := chi.URLParam(r, "user_id")"
-	userID := "1"
 	itemID := chi.URLParam(r, "item_id")
 
 	var request utils.QuantityItemRequest
@@ -62,10 +64,9 @@ func (c *Controller) AddItem(w http.ResponseWriter, r *http.Request) {
 
 // GetCartItems a handler for retrieval list of dishes from user's cart
 func (c *Controller) GetCartItems(w http.ResponseWriter, r *http.Request) {
+	token := jwtauth.TokenFromHeader(r)
+	userID, err := c.tokenService.ExtractIDFromToken(token, viper.GetString("secret.key"))
 	w.Header().Set("Content-Type", "application/json")
-	// Using hardcoded value as 1 before authentication is implemented, then "userID := chi.URLParam(r, "user_id")"
-	userID := "1"
-	// Get items from the cart
 	items, err := c.cartService.GetItemsList(userID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -89,12 +90,11 @@ func (c *Controller) GetCartItems(w http.ResponseWriter, r *http.Request) {
 // RemoveItem is a handler for removing entire item from user's cart
 func (c *Controller) RemoveItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	// Hardcoded 1 before authentication is implemented
-	//userID := chi.URLParam(r, "user_id")
-	userID := "1"
+	token := jwtauth.TokenFromHeader(r)
+	userID, err := c.tokenService.ExtractIDFromToken(token, viper.GetString("secret.key"))
 	itemID := chi.URLParam(r, "item_id")
 
-	err := c.cartService.RemoveItem(userID, itemID)
+	err = c.cartService.RemoveItem(userID, itemID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("Error removing item: %s", err.Error())
@@ -108,10 +108,9 @@ func (c *Controller) RemoveItem(w http.ResponseWriter, r *http.Request) {
 
 // UpdateItem is a handler for updating item quantity
 func (c *Controller) UpdateItem(w http.ResponseWriter, r *http.Request) {
+	token := jwtauth.TokenFromHeader(r)
+	userID, err := c.tokenService.ExtractIDFromToken(token, viper.GetString("secret.key"))
 	w.Header().Set("Content-Type", "application/json")
-	// Hardcoded 1 before authentication is implemented
-	//userID := chi.URLParam(r, "user_id")
-	userID := "1"
 	itemID := chi.URLParam(r, "item_id")
 
 	var request utils.QuantityItemRequest

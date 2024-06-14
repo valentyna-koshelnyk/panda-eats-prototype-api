@@ -13,5 +13,12 @@ database:
   password: "postgres"
   host: "localhost"
   port: "5432"
-
+aws:
+  access_key_id: "AKIAIOSFODNN7EXAMPLE"
+  secret_access_key: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+  region: "eu-central-1"
+  endpoint: "http://localhost:4566/"
+  token: "token"
+secret:
+  key: "secret"
 

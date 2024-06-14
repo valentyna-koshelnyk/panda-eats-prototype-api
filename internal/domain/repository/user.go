@@ -9,8 +9,9 @@ import (
 
 // UserRepository interface for interacting with db
 type UserRepository interface {
-	GetUser(email string) (*entity.User, error)
 	CreateUser(u *entity.User) error
+	GetUserByID(ID string) (entity.User, error)
+	GetUserByEmail(email string) (entity.User, error)
 }
 
 // userRepository layer for interacting with db
@@ -23,18 +24,6 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{db: db}
 }
 
-// GetUser checks if user with the input email exists
-func (r *userRepository) GetUser(email string) (*entity.User, error) {
-	var u entity.User
-	result := r.db.Where("email = ?", email).First(&u)
-
-	if result.Error != nil {
-		log.Error("user not found: ", result.Error)
-		return nil, result.Error
-	}
-	return &u, nil
-}
-
 // CreateUser creates a new user
 func (r *userRepository) CreateUser(u *entity.User) error {
 	result := r.db.Create(&u)
@@ -42,4 +31,28 @@ func (r *userRepository) CreateUser(u *entity.User) error {
 		log.Error(result.Error)
 	}
 	return nil
+}
+
+// GetUserByID retrieves user based on his id
+func (r *userRepository) GetUserByID(ID string) (entity.User, error) {
+	var u entity.User
+	result := r.db.Where("ID = ?", ID).First(&u)
+
+	if result.Error != nil {
+		log.Error("user not found: ", result.Error)
+		return entity.User{}, result.Error
+	}
+	return u, nil
+}
+
+// GetUserByEmail retrieves user based on his email
+func (r *userRepository) GetUserByEmail(email string) (entity.User, error) {
+	var u entity.User
+	result := r.db.Where("email = ?", email).First(&u)
+
+	if result.Error != nil {
+		log.Error("user not found: ", result.Error)
+		return entity.User{}, result.Error
+	}
+	return u, nil
 }
