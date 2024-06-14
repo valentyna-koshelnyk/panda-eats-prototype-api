@@ -14,12 +14,12 @@ import (
 
 // Controller handles user-related requests
 type Controller struct {
-	s service.UserService
+	userService service.UserService
 }
 
 // NewUserController creates a new UserController
-func NewUserController(service service.UserService) Controller {
-	return Controller{s: service}
+func NewUserController(userService service.UserService) Controller {
+	return Controller{userService: userService}
 }
 
 // RegistrationUser handles user registration by validating and creating a new user
@@ -44,7 +44,7 @@ func (c *Controller) RegistrationUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = c.s.CreateUser(*user)
+	_, err = c.userService.CreateUser(*user)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error creating new user: %s", err)
@@ -59,8 +59,8 @@ func (c *Controller) RegistrationUser(w http.ResponseWriter, r *http.Request) {
 
 func (c *Controller) LoginUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
 	var user *entity.User
+
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -71,7 +71,7 @@ func (c *Controller) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(data, &user)
 
-	response, err := c.s.GenerateTokenResponse(*user)
+	response, err := c.userService.GenerateTokenResponse(user.Email, user.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error generating response: %s", err)
