@@ -12,6 +12,7 @@ import (
 // MenuRepository represents methods for interacting with db, menu entity
 type MenuRepository interface {
 	GetMenu(id int, pagination *utils.Pagination) (*utils.Pagination, error)
+	GetItem(id string) (entity.Menu, error)
 }
 
 // menuRepository layer for interacting with db
@@ -26,7 +27,7 @@ func NewMenuRepository(db *gorm.DB) MenuRepository {
 	}
 }
 
-// GetMenu retrieves menu of the specific restaurant from the database
+// GetMenu retrieves menu (list of dishes) of the specific restaurant from the database
 func (r *menuRepository) GetMenu(restaurantID int, pagination *utils.Pagination) (*utils.Pagination, error) {
 	var menuList []entity.Menu
 	err := r.db.
@@ -40,4 +41,11 @@ func (r *menuRepository) GetMenu(restaurantID int, pagination *utils.Pagination)
 	pagination.Rows = menuList
 
 	return pagination, nil
+}
+
+// GetItem retrieves a particular dish from menu which allows to add it to cart/order
+func (r *menuRepository) GetItem(id string) (entity.Menu, error) {
+	var menu entity.Menu
+	err := r.db.Where("id = ?", id).First(&menu).Error
+	return menu, err
 }

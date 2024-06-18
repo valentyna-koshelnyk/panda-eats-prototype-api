@@ -14,5 +14,9 @@ var tokenAuth *jwtauth.JWTAuth
 func Routes(c OrderController) chi.Router {
 	r := chi.NewRouter()
 	r.Post("/", c.CreateOrder)
+	r.Patch("/shipped", c.UpdateOrderStatusShipped)
+	r.Patch("/deliver", c.UpdateOrderStatusDelivered)
+	r.Get("/orders", c.GetOrdersHistory)
+	
 	return r
 }

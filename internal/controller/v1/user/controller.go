@@ -9,7 +9,6 @@ import (
 
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
 
 // Controller handles user-related requests
@@ -37,7 +36,7 @@ func (c *userController) RegistrationUser(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error reading body: %s", err)
-		utils.RespondWithJSON(w, r, "", "error creating new user")
+		entity.RespondWithJSON(w, r, "", "error creating new user")
 		return
 	}
 
@@ -45,7 +44,7 @@ func (c *userController) RegistrationUser(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error unmarshalling body: %s", err)
-		utils.RespondWithJSON(w, r, "", "error creating new user")
+		entity.RespondWithJSON(w, r, "", "error creating new user")
 		return
 	}
 
@@ -53,12 +52,12 @@ func (c *userController) RegistrationUser(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error creating new user: %s", err)
-		utils.RespondWithJSON(w, r, "", "error creating new user")
+		entity.RespondWithJSON(w, r, "", "error creating new user")
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
 
-	utils.RespondWithJSON(w, r, "User registered successfully", "")
+	entity.RespondWithJSON(w, r, "User registered successfully", "")
 	return
 }
 
@@ -70,7 +69,7 @@ func (c *userController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error reading body: %s", err)
-		utils.RespondWithJSON(w, r, "", "user not found")
+		entity.RespondWithJSON(w, r, "", "user not found")
 		return
 	}
 
@@ -80,10 +79,10 @@ func (c *userController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error generating response: %s", err)
-		utils.RespondWithJSON(w, r, "", "error with formatting")
+		entity.RespondWithJSON(w, r, "", "error with formatting")
 	}
 
 	w.WriteHeader(http.StatusOK)
-	utils.RespondWithJSON(w, r, response, "")
+	entity.RespondWithJSON(w, r, response, "")
 	return
 }

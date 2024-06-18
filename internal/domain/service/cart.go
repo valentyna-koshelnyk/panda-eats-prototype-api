@@ -13,7 +13,7 @@ import (
 //
 //go:generate mockery --name=CartService
 type CartService interface {
-	AddItem(userEmail, itemID string, quantity int64) error
+	AddItem(userID, itemID string, quantity int64) error
 	GetItemsList(userID string) ([]entity.Cart, error)
 	RemoveItem(userID, itemID string) error
 	RemoveItems(cartItems []entity.Cart) error
@@ -36,9 +36,9 @@ func NewCartService(cartRepository repository.CartRepository, userService UserSe
 }
 
 // AddItem after validating user input (userId/itemId) adds item to cart using cart repository
-func (c *cartService) AddItem(userEmail, itemID string, quantity int64) error {
+func (c *cartService) AddItem(userID, itemID string, quantity int64) error {
 	// TODO: to replace getUserById to bool isUserPresent, so we needn't to retrieve entire object but bool value
-	user, _ := c.userService.GetUserByEmail(userEmail)
+	user, _ := c.userService.GetUserById(userID)
 	if user == nil {
 		return errors.New("user not found")
 	}

@@ -52,8 +52,8 @@ func (c *orderController) CreateOrder(w http.ResponseWriter, r *http.Request) {
 func (c *orderController) UpdateOrderStatusShipped(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var order *entity.Order
-
+	var orderID entity.OrderIDRequest
+	userID := "50aa4686-bb62-4202-b2ce-471df794adea"
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -61,9 +61,9 @@ func (c *orderController) UpdateOrderStatusShipped(w http.ResponseWriter, r *htt
 		entity.RespondWithJSON(w, r, "", "error retrieving user")
 		return
 	}
-	err = json.Unmarshal(data, &order.OrderID)
+	err = json.Unmarshal(data, &orderID)
 
-	err = c.orderService.UpdateOrderStatusShipped(order.OrderID)
+	err = c.orderService.UpdateOrderStatusShipped(userID, orderID.OrderID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error updating the order: %s", err)
@@ -79,8 +79,8 @@ func (c *orderController) UpdateOrderStatusShipped(w http.ResponseWriter, r *htt
 func (c *orderController) UpdateOrderStatusDelivered(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var order *entity.Order
-
+	var orderID entity.OrderIDRequest
+	userID := "50aa4686-bb62-4202-b2ce-471df794adea"
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -88,10 +88,9 @@ func (c *orderController) UpdateOrderStatusDelivered(w http.ResponseWriter, r *h
 		entity.RespondWithJSON(w, r, "", "error retrieving user")
 		return
 	}
-	err = json.Unmarshal(data, &order.OrderID)
+	err = json.Unmarshal(data, &orderID)
 
-	err = c.orderService.UpdateOrderStatusDelivered(order.OrderID)
-	if err != nil {
+	if err = c.orderService.UpdateOrderStatusDelivered(userID, orderID.OrderID); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error updating the order: %s", err)
 		entity.RespondWithJSON(w, r, "", "error updating the order")

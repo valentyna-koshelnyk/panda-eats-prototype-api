@@ -12,7 +12,6 @@ import (
 
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
 
 // Controller datatype for controller layer
@@ -46,18 +45,18 @@ func (c *restaurantController) GetAll(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("Error getting restaurants: %s", err.Error())
-		utils.RespondWithJSON(w, r, "", "error getting restaurants")
+		entity.RespondWithJSON(w, r, "", "error getting restaurants")
 		return
 	}
 
 	if len(restaurants) == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		log.Errorf("Restaurant not found")
-		utils.RespondWithJSON(w, r, "", "restaurant not found")
+		entity.RespondWithJSON(w, r, "", "restaurant not found")
 		return
 	}
 
-	response := utils.CustomResponse{Data: restaurants}
+	response := entity.CustomResponse{Data: restaurants}
 
 	w.WriteHeader(http.StatusOK)
 	render.JSON(w, r, response)
@@ -77,14 +76,14 @@ func (c *restaurantController) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("Error reading request body: %s", err.Error())
-		utils.RespondWithJSON(w, r, "", "error reading request body")
+		entity.RespondWithJSON(w, r, "", "error reading request body")
 		return
 	}
 	err = json.Unmarshal(data, &restaurant)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Error("Error decoding restaurant", err.Error())
-		utils.RespondWithJSON(w, r, "", "error decoding restaurant")
+		entity.RespondWithJSON(w, r, "", "error decoding restaurant")
 		return
 	}
 
@@ -92,11 +91,11 @@ func (c *restaurantController) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		log.Error("Error creating restaurant", err.Error())
-		utils.RespondWithJSON(w, r, "", "error creating restaurant")
+		entity.RespondWithJSON(w, r, "", "error creating restaurant")
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
-	utils.RespondWithJSON(w, r, "restaurant created", "")
+	entity.RespondWithJSON(w, r, "restaurant created", "")
 	return
 }
 
@@ -114,7 +113,7 @@ func (c *restaurantController) Update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusConflict)
 		log.Error("Error decoding restaurant", err.Error())
-		utils.RespondWithJSON(w, r, "", "error decoding restaurant")
+		entity.RespondWithJSON(w, r, "", "error decoding restaurant")
 		return
 	}
 
@@ -122,11 +121,11 @@ func (c *restaurantController) Update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("Error updating restaurant: %s", err.Error())
-		utils.RespondWithJSON(w, r, "", "error updating restaurant")
+		entity.RespondWithJSON(w, r, "", "error updating restaurant")
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
-	utils.RespondWithJSON(w, r, "successfully updated restaurant", "")
+	entity.RespondWithJSON(w, r, "successfully updated restaurant", "")
 	return
 }
 
@@ -144,11 +143,11 @@ func (c *restaurantController) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("Error deleting restaurant: %s", err.Error())
-		utils.RespondWithJSON(w, r, "", "error deleting restaurant")
+		entity.RespondWithJSON(w, r, "", "error deleting restaurant")
 		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)
-	utils.RespondWithJSON(w, r, "Restaurant deleted successfully", "restaurant deleted")
+	entity.RespondWithJSON(w, r, "Restaurant deleted successfully", "restaurant deleted")
 	return
 }

@@ -24,7 +24,7 @@ func (status OrderStatus) EnumIndex() int {
 
 // Order struct is takes items from user's cart and transforms to order
 type Order struct {
-	OrderID         string      `dynamo:"order_id"`
+	OrderID         string      `json:"order_id" dynamo:"order_id"`
 	UserID          string      `dynamo:"user_id"`
 	Items           []Cart      `dynamo:"cart"`
 	TotalOrderPrice float64     `dynamo:"total_price"`
