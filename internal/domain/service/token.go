@@ -14,9 +14,9 @@ import (
 
 // TokenService is an interface for the token service
 type TokenService interface {
-	GenerateToken(userID string) (string, error)
+	GenerateToken(email string) (string, error)
 	VerifyToken(tokenString string) error
-	ExtractIDFromToken(requestToken string, secret string) (string, error)
+	ExtractEmailFromToken(requestToken string, secret string) (string, error)
 }
 
 type tokenService struct{}
@@ -28,12 +28,12 @@ func NewTokenService() TokenService {
 
 var secretKey = []byte(viper.GetString("secret.key"))
 
-// GenerateToken generates JWT token from email, role, user ID and returns it as string
-func (t *tokenService) GenerateToken(userID string) (string, error) {
+// GenerateToken generates JWT token from user ID and returns it as string
+func (t *tokenService) GenerateToken(email string) (string, error) {
 	claims := &auth.Claims{
-		UserID: userID,
+		Email: email,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   userID,
+			Subject:   email,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 1)),
 		},
 	}
@@ -65,10 +65,10 @@ func (t *tokenService) VerifyToken(tokenString string) error {
 	return errors.New("invalid token")
 }
 
-func (t *tokenService) ExtractIDFromToken(requestToken string, secret string) (string, error) {
+func (t *tokenService) ExtractEmailFromToken(requestToken string, secret string) (string, error) {
 	token, err := jwt.Parse(requestToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("Unexpected signing method")
+			return nil, errors.New("unexpected signing method")
 		}
 		return []byte(secret), nil
 	})
@@ -80,8 +80,8 @@ func (t *tokenService) ExtractIDFromToken(requestToken string, secret string) (s
 	claims, ok := token.Claims.(jwt.MapClaims)
 
 	if !ok && !token.Valid {
-		return "", fmt.Errorf("Invalid Token")
+		return "", fmt.Errorf("invalid Token")
 	}
 
-	return claims["user_id"].(string), nil
+	return claims["email"].(string), nil
 }

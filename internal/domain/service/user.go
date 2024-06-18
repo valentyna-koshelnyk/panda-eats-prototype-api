@@ -2,8 +2,6 @@ package service
 
 import (
 	"errors"
-	"github.com/aidarkhanov/nanoid"
-
 	log "github.com/sirupsen/logrus"
 
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
@@ -45,7 +43,6 @@ func NewUserService(repository repository.UserRepository, auth AuthService, toke
 func (s *userService) CreateUser(u entity.User) (*entity.User, error) {
 	hashedPassword, err := s.auth.Hash(u.Password)
 	u.Password = hashedPassword
-	u.ID = nanoid.New()
 
 	// For now keeping user as a role and keeping all registered users as "user" by default.
 	// TODO: to add admin as a role and all methods related to admin role make accessible just for admins
@@ -71,6 +68,7 @@ func (s *userService) CreateUser(u entity.User) (*entity.User, error) {
 
 // GetUserByid retrieves user based on his id
 func (s *userService) GetUserById(id string) (*entity.User, error) {
+
 	user, err := s.repository.GetUserByID(id)
 	if err != nil {
 		return nil, err
@@ -100,7 +98,7 @@ func (s *userService) GenerateTokenResponse(email, password string) (string, err
 		return "", errors.New("invalid password")
 	}
 
-	token, err = s.token.GenerateToken(existingUser.ID)
+	token, err = s.token.GenerateToken(existingUser.Email)
 	if err != nil {
 		return "", errors.New("invalid user")
 	}

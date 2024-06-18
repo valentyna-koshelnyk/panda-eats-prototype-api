@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/guregu/dynamo"
@@ -21,9 +20,8 @@ import (
 )
 
 var (
-	db       *gorm.DB
-	once     sync.Once
-	dynamoDB *dynamodb.Client
+	db   *gorm.DB
+	once sync.Once
 )
 
 type Resolver struct {
@@ -79,12 +77,11 @@ func initDB() *gorm.DB {
 	return db
 }
 
-func InitDynamoSession() dynamo.Table {
+func InitDynamoSession(tableName string) dynamo.Table {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		Config: aws.Config{Endpoint: aws.String("http://localhost:4566")},
 	}))
 	db := dynamo.New(sess, &aws.Config{Region: aws.String("eu-central-1")})
-
-	table := db.Table("cart")
+	table := db.Table(tableName)
 	return table
 }
