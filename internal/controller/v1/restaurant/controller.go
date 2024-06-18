@@ -16,19 +16,26 @@ import (
 )
 
 // Controller datatype for controller layer
-type Controller struct {
+type restaurantController struct {
 	s service.RestaurantService
 }
 
+type RestaurantController interface {
+	GetAll(w http.ResponseWriter, r *http.Request)
+	Create(w http.ResponseWriter, r *http.Request)
+	Update(w http.ResponseWriter, r *http.Request)
+	Delete(w http.ResponseWriter, r *http.Request)
+}
+
 // NewRestaurantController constructor for controller layer
-func NewRestaurantController(service service.RestaurantService) Controller {
-	return Controller{s: service}
+func NewRestaurantController(service service.RestaurantService) RestaurantController {
+	return &restaurantController{s: service}
 }
 
 // @Summary Get all restaurants
 // @Description Retrieves the list of all restaurants from the database
 // @Produce  json
-func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
+func (c *restaurantController) GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	category := r.URL.Query().Get("category")
@@ -62,7 +69,7 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Param restaurant body restaurant.Restaurant true "Restaurant"
-func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
+func (c *restaurantController) Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var restaurant entity.Restaurant
@@ -98,7 +105,7 @@ func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Param restaurant body restaurant.Restaurant true "Restaurant"
-func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
+func (c *restaurantController) Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var restaurant entity.Restaurant
@@ -127,7 +134,7 @@ func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
 // @Description Deletes the restaurant
 // @Accept  json
 // @Produce  json
-func (c *Controller) Delete(w http.ResponseWriter, r *http.Request) {
+func (c *restaurantController) Delete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	idStr := chi.URLParam(r, "restaurant_id")

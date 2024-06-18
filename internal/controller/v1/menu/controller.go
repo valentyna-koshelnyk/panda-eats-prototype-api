@@ -14,14 +14,18 @@ import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
 
+type MenuController interface {
+	GetMenuByRestaurant(w http.ResponseWriter, r *http.Request)
+}
+
 // Controller type for menu controller layer
-type Controller struct {
+type menuController struct {
 	s service.MenuService
 }
 
 // NewController constructor for controller layer
-func NewController(s service.MenuService) *Controller {
-	return &Controller{
+func NewController(s service.MenuService) MenuController {
+	return &menuController{
 		s: s,
 	}
 }
@@ -34,7 +38,7 @@ func NewController(s service.MenuService) *Controller {
 // @Param id path int true "restaurant_id"
 // @Success 200 {array} Menu
 // @Router /restaurants/{restaurant_id}/items [get]
-func (c *Controller) GetMenuByRestaurant(w http.ResponseWriter, r *http.Request) {
+func (c *menuController) GetMenuByRestaurant(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	idStr := chi.URLParam(r, "restaurant_id")
 

@@ -14,7 +14,7 @@ import (
 )
 
 // Controller is struct for cart controller, which takes cart service as an attribute
-type Controller struct {
+type cartController struct {
 	cartService  service.CartService
 	tokenService service.TokenService
 }
@@ -28,17 +28,18 @@ type CartController interface {
 }
 
 // NewCartController is a contrsuctor for cart
-func NewCartController(cartService service.CartService, tokenService service.TokenService) Controller {
-	return Controller{
+func NewCartController(cartService service.CartService, tokenService service.TokenService) CartController {
+	return &cartController{
 		cartService:  cartService,
 		tokenService: tokenService,
 	}
 }
 
 // AddItem is a handler for adding item to user's cart
-func (c *Controller) AddItem(w http.ResponseWriter, r *http.Request) {
-	token := jwtauth.TokenFromHeader(r)
-	userID, err := c.tokenService.ExtractIDFromToken(token, viper.GetString("secret.key"))
+func (c *cartController) AddItem(w http.ResponseWriter, r *http.Request) {
+	//token := jwtauth.TokenFromHeader(r)
+	//userEmail, err := c.tokenService.ExtractEmailFromToken(token, viper.GetString("secret.key"))
+	userEmail := "user@deliveryhero.com"
 	w.Header().Set("Content-Type", "application/json")
 	itemID := chi.URLParam(r, "item_id")
 
@@ -51,7 +52,7 @@ func (c *Controller) AddItem(w http.ResponseWriter, r *http.Request) {
 	}
 	err = json.Unmarshal(data, &request)
 
-	err = c.cartService.AddItem(userID, itemID, request.Quantity)
+	err = c.cartService.AddItem(userEmail, itemID, request.Quantity)
 	if err != nil {
 		utils.RespondWithJSON(w, r, "", err.Error())
 		http.Error(w, "", http.StatusNotFound)
@@ -63,9 +64,9 @@ func (c *Controller) AddItem(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetCartItems a handler for retrieval list of dishes from user's cart
-func (c *Controller) GetCartItems(w http.ResponseWriter, r *http.Request) {
+func (c *cartController) GetCartItems(w http.ResponseWriter, r *http.Request) {
 	token := jwtauth.TokenFromHeader(r)
-	userID, err := c.tokenService.ExtractIDFromToken(token, viper.GetString("secret.key"))
+	userID, err := c.tokenService.ExtractEmailFromToken(token, viper.GetString("secret.key"))
 	w.Header().Set("Content-Type", "application/json")
 	items, err := c.cartService.GetItemsList(userID)
 	if err != nil {
@@ -88,10 +89,10 @@ func (c *Controller) GetCartItems(w http.ResponseWriter, r *http.Request) {
 }
 
 // RemoveItem is a handler for removing entire item from user's cart
-func (c *Controller) RemoveItem(w http.ResponseWriter, r *http.Request) {
+func (c *cartController) RemoveItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	token := jwtauth.TokenFromHeader(r)
-	userID, err := c.tokenService.ExtractIDFromToken(token, viper.GetString("secret.key"))
+	userID, err := c.tokenService.ExtractEmailFromToken(token, viper.GetString("secret.key"))
 	itemID := chi.URLParam(r, "item_id")
 
 	err = c.cartService.RemoveItem(userID, itemID)
@@ -107,9 +108,9 @@ func (c *Controller) RemoveItem(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateItem is a handler for updating item quantity
-func (c *Controller) UpdateItem(w http.ResponseWriter, r *http.Request) {
+func (c *cartController) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	token := jwtauth.TokenFromHeader(r)
-	userID, err := c.tokenService.ExtractIDFromToken(token, viper.GetString("secret.key"))
+	userID, err := c.tokenService.ExtractEmailFromToken(token, viper.GetString("secret.key"))
 	w.Header().Set("Content-Type", "application/json")
 	itemID := chi.URLParam(r, "item_id")
 

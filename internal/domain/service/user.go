@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"github.com/aidarkhanov/nanoid"
 
 	log "github.com/sirupsen/logrus"
 
@@ -13,7 +14,7 @@ import (
 
 // UserService defines an API for user service to be used by presentation layer
 type UserService interface {
-	CreateUser(user entity.User) (entity.User, error)
+	CreateUser(user entity.User) (*entity.User, error)
 	VerifyUser(user entity.User) (bool, error)
 	GenerateTokenResponse(email, password string) (string, error)
 	GetUserById(id string) (*entity.User, error)
@@ -41,9 +42,10 @@ func NewUserService(repository repository.UserRepository, auth AuthService, toke
 }
 
 // CreateUser presentation layer for adding user to repository
-func (s *userService) CreateUser(u entity.User) (entity.User, error) {
+func (s *userService) CreateUser(u entity.User) (*entity.User, error) {
 	hashedPassword, err := s.auth.Hash(u.Password)
 	u.Password = hashedPassword
+	u.ID = nanoid.New()
 
 	// For now keeping user as a role and keeping all registered users as "user" by default.
 	// TODO: to add admin as a role and all methods related to admin role make accessible just for admins
@@ -52,19 +54,19 @@ func (s *userService) CreateUser(u entity.User) (entity.User, error) {
 	existingUser, err := s.GetUserByEmail(u.Email)
 	if existingUser != nil {
 		log.Error("User already exists")
-		return u, errors.New("user already exists")
+		return &u, errors.New("user already exists")
 	}
 
 	err = u.Validate()
 	if err != nil {
-		return entity.User{}, errors.New("invalid user")
+		return &entity.User{}, errors.New("invalid user")
 	}
 
 	err = s.repository.CreateUser(&u)
 	if err != nil {
-		return entity.User{}, err
+		return &entity.User{}, err
 	}
-	return u, nil
+	return &u, nil
 }
 
 // GetUserByid retrieves user based on his id

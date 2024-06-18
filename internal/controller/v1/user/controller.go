@@ -13,17 +13,22 @@ import (
 )
 
 // Controller handles user-related requests
-type Controller struct {
+type userController struct {
 	userService service.UserService
 }
 
+type UserController interface {
+	RegistrationUser(w http.ResponseWriter, r *http.Request)
+	LoginUser(w http.ResponseWriter, r *http.Request)
+}
+
 // NewUserController creates a new UserController
-func NewUserController(userService service.UserService) Controller {
-	return Controller{userService: userService}
+func NewUserController(userService service.UserService) UserController {
+	return &userController{userService: userService}
 }
 
 // RegistrationUser handles user registration by validating and creating a new user
-func (c *Controller) RegistrationUser(w http.ResponseWriter, r *http.Request) {
+func (c *userController) RegistrationUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var user *entity.User
@@ -57,7 +62,7 @@ func (c *Controller) RegistrationUser(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (c *Controller) LoginUser(w http.ResponseWriter, r *http.Request) {
+func (c *userController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var user *entity.User
 
