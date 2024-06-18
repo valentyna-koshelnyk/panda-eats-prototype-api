@@ -4,7 +4,7 @@ import (
 	"net/mail"
 	"time"
 
-	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
+	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom_errors"
 )
 
 // User represents a user entity/

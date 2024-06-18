@@ -22,6 +22,7 @@ type OrderService interface {
 	UpdateOrderStatusDelivered(userID, orderID string) error
 }
 
+// NewOrderService is a struct for order service
 func NewOrderService(orderRepository repository.OrderRepository, cartService CartService, userService UserService) OrderService {
 	return &orderService{
 		orderRepository: orderRepository,

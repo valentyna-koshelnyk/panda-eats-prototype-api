@@ -19,13 +19,14 @@ type orderRepository struct {
 	table *dynamo.Table
 }
 
+// NewOrderRepository is a constructor for order
 func NewOrderRepository(table *dynamo.Table) OrderRepository {
 	return &orderRepository{table: table}
 }
 
 // CreateOrder persists order in the order table
-func (orderRepository *orderRepository) CreateOrder(order entity.Order) error {
-	err := orderRepository.table.Put(entity.Order{
+func (r *orderRepository) CreateOrder(order entity.Order) error {
+	err := r.table.Put(entity.Order{
 		OrderID:         order.OrderID,
 		UserID:          order.UserID,
 		Items:           order.Items,
@@ -40,8 +41,8 @@ func (orderRepository *orderRepository) CreateOrder(order entity.Order) error {
 }
 
 // UpdateOrderStatus updates order status
-func (orderRepository *orderRepository) UpdateOrderStatus(order *entity.Order) error {
-	err := orderRepository.table.
+func (r *orderRepository) UpdateOrderStatus(order *entity.Order) error {
+	err := r.table.
 		Update("user_id", order.UserID).
 		Range("order_id", order.OrderID).
 		Set("status", order.Status).Run()
@@ -68,10 +69,10 @@ func (r *orderRepository) GetOrderInformation(userID, orderID string) (*entity.O
 }
 
 // GetOrderHistory retrieves orders from the table based on userID
-func (orderRepository *orderRepository) GetOrderHistory(userID string) ([]entity.Order, error) {
+func (r *orderRepository) GetOrderHistory(userID string) ([]entity.Order, error) {
 	var orders []entity.Order
 
-	err := orderRepository.table.Get("user_id", userID).All(&orders)
+	err := r.table.Get("user_id", userID).All(&orders)
 	if err != nil {
 		log.Printf("Failed to retrieve order history for user %s: %v", userID, err)
 		return nil, err

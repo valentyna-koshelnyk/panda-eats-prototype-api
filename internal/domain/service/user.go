@@ -15,7 +15,7 @@ type UserService interface {
 	CreateUser(user entity.User) (*entity.User, error)
 	VerifyUser(user entity.User) (bool, error)
 	GenerateTokenResponse(email, password string) (string, error)
-	GetUserById(id string) (*entity.User, error)
+	GetUserByID(id string) (*entity.User, error)
 	GetUserByEmail(email string) (*entity.User, error)
 }
 
@@ -66,8 +66,8 @@ func (s *userService) CreateUser(u entity.User) (*entity.User, error) {
 	return &u, nil
 }
 
-// GetUserByid retrieves user based on his id
-func (s *userService) GetUserById(id string) (*entity.User, error) {
+// GetUserByID retrieves user based on his id
+func (s *userService) GetUserByID(id string) (*entity.User, error) {
 
 	user, err := s.repository.GetUserByID(id)
 	if err != nil {

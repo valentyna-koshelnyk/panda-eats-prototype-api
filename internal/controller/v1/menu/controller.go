@@ -2,6 +2,7 @@ package menu
 
 import (
 	"errors"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"net/http"
 	"strconv"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
 
-	custom_errors "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
+	custom_errors "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom_errors"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
@@ -45,7 +46,7 @@ func (c *menuController) GetMenuByRestaurant(w http.ResponseWriter, r *http.Requ
 	var err error
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.RespondWithJSON(w, r, "", "no restaurant found")
+		entity.RespondWithJSON(w, r, "", "no restaurant found")
 		http.Error(w, "Invalid restaurant ID", http.StatusBadRequest)
 		return
 	}
@@ -65,18 +66,18 @@ func (c *menuController) GetMenuByRestaurant(w http.ResponseWriter, r *http.Requ
 	if err != nil && !errors.Is(err, custom_errors.ErrNotFound) {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Errorf("Error getting menu: %s", err)
-		utils.RespondWithJSON(w, r, "", "error getting menu")
+		entity.RespondWithJSON(w, r, "", "error getting menu")
 		return
 	}
 
 	if errors.Is(err, custom_errors.ErrNotFound) {
 		w.WriteHeader(http.StatusNotFound)
 		log.Errorf("No items available")
-		utils.RespondWithJSON(w, r, "", "no items available")
+		entity.RespondWithJSON(w, r, "", "no items available")
 		return
 	}
 
-	response := utils.NewPaginatedResponse(pagedMenu)
+	response := entity.NewPaginatedResponse(pagedMenu)
 
 	w.WriteHeader(http.StatusOK)
 	render.JSON(w, r, response)

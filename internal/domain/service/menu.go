@@ -1,7 +1,7 @@
 package service
 
 import (
-	custom_errors "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
+	custom_errors "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom_errors"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
@@ -12,7 +12,7 @@ import (
 // MenuService interface layer for menu service
 type MenuService interface {
 	GetRestaurantMenu(id int, limit, offset int) (*utils.Pagination, error)
-	GetItem(itemId string) (*entity.Menu, error)
+	GetItem(itemID string) (*entity.Menu, error)
 }
 
 // menuService  layer for menu
@@ -45,8 +45,8 @@ func (s *menuService) GetRestaurantMenu(id int, limit, offset int) (*utils.Pagin
 }
 
 // GetItem retrieves menu dish by dish(item) id
-func (s *menuService) GetItem(itemId string) (*entity.Menu, error) {
-	item, err := s.repository.GetItem(itemId)
+func (s *menuService) GetItem(itemID string) (*entity.Menu, error) {
+	item, err := s.repository.GetItem(itemID)
 	if err != nil {
 		return nil, err
 	}
