@@ -1,4 +1,4 @@
-package utils
+package entity
 
 // QuantityItemRequest struct for deserialization json body of quantity
 type QuantityItemRequest struct {

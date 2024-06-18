@@ -1,6 +1,7 @@
-package utils
+package entity
 
 import (
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 	"net/http"
 
 	"github.com/go-chi/render"
@@ -29,7 +30,7 @@ const (
 	DefaultStartIndex = 1
 )
 
-func NewPaginatedResponse(pagination *Pagination) *PaginatedResponse {
+func NewPaginatedResponse(pagination *utils.Pagination) *PaginatedResponse {
 	return &PaginatedResponse{
 		APIVersion: DefaultAPIVersion,
 		Data: PaginatedData{
