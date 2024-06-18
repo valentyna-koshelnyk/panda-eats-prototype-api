@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/emicklei/pgtalk/convert"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
@@ -36,8 +37,8 @@ func (r *userRepository) CreateUser(u *entity.User) error {
 // GetUserByID retrieves user based on his id
 func (r *userRepository) GetUserByID(ID string) (entity.User, error) {
 	var u entity.User
-	result := r.db.Where("ID = ?", ID).First(&u)
-
+	userID := convert.StringToUUID(ID)
+	result := r.db.Where("user_id = ?", userID).First(&u)
 	if result.Error != nil {
 		log.Error("user not found: ", result.Error)
 		return entity.User{}, result.Error

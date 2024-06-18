@@ -13,6 +13,7 @@ func init() {
 	tokenAuth = jwtauth.New("HS256", []byte(viper.GetString("secret.key")), nil)
 }
 
+// Routes for order controller
 func Routes(c OrderController) chi.Router {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

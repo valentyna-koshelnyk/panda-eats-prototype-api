@@ -10,6 +10,7 @@ import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/user"
 )
 
+// HTTPController is an object which handles all controllers as attributes for their initialisation at one entry point
 type HTTPController struct {
 	Menu       menu.MenuController
 	Restaurant restaurant.RestaurantController

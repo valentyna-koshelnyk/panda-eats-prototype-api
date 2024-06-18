@@ -11,11 +11,12 @@ import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 )
 
-// Controller handles user-related requests
+// userController handles user-related requests
 type userController struct {
 	userService service.UserService
 }
 
+// UserController interface for user registration and login
 type UserController interface {
 	RegistrationUser(w http.ResponseWriter, r *http.Request)
 	LoginUser(w http.ResponseWriter, r *http.Request)
@@ -61,6 +62,7 @@ func (c *userController) RegistrationUser(w http.ResponseWriter, r *http.Request
 	return
 }
 
+// LoginUser is a handler for user's signing in process
 func (c *userController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var user *entity.User

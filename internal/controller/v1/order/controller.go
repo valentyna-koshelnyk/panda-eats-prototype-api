@@ -10,12 +10,13 @@ import (
 	"net/http"
 )
 
-// Controller type for order controller layer
+// orderController type for order controller layer
 type orderController struct {
 	orderService service.OrderService
 	tokenService service.TokenService
 }
 
+// OrderController interface for orders
 type OrderController interface {
 	CreateOrder(w http.ResponseWriter, r *http.Request)
 	UpdateOrderStatusShipped(w http.ResponseWriter, r *http.Request)
@@ -31,6 +32,7 @@ func NewController(orderService service.OrderService, tokenService service.Token
 	}
 }
 
+// CreateOrder is a handler for placing the order
 func (c *orderController) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	//token := jwtauth.TokenFromHeader(r)
 	//userID, err := c.tokenService.ExtractEmailFromToken(token, viper.GetString("secret.key"))
@@ -49,6 +51,7 @@ func (c *orderController) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// UpdateOrderStatusShipped updates status of the order to be set as shipped
 func (c *orderController) UpdateOrderStatusShipped(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -76,6 +79,7 @@ func (c *orderController) UpdateOrderStatusShipped(w http.ResponseWriter, r *htt
 	return
 }
 
+// UpdateOrderStatusDelivered updates status of the order to be set as delivered
 func (c *orderController) UpdateOrderStatusDelivered(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -102,6 +106,7 @@ func (c *orderController) UpdateOrderStatusDelivered(w http.ResponseWriter, r *h
 	return
 }
 
+// GetOrdersHistory retrieves orders history  of the particular user
 func (c *orderController) GetOrdersHistory(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	userID := "50aa4686-bb62-4202-b2ce-471df794adea"
