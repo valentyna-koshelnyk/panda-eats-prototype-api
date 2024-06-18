@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+//go:generate mockery --name=OrderService
 type orderService struct {
 	orderRepository repository.OrderRepository
 	cartService     CartService

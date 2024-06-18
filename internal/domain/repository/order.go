@@ -6,6 +6,7 @@ import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 )
 
+//go:generate mockery --name=OrderRepository
 // OrderRepository crud operations for interacting with order table
 type OrderRepository interface {
 	CreateOrder(order entity.Order) error
