@@ -19,10 +19,10 @@ func Routes(c OrderController) chi.Router {
 	r.Use(middleware.Logger)
 	r.Group(func(r chi.Router) {
 		r.Use(jwtauth.Verifier(tokenAuth))
-		r.Use(jwtauth.Authenticator(tokenAuth))
+		//r.Use(jwtauth.Authenticator(tokenAuth))
 		r.Post("/", c.CreateOrder)
-		r.Patch("/shipped", c.UpdateOrderStatusShipped)
-		r.Patch("/deliver", c.UpdateOrderStatusDelivered)
+		r.Patch("/shipping", c.UpdateOrderStatusShipped)
+		r.Patch("/delivery", c.UpdateOrderStatusDelivered)
 		r.Get("/orders", c.GetOrdersHistory)
 	})
 	return r
