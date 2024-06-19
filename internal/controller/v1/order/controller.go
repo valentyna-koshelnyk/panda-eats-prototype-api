@@ -46,7 +46,7 @@ func (c *orderController) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		entity.RespondWithJSON(w, r, "", "error creating order")
 		return
 	}
-
+	w.WriteHeader(http.StatusCreated)
 	entity.RespondWithJSON(w, r, "Order created", "")
 	return
 }
@@ -120,8 +120,10 @@ func (c *orderController) GetOrdersHistory(w http.ResponseWriter, r *http.Reques
 	}
 
 	if len(orders) == 0 {
-		w.WriteHeader(http.StatusNotFound)
-		log.Errorf("o")
+		w.WriteHeader(http.StatusNoContent)
+		log.Errorf("not found")
+		entity.RespondWithJSON(w, r, "", "order history is empty")
+		return
 	}
 
 	response := entity.CustomResponse{Data: orders}
