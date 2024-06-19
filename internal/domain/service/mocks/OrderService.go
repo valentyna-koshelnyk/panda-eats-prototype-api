@@ -12,6 +12,24 @@ type OrderService struct {
 	mock.Mock
 }
 
+// CalculateTotalOrderPrice provides a mock function with given fields: carts
+func (_m *OrderService) CalculateTotalOrderPrice(carts []entity.Cart) float64 {
+	ret := _m.Called(carts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CalculateTotalOrderPrice")
+	}
+
+	var r0 float64
+	if rf, ok := ret.Get(0).(func([]entity.Cart) float64); ok {
+		r0 = rf(carts)
+	} else {
+		r0 = ret.Get(0).(float64)
+	}
+
+	return r0
+}
+
 // CreateOrder provides a mock function with given fields: userID
 func (_m *OrderService) CreateOrder(userID string) error {
 	ret := _m.Called(userID)
@@ -91,24 +109,6 @@ func (_m *OrderService) UpdateOrderStatusShipped(userID string, orderID string) 
 		r0 = rf(userID, orderID)
 	} else {
 		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// calculateTotalOrderPrice provides a mock function with given fields: carts
-func (_m *OrderService) calculateTotalOrderPrice(carts []entity.Cart) float64 {
-	ret := _m.Called(carts)
-
-	if len(ret) == 0 {
-		panic("no return value specified for calculateTotalOrderPrice")
-	}
-
-	var r0 float64
-	if rf, ok := ret.Get(0).(func([]entity.Cart) float64); ok {
-		r0 = rf(carts)
-	} else {
-		r0 = ret.Get(0).(float64)
 	}
 
 	return r0
