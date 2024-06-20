@@ -25,7 +25,7 @@ type CartController interface {
 	UpdateItem(w http.ResponseWriter, r *http.Request)
 }
 
-// NewCartController is a contrsuctor for cart
+// NewCartController is a constructor for cart
 func NewCartController(cartService service.CartService, tokenService service.TokenService) CartController {
 	return &cartController{
 		cartService:  cartService,
@@ -124,6 +124,7 @@ func (c *cartController) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(data, &request)
 
 	if err = c.cartService.UpdateUserItem(userID, itemID, request.Quantity); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		entity.RespondWithJSON(w, r, "", err.Error())
 		return
 	}
