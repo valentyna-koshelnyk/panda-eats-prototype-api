@@ -20,7 +20,7 @@ func Routes(c CartController) chi.Router {
 	r.Use(middleware.Logger)
 	r.Group(func(r chi.Router) {
 		r.Use(jwtauth.Verifier(tokenAuth))
-		r.Use(jwtauth.Authenticator(tokenAuth))
+		//r.Use(jwtauth.Authenticator(tokenAuth))
 		r.Post("/item/{item_id}", c.AddItem)
 		r.Get("/", c.GetCartItems)
 		r.Delete("/item/{item_id}", c.RemoveItem)

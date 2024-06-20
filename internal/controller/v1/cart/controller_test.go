@@ -1,4 +1,4 @@
-package cart
+package order
 
 import (
 	"errors"
@@ -13,18 +13,22 @@ import (
 )
 
 const (
-	userID   = "50aa4686-bb62-4202-b2ce-471df794adea"
-	itemID   = "5"
-	quantity = 3
+	userID  = "50aa4686-bb62-4202-b2ce-471df794adea"
+	orderID = "jQ8pMyTsrfs7ZkvmDj6y8"
 )
 
-var (
-	cart = []entity.Cart{
-		{
+var orderIDRequest = `{
+		"order_id" : "jQ8pMyTsrfs7ZkvmDj6y8"
+}`
+
+var orders = []entity.Order{
+	{OrderID: orderID,
+		UserID: userID,
+		Items: []entity.Cart{{
 			UserID: userID,
-			ItemID: itemID,
+			ItemID: "12",
 			Item: entity.Menu{
-				ID:           itemID,
+				ID:           "12",
 				RestaurantID: 3,
 				Name:         "chicken",
 				Description:  "delicious chicken",
@@ -33,31 +37,26 @@ var (
 			PricePerUnit: 2.5,
 			TotalPrice:   7.5,
 		},
-	}
-	emptyCart []entity.Cart
-)
+		},
+		TotalOrderPrice: 124.50,
+		Status:          entity.InProcess,
+	},
+}
 
-func TestCartController_AddItem(t *testing.T) {
-	// Arrange
-	t.Run("on add item, return created", func(t *testing.T) {
+func TestOrderController_CreateOrder(t *testing.T) {
+	t.Run("on create, return created", func(t *testing.T) {
 		// Arrange
 		r := chi.NewRouter()
-		mockService := new(mocks.CartService)
-		controller := cartController{
-			cartService: mockService,
-		}
+		mockOrderService := new(mocks.OrderService)
 
-		r.Post("/api/v1/cart/item/{item_id}", controller.AddItem)
+		controller := orderController{
+			orderService: mockOrderService,
+		}
+		r.Post("/api/v1/cart/order", controller.CreateOrder)
 
 		// Act
-		mockService.On("AddItem", userID, itemID, int64(quantity)).Return(nil)
-		reqBody := `
-			{
-				"quantity": 3
-			}
-		`
-
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/cart/item/5", strings.NewReader(reqBody))
+		mockOrderService.On("CreateOrder", userID).Return(nil)
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/cart/order", nil)
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
@@ -66,167 +65,138 @@ func TestCartController_AddItem(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, rec.Code)
 	})
 
-	t.Run("on add item, return error", func(t *testing.T) {
+	t.Run("on create, return error", func(t *testing.T) {
 		// Arrange
 		r := chi.NewRouter()
-		mockService := new(mocks.CartService)
-		controller := cartController{
-			cartService: mockService,
-		}
+		mockOrderService := new(mocks.OrderService)
 
-		r.Post("/api/v1/cart/item/", controller.AddItem)
+		controller := orderController{
+			orderService: mockOrderService,
+		}
+		r.Post("/api/v1/cart/order", controller.CreateOrder)
 
 		// Act
-
-		mockService.On("AddItem", userID, itemID, int64(quantity)).Return(errors.New("not found"))
-		reqBody := `
-			{
-				"quantity": 3
-			}
-		`
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/cart/item/5", strings.NewReader(reqBody))
+		mockOrderService.On("CreateOrder", userID).Return(errors.New("user doesn't exist"))
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/cart/order", nil)
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
 
 		// Assert
-		assert.Equal(t, http.StatusNotFound, rec.Code) // TODO: Update the code to StatusNoContent
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
 	})
 }
 
-func TestController_GetCartItems(t *testing.T) {
-	t.Run("on get items, return OK", func(t *testing.T) {
+func TestOrderController_UpdateOrderStatusShipped(t *testing.T) {
+	t.Run("on update, return accepted", func(t *testing.T) {
 		// Arrange
 		r := chi.NewRouter()
-		mockService := new(mocks.CartService)
-		controller := cartController{
-			cartService: mockService,
+		mockOrderService := new(mocks.OrderService)
+		controller := orderController{
+			orderService: mockOrderService,
 		}
-		r.Get("/api/v1/cart/", controller.GetCartItems)
-
+		r.Patch("/api/v1/cart/order/shipped", controller.UpdateOrderStatusShipped)
 		// Act
-		mockService.On("GetItemsList", userID).Return(cart, nil)
-		req := httptest.NewRequest(http.MethodGet, "/api/v1/cart/", nil)
+		mockOrderService.On("UpdateOrderStatusShipped", userID, orderID).Return(nil)
+		req := httptest.NewRequest(http.MethodPatch, "/api/v1/cart/order/shipped", strings.NewReader(orderIDRequest))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		r.ServeHTTP(rec, req)
+		// Assert
+		assert.Equal(t, http.StatusAccepted, rec.Code)
+	})
+	t.Run("on update, return bad request", func(t *testing.T) {
+		// Arrange
+		r := chi.NewRouter()
+		mockOrderService := new(mocks.OrderService)
+		controller := orderController{
+			orderService: mockOrderService,
+		}
+		r.Patch("/api/v1/cart/order/shipped", controller.UpdateOrderStatusShipped)
+		// Act
+		mockOrderService.On("UpdateOrderStatusShipped", userID, orderID).Return(errors.New("order not found"))
+		req := httptest.NewRequest(http.MethodPatch, "/api/v1/cart/order/shipped", strings.NewReader(orderIDRequest))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		r.ServeHTTP(rec, req)
+		// Assert
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	})
+}
+
+func TestOrderController_UpdateOrderStatusDelivered(t *testing.T) {
+	t.Run("on update, return accepted", func(t *testing.T) {
+		// Arrange
+		r := chi.NewRouter()
+		mockOrderService := new(mocks.OrderService)
+		controller := orderController{
+			orderService: mockOrderService,
+		}
+		r.Patch("/api/v1/cart/order", controller.UpdateOrderStatusDelivered)
+		// Act
+		mockOrderService.On("UpdateOrderStatusDelivered", userID, orderID).Return(nil)
+		req := httptest.NewRequest(http.MethodPatch, "/api/v1/cart/order", strings.NewReader(orderIDRequest))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		r.ServeHTTP(rec, req)
+		// Assert
+		assert.Equal(t, http.StatusAccepted, rec.Code)
+	})
+	t.Run("on update, return bad request", func(t *testing.T) {
+		// Arrange
+		r := chi.NewRouter()
+		mockOrderService := new(mocks.OrderService)
+		controller := orderController{
+			orderService: mockOrderService,
+		}
+		r.Patch("/api/v1/cart/order/delivery", controller.UpdateOrderStatusDelivered)
+		// Act
+		mockOrderService.On("UpdateOrderStatusDelivered", userID, orderID).Return(errors.New("order not found"))
+		req := httptest.NewRequest(http.MethodPatch, "/api/v1/cart/order/delivery", strings.NewReader(orderIDRequest))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		r.ServeHTTP(rec, req)
+		// Assert
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	})
+}
+
+func TestOrderController_GetOrdersHistory(t *testing.T) {
+	t.Run("on get, return OK", func(t *testing.T) {
+		// Arrange
+		r := chi.NewRouter()
+		mockOrderService := new(mocks.OrderService)
+		controller := orderController{
+			orderService: mockOrderService,
+		}
+		r.Get("/api/v1/cart/order/orders", controller.GetOrdersHistory)
+		// Act
+		mockOrderService.On("GetOrderHistory", userID).Return(orders, nil)
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/cart/order/orders", strings.NewReader(orderIDRequest))
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
 
 		// Assert
 		assert.Equal(t, http.StatusOK, rec.Code)
-		// TODO: Check the length of the items list
 	})
 
-	t.Run("on get items, return no content", func(t *testing.T) {
+	t.Run("on get, return no content ", func(t *testing.T) {
 		// Arrange
 		r := chi.NewRouter()
-		mockService := new(mocks.CartService)
-		controller := cartController{
-			cartService: mockService,
+		mockOrderService := new(mocks.OrderService)
+		controller := orderController{
+			orderService: mockOrderService,
 		}
-		r.Get("/api/v1/cart/", controller.GetCartItems)
+		r.Get("/api/v1/cart/order/orders", controller.GetOrdersHistory)
 		// Act
-		mockService.On("GetItemsList", userID).Return(emptyCart, nil)
-		req := httptest.NewRequest(http.MethodGet, "/api/v1/cart/", nil)
+		mockOrderService.On("GetOrderHistory", userID).Return([]entity.Order{}, nil)
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/cart/order/orders", strings.NewReader(orderIDRequest))
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
 
-		//Assert
+		// Assert
 		assert.Equal(t, http.StatusNoContent, rec.Code)
 	})
-}
-
-func TestController_UpdateItem(t *testing.T) {
-	t.Run("on update item, return updated", func(t *testing.T) {
-		// Arrange
-		r := chi.NewRouter()
-		mockService := new(mocks.CartService)
-		controller := cartController{
-			cartService: mockService,
-		}
-
-		r.Patch("/api/v1/cart/item/{item_id}", controller.UpdateItem)
-
-		// Act
-		mockService.On("UpdateUserItem", userID, itemID, int64(quantity)).Return(nil)
-		reqBody := `
-			{
-				"quantity": 3
-			}
-		`
-		req := httptest.NewRequest(http.MethodPatch, "/api/v1/cart/item/5", strings.NewReader(reqBody))
-		req.Header.Set("Content-Type", "application/json")
-		rec := httptest.NewRecorder()
-		r.ServeHTTP(rec, req)
-
-		// Assert
-		assert.Equal(t, http.StatusCreated, rec.Code)
-	})
-
-	t.Run("on update item, return error", func(t *testing.T) {
-		// Arrange
-		r := chi.NewRouter()
-		mockService := new(mocks.CartService)
-		controller := cartController{
-			cartService: mockService,
-		}
-
-		r.Patch("/api/v1/cart/item/{item_id}", controller.UpdateItem)
-
-		// Act
-		mockService.On("UpdateUserItem", userID, itemID, int64(0)).Return(errors.New("not allowed"))
-		req := httptest.NewRequest(http.MethodPatch, "/api/v1/cart/item/5", nil)
-		// TODO: Modify to pass the body and check only what happens when the service returns an error
-		req.Header.Set("Content-Type", "application/json")
-		rec := httptest.NewRecorder()
-		r.ServeHTTP(rec, req)
-
-		// Assert
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-	})
-}
-
-func TestController_RemoveItem(t *testing.T) {
-	t.Run("on remove item, return OK", func(t *testing.T) {
-		// Arrange
-		r := chi.NewRouter()
-		mockService := new(mocks.CartService)
-		controller := cartController{
-			cartService: mockService,
-		}
-
-		r.Delete("/api/v1/cart/item/{item_id}", controller.RemoveItem)
-
-		// Act
-		mockService.On("RemoveItem", userID, itemID).Return(nil)
-		req := httptest.NewRequest(http.MethodDelete, "/api/v1/cart/item/5", nil)
-		req.Header.Set("Content-Type", "application/json")
-		rec := httptest.NewRecorder()
-		r.ServeHTTP(rec, req)
-
-		// Assert
-		assert.Equal(t, http.StatusOK, rec.Code)
-	})
-
-	t.Run("on remove item, return error", func(t *testing.T) {
-		// Arrange
-		r := chi.NewRouter()
-		mockService := new(mocks.CartService)
-		controller := cartController{
-			cartService: mockService,
-		}
-
-		r.Delete("/api/v1/cart/item/{item_id}", controller.RemoveItem)
-
-		// Act
-		mockService.On("RemoveItem", userID, itemID).Return(errors.New("error"))
-		req := httptest.NewRequest(http.MethodDelete, "/api/v1/cart/item/5", nil)
-		req.Header.Set("Content-Type", "application/json")
-		rec := httptest.NewRecorder()
-		r.ServeHTTP(rec, req)
-
-		// Assert
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-	})
-
 }

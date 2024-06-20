@@ -78,6 +78,7 @@ func initDB() *gorm.DB {
 }
 
 func InitDynamoSession(tableName string) dynamo.Table {
+
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		Config: aws.Config{Endpoint: aws.String("http://localhost:4566")},
 	}))
