@@ -1,7 +1,8 @@
 package service
 
 import (
-	custom_errors "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
+	custom_errors "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom_errors"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
@@ -10,7 +11,8 @@ import (
 
 // MenuService interface layer for menu service
 type MenuService interface {
-	GetMenu(id int, limit, offset int) (*utils.Pagination, error)
+	GetRestaurantMenu(id int, limit, offset int) (*utils.Pagination, error)
+	GetItem(itemID string) (*entity.Menu, error)
 }
 
 // menuService  layer for menu
@@ -23,8 +25,8 @@ func NewMenuService(r repository.MenuRepository) MenuService {
 	return &menuService{repository: r}
 }
 
-// GetMenu retrieves menu of the specific restaurant
-func (s *menuService) GetMenu(id int, limit, offset int) (*utils.Pagination, error) {
+// GetRestaurantMenu retrieves menu of the specific restaurant
+func (s *menuService) GetRestaurantMenu(id int, limit, offset int) (*utils.Pagination, error) {
 	pagination := utils.Pagination{
 		Limit: limit,
 		Page:  offset,
@@ -40,4 +42,13 @@ func (s *menuService) GetMenu(id int, limit, offset int) (*utils.Pagination, err
 	}
 
 	return pagedMenu, nil
+}
+
+// GetItem retrieves menu dish by dish(item) id
+func (s *menuService) GetItem(itemID string) (*entity.Menu, error) {
+	item, err := s.repository.GetItem(itemID)
+	if err != nil {
+		return nil, err
+	}
+	return &item, nil
 }

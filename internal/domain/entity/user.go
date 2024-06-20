@@ -4,22 +4,17 @@ import (
 	"net/mail"
 	"time"
 
-	"gorm.io/gorm"
-
-	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
+	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom_errors"
 )
 
 // User represents a user entity/
 type User struct {
-	gorm.Model
-	ID           int64     `json:"id"`
-	Email        string    `json:"email"`
-	Password     string    `json:"password"`
-	Role         string    `json:"role"`
-	Token        string    `json:"token"`
-	RefreshToken string    `json:"refresh_token"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	UserID    string    `json:"user_id" gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	Role      string    `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // Validate validates the user entity.

@@ -14,9 +14,9 @@ type MenuService struct {
 	mock.Mock
 }
 
-// GetItem provides a mock function with given fields: itemId
-func (_m *MenuService) GetItem(itemId string) (*entity.Menu, error) {
-	ret := _m.Called(itemId)
+// GetItem provides a mock function with given fields: itemID
+func (_m *MenuService) GetItem(itemID string) (*entity.Menu, error) {
+	ret := _m.Called(itemID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetItem")
@@ -25,10 +25,10 @@ func (_m *MenuService) GetItem(itemId string) (*entity.Menu, error) {
 	var r0 *entity.Menu
 	var r1 error
 	if rf, ok := ret.Get(0).(func(string) (*entity.Menu, error)); ok {
-		return rf(itemId)
+		return rf(itemID)
 	}
 	if rf, ok := ret.Get(0).(func(string) *entity.Menu); ok {
-		r0 = rf(itemId)
+		r0 = rf(itemID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*entity.Menu)
@@ -36,7 +36,7 @@ func (_m *MenuService) GetItem(itemId string) (*entity.Menu, error) {
 	}
 
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(itemId)
+		r1 = rf(itemID)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -9,7 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 
-	custom_errors "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
+	customErrors "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom_errors"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service/mocks"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
@@ -24,7 +24,7 @@ func TestGetMenuByRestaurant(t *testing.T) {
 		r := chi.NewRouter()
 
 		mockService := new(mocks.MenuService)
-		controller := Controller{
+		controller := menuController{
 			s: mockService,
 		}
 
@@ -38,13 +38,13 @@ func TestGetMenuByRestaurant(t *testing.T) {
 
 		r.Get("/api/v1/restaurants/{restaurant_id}/items", controller.GetMenuByRestaurant)
 
-		mockService.On("GetMenu", 1, 10, 0).Return(pagination, nil)
+		mockService.On("GetRestaurantMenu", 1, 10, 0).Return(pagination, nil)
 
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/restaurants/1/items", nil)
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
 
-		var result utils.PaginatedResponse
+		var result entity.PaginatedResponse
 		err := json.Unmarshal(rec.Body.Bytes(), &result)
 
 		assert.NoError(t, err)
@@ -55,10 +55,10 @@ func TestGetMenuByRestaurant(t *testing.T) {
 		r := chi.NewRouter()
 
 		mockService := new(mocks.MenuService)
-		controller := Controller{s: mockService}
+		controller := menuController{s: mockService}
 		r.Get("/api/v1/restaurants/{restaurant_id}/items", controller.GetMenuByRestaurant)
 
-		mockService.On("GetMenu", 2, 10, 0).Return(nil, custom_errors.ErrNotFound)
+		mockService.On("GetRestaurantMenu", 2, 10, 0).Return(nil, customErrors.ErrNotFound)
 
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/restaurants/2/items", nil)
 		rec := httptest.NewRecorder()

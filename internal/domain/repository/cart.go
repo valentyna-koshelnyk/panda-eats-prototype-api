@@ -7,6 +7,8 @@ import (
 )
 
 // CartRepository serves a repository for cart, layer for interaction with dynamoDB
+//
+//go:generate mockery --name=CartRepository
 type CartRepository interface {
 	AddItem(cart entity.Cart) error
 	GetCartItems(UserID string) ([]entity.Cart, error)

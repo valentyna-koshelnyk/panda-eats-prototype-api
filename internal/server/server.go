@@ -17,12 +17,12 @@ type Server struct {
 }
 
 // CreateNewServer should return a server struct
-func CreateNewServer(port string) *Server {
+func CreateNewServer(port string, controllers *v1.HTTPController) *Server {
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
-	router.Mount("/api/v1", v1.Routes())
+	router.Mount("/api/v1", v1.Routes(controllers))
 
 	server := &Server{
 		Router: router,

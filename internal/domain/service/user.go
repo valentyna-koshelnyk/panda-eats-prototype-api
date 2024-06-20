@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-
 	log "github.com/sirupsen/logrus"
 
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
@@ -13,10 +12,11 @@ import (
 
 // UserService defines an API for user service to be used by presentation layer
 type UserService interface {
-	CreateUser(user entity.User) (entity.User, error)
-	GetUser(email string) (*entity.User, error)
+	CreateUser(user entity.User) (*entity.User, error)
 	VerifyUser(user entity.User) (bool, error)
-	GenerateTokenResponse(u entity.User) (string, error)
+	GenerateTokenResponse(email, password string) (string, error)
+	GetUserByID(id string) (*entity.User, error)
+	GetUserByEmail(email string) (*entity.User, error)
 }
 
 var (
@@ -40,7 +40,7 @@ func NewUserService(repository repository.UserRepository, auth AuthService, toke
 }
 
 // CreateUser presentation layer for adding user to repository
-func (s *userService) CreateUser(u entity.User) (entity.User, error) {
+func (s *userService) CreateUser(u entity.User) (*entity.User, error) {
 	hashedPassword, err := s.auth.Hash(u.Password)
 	u.Password = hashedPassword
 
@@ -48,36 +48,38 @@ func (s *userService) CreateUser(u entity.User) (entity.User, error) {
 	// TODO: to add admin as a role and all methods related to admin role make accessible just for admins
 	u.Role = "user"
 
-	existingUser, err := s.GetUser(u.Email)
+	existingUser, err := s.GetUserByEmail(u.Email)
 	if existingUser != nil {
 		log.Error("User already exists")
-		return u, errors.New("user already exists")
+		return &u, errors.New("user already exists")
 	}
 
 	err = u.Validate()
 	if err != nil {
-		return entity.User{}, errors.New("invalid user")
+		return &entity.User{}, errors.New("invalid user")
 	}
 
 	err = s.repository.CreateUser(&u)
 	if err != nil {
-		return entity.User{}, err
+		return &entity.User{}, err
 	}
-	return u, nil
+	return &u, nil
 }
 
-// GetUser retrieves the user based on his id, username and/or email
-func (s *userService) GetUser(email string) (*entity.User, error) {
-	user, err := s.repository.GetUser(email)
+// GetUserByID retrieves user based on his id
+func (s *userService) GetUserByID(id string) (*entity.User, error) {
+
+	user, err := s.repository.GetUserByID(id)
 	if err != nil {
 		return nil, err
 	}
-	return user, nil
+
+	return &user, nil
 }
 
 // VerifyUser verifies if login and password are
 func (s *userService) VerifyUser(u entity.User) (bool, error) {
-	existingUser, err := s.GetUser(u.Email)
+	existingUser, err := s.GetUserByEmail(u.Email)
 	if err != nil {
 		return false, errors.New("invalid user")
 	}
@@ -87,17 +89,29 @@ func (s *userService) VerifyUser(u entity.User) (bool, error) {
 	return false, errors.New("invalid password")
 }
 
-func (s *userService) GenerateTokenResponse(u entity.User) (string, error) {
-	verified, err := s.VerifyUser(u)
-
-	if verified {
-		token, err = s.token.GenerateToken(u.ID, u.Email, u.Role)
-		if err != nil {
-			return "", errors.New("invalid user")
-		}
-
-		return token, nil
+func (s *userService) GenerateTokenResponse(email, password string) (string, error) {
+	existingUser, err := s.GetUserByEmail(email)
+	if err != nil {
+		return "", errors.New("invalid user")
+	}
+	if !s.auth.VerifyPassword(password, existingUser.Password) {
+		return "", errors.New("invalid password")
 	}
 
-	return "", errors.New("invalid user")
+	token, err = s.token.GenerateToken(existingUser.Email)
+	if err != nil {
+		return "", errors.New("invalid user")
+	}
+	return token, nil
+}
+
+// GetUserByEmail retrieves user based on his email
+func (s *userService) GetUserByEmail(email string) (*entity.User, error) {
+	user, err := s.repository.GetUserByEmail(email)
+	if err != nil {
+		return nil, err
+	} else {
+		return &user, nil
+	}
+
 }

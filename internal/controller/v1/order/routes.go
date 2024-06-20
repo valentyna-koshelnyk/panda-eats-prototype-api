@@ -1,4 +1,4 @@
-package cart
+package order
 
 import (
 	"github.com/go-chi/chi/v5"
@@ -13,19 +13,17 @@ func init() {
 	tokenAuth = jwtauth.New("HS256", []byte(viper.GetString("secret.key")), nil)
 }
 
-// Routes for cart
-func Routes(c CartController) chi.Router {
+// Routes for order controller
+func Routes(c OrderController) chi.Router {
 	r := chi.NewRouter()
-
 	r.Use(middleware.Logger)
 	r.Group(func(r chi.Router) {
 		r.Use(jwtauth.Verifier(tokenAuth))
 		//r.Use(jwtauth.Authenticator(tokenAuth))
-		r.Post("/item/{item_id}", c.AddItem)
-		r.Get("/", c.GetCartItems)
-		r.Delete("/item/{item_id}", c.RemoveItem)
-		r.Patch("/item/{item_id}", c.UpdateItem)
+		r.Post("/", c.CreateOrder)
+		r.Patch("/shipping", c.UpdateOrderStatusShipped)
+		r.Patch("/delivery", c.UpdateOrderStatusDelivered)
+		r.Get("/orders", c.GetOrdersHistory)
 	})
-
 	return r
 }
