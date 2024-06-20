@@ -2,12 +2,11 @@ package main
 
 import (
 	"encoding/csv"
-	"os"
-	"strconv"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/gorm/clause"
+	"os"
+	"strconv"
 
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/config"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"

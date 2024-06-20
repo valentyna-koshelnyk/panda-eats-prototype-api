@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -17,7 +18,7 @@ type Server struct {
 }
 
 // CreateNewServer should return a server struct
-func CreateNewServer(port string, controllers *v1.HTTPController) *Server {
+func CreateNewServer(port string, controllers *controller.HTTPController) *Server {
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Logger)

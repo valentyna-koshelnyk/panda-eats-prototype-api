@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 
-	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom-errors"
+	ce "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/custom_errors"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service/mocks"
 )
@@ -36,13 +36,13 @@ func TestController_RegistrationUser(t *testing.T) {
 		r := chi.NewRouter()
 
 		mockService := new(mocks.UserService)
-		controller := Controller{
-			s: mockService,
+		controller := userController{
+			userService: mockService,
 		}
 		r.Post("/api/v1/auth/signup", controller.RegistrationUser)
 
 		// Act
-		mockService.On("CreateUser", user).Return(user, nil)
+		mockService.On("CreateUser", user).Return(&user, nil)
 		reqBody, _ := json.Marshal(user)
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/signup", bytes.NewBuffer(reqBody))
 		req.Header.Set("Content-Type", "application/json")
@@ -60,13 +60,13 @@ func TestController_RegistrationUser(t *testing.T) {
 		// Arrange
 		r := chi.NewRouter()
 		mockService := new(mocks.UserService)
-		controller := Controller{
-			s: mockService,
+		controller := userController{
+			userService: mockService,
 		}
 		r.Post("/api/v1/auth/signup", controller.RegistrationUser)
 
 		// Act
-		mockService.On("CreateUser", wrongPassword).Return(entity.User{}, ce.ErrShortPassword)
+		mockService.On("CreateUser", wrongPassword).Return(nil, ce.ErrShortPassword)
 		reqBody, _ := json.Marshal(wrongPassword)
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/signup", bytes.NewBuffer(reqBody))
 		req.Header.Set("Content-Type", "application/json")
@@ -84,11 +84,11 @@ func TestController_RegistrationUser(t *testing.T) {
 		// Arrange
 		r := chi.NewRouter()
 		mockService := new(mocks.UserService)
-		controller := Controller{s: mockService}
+		controller := userController{userService: mockService}
 		r.Post("/api/v1/auth/signup", controller.RegistrationUser)
 
 		// Act
-		mockService.On("CreateUser", emptyUser).Return(entity.User{}, errors.New("invalid request body"))
+		mockService.On("CreateUser", emptyUser).Return(nil, errors.New("invalid request body"))
 		reqBody, _ := json.Marshal(emptyUser)
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/signup", bytes.NewBuffer(reqBody))
 		req.Header.Set("Content-Type", "application/json")
@@ -110,13 +110,13 @@ func TestController_LoginUser(t *testing.T) {
 		r := chi.NewRouter()
 
 		mockService := new(mocks.UserService)
-		controller := Controller{
-			s: mockService,
+		controller := userController{
+			userService: mockService,
 		}
 		r.Post("/api/v1/auth/login", controller.LoginUser)
 
 		// Act
-		mockService.On("GenerateTokenResponse", user).Return("string", nil)
+		mockService.On("GenerateTokenResponse", user.Email, user.Password).Return("string", nil)
 		reqBody, _ := json.Marshal(user)
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", bytes.NewBuffer(reqBody))
 		req.Header.Set("Content-Type", "application/json")
@@ -132,13 +132,13 @@ func TestController_LoginUser(t *testing.T) {
 	t.Run("on login, return error", func(t *testing.T) {
 		r := chi.NewRouter()
 		mockService := new(mocks.UserService)
-		controller := Controller{
-			s: mockService,
+		controller := userController{
+			userService: mockService,
 		}
 
 		r.Post("/api/v1/auth/login", controller.LoginUser)
 		// Act
-		mockService.On("GenerateTokenResponse", wrongPassword).Return("", errors.New("incorrect password"))
+		mockService.On("GenerateTokenResponse", wrongPassword.Email, wrongPassword.Password).Return("", errors.New("incorrect password"))
 		reqBody, _ := json.Marshal(wrongPassword)
 		r.Post("/api/v1/auth/login", controller.LoginUser)
 

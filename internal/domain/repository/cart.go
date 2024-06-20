@@ -31,8 +31,8 @@ func NewCartRepository(table *dynamo.Table) CartRepository {
 
 // AddItem adds item to dynamodb table 'cart'
 // TODO: to fix unmarshalling of entity
-func (cartRepository *cartRepository) AddItem(cart entity.Cart) error {
-	err := cartRepository.table.Put(entity.Cart{
+func (c *cartRepository) AddItem(cart entity.Cart) error {
+	err := c.table.Put(entity.Cart{
 		UserID:       cart.UserID,
 		ItemID:       cart.ItemID,
 		Item:         cart.Item,
@@ -48,9 +48,9 @@ func (cartRepository *cartRepository) AddItem(cart entity.Cart) error {
 }
 
 // GetCartItem retrieves a single item added by user to his cart
-func (cartRepository *cartRepository) GetCartItem(userID, itemID string) (*entity.Cart, error) {
+func (c *cartRepository) GetCartItem(userID, itemID string) (*entity.Cart, error) {
 	var cart entity.Cart
-	err := cartRepository.table.Get("user_id", userID).Range("product_id", dynamo.Equal, itemID).One(&cart)
+	err := c.table.Get("user_id", userID).Range("product_id", dynamo.Equal, itemID).One(&cart)
 	if err != nil {
 		return nil, err
 	}
@@ -58,10 +58,10 @@ func (cartRepository *cartRepository) GetCartItem(userID, itemID string) (*entit
 }
 
 // GetCartItems retrieves dishes that were added to cart of the user
-func (cartRepository *cartRepository) GetCartItems(userID string) ([]entity.Cart, error) {
+func (c *cartRepository) GetCartItems(userID string) ([]entity.Cart, error) {
 	var cart []entity.Cart
 
-	err := cartRepository.table.Get("user_id", userID).All(&cart)
+	err := c.table.Get("user_id", userID).All(&cart)
 	if err != nil {
 		log.Printf("Failed to retrieve cart items for user %s: %v", userID, err)
 		return nil, err
@@ -70,8 +70,8 @@ func (cartRepository *cartRepository) GetCartItems(userID string) ([]entity.Cart
 }
 
 // RemoveItem removes item from user's cart
-func (cartRepository *cartRepository) RemoveItem(userID, itemID string) error {
-	err := cartRepository.table.Delete("user_id", userID).Range("product_id", itemID).Run()
+func (c *cartRepository) RemoveItem(userID, itemID string) error {
+	err := c.table.Delete("user_id", userID).Range("product_id", itemID).Run()
 	if err != nil {
 		log.Printf("Failed to delete cart item %s for user %s: %v", itemID, userID, err)
 		return err
@@ -81,8 +81,8 @@ func (cartRepository *cartRepository) RemoveItem(userID, itemID string) error {
 }
 
 // UpdateCartItems updates quantity of item in the user's cart
-func (cartRepository *cartRepository) UpdateCartItems(userID string, item entity.Cart) error {
-	err := cartRepository.table.Update("user_id", userID).Range("product_id", item.Item.ID).Set("quantity", item.Quantity).Set("total_price", item.TotalPrice).Run()
+func (c *cartRepository) UpdateCartItems(userID string, item entity.Cart) error {
+	err := c.table.Update("user_id", userID).Range("product_id", item.Item.ID).Set("quantity", item.Quantity).Set("total_price", item.TotalPrice).Run()
 	if err != nil {
 		log.Printf("Failed to update cart item %s for user %s: %v", item.ItemID, userID, err)
 		return err

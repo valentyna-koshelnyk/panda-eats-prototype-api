@@ -1,11 +1,11 @@
 package restaurant
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -13,23 +13,20 @@ import (
 
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service/mocks"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/utils"
 )
 
 var (
-	restaurant = entity.Restaurant{
-		ID:          2,
-		Position:    5,
-		Name:        "Philly Fresh Cheesesteaks (541-B Graymont Ave)",
-		Score:       0,
-		Ratings:     0,
-		Category:    "Pizza",
-		PriceRange:  "$",
-		FullAddress: "541-B Graymont Ave, Birmingham, AL, 23204",
-		ZipCode:     "23204",
-		Lat:         "33.43098",
-		Lng:         "-86.8565464",
-	}
+	restaurant = `"ID": 2,
+				"Position": 5,
+				"Name": "Philly Fresh Cheesesteaks (541-B Graymont Ave)",
+				"Score": 0,
+				"Ratings": 0,
+				"Category": "Pizza",
+				"PriceRange": "$",
+				"FullAddress": "541-B Graymont Ave, Birmingham, AL, 23204",
+				"ZipCode": "23204",
+				"Lat": "33.43098",
+				"Lng": "-86.8565464"`
 
 	restaurants = []entity.Restaurant{
 		{ID: 2,
@@ -52,11 +49,11 @@ func TestController_GetAll(t *testing.T) {
 		r := chi.NewRouter()
 
 		mockService := new(mocks.RestaurantService)
-		controller := Controller{
+		restaurantController := restaurantController{
 			s: mockService,
 		}
 
-		r.Get("/api/v1/restaurants", controller.GetAll)
+		r.Get("/api/v1/restaurants", restaurantController.GetAll)
 
 		// Act
 		mockService.On("FilterRestaurants", "pizza", "23204", "$").Return(restaurants, nil)
@@ -64,7 +61,7 @@ func TestController_GetAll(t *testing.T) {
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
 		respBody := rec.Body.Bytes()
-		var result utils.PaginatedResponse
+		var result entity.PaginatedResponse
 		_ = json.Unmarshal(respBody, &result)
 
 		// Assert
@@ -74,10 +71,10 @@ func TestController_GetAll(t *testing.T) {
 	t.Run("on get all, return error", func(t *testing.T) {
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
-		controller := Controller{
+		restaurantController := restaurantController{
 			s: mockService,
 		}
-		r.Get("/api/v1/restaurants", controller.GetAll)
+		r.Get("/api/v1/restaurants", restaurantController.GetAll)
 
 		// Act
 		mockService.On("FilterRestaurants", "p", "1", "$").Return(nil, errors.New("restaurant doesn't exist"))
@@ -91,20 +88,20 @@ func TestController_GetAll(t *testing.T) {
 	})
 }
 
-func TestController_Create(t *testing.T) {
+func TestrestaurantController_Create(t *testing.T) {
 	t.Run("on create, return Created", func(t *testing.T) {
 		// Arrange
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
-		controller := Controller{
+		restaurantController := restaurantController{
 			s: mockService,
 		}
-		r.Post("/api/v1/restaurants", controller.Create)
+		r.Post("/api/v1/restaurants", restaurantController.Create)
 
 		//Act
 		mockService.On("CreateRestaurant", entity.Restaurant{}).Return(nil)
-		reqBody, _ := json.Marshal(entity.Restaurant{})
-		req, _ := http.NewRequest(http.MethodPost, "/api/v1/restaurants", bytes.NewBuffer(reqBody))
+
+		req, _ := http.NewRequest(http.MethodPost, "/api/v1/restaurants", strings.NewReader(restaurant))
 		req.Header.Set("Content-Type", "application/json")
 		response := httptest.NewRecorder()
 		r.ServeHTTP(response, req)
@@ -116,25 +113,12 @@ func TestController_Create(t *testing.T) {
 	t.Run("on create, return error", func(t *testing.T) {
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
-		controller := Controller{
+		restaurantController := restaurantController{
 			s: mockService,
 		}
-		r.Post("/api/v1/restaurants", controller.Create)
-		wrongJSON := []byte(`{
-			"ID": 1,
-			"Position": 6,
-			"Name": "Restaurant",
-			"Score": 0.0,
-			"Ratings": 0,
-			"Category": "American, Cheesesteak, Sandwiches, Alcohol",
-			"PriceRange": "$",
-			"FullAddress": "541-B Graymont Ave, Birmingham, AL, 35204",
-			"ZipCode": "35204",
-			"Lat": "33.5098"",
-			"Lng": "-86.85464"
-		}`)
+		r.Post("/api/v1/restaurants", restaurantController.Create)
 		mockService.On("CreateRestaurant", restaurant).Return(nil)
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/restaurants", bytes.NewBuffer(wrongJSON))
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/restaurants", strings.NewReader(restaurant))
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
@@ -145,20 +129,19 @@ func TestController_Create(t *testing.T) {
 	})
 }
 
-func TestController_Update(t *testing.T) {
+func TestrestaurantController_Update(t *testing.T) {
 	t.Run("on update, return NoContent", func(t *testing.T) {
 		// Arrange
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
-		controller := Controller{
+		restaurantController := restaurantController{
 			s: mockService,
 		}
-		r.Put("/api/v1/restaurants", controller.Update)
+		r.Put("/api/v1/restaurants", restaurantController.Update)
 
 		// Act
 		mockService.On("UpdateRestaurant", restaurant).Return(nil)
-		reqBody, _ := json.Marshal(restaurant)
-		req := httptest.NewRequest(http.MethodPut, "/api/v1/restaurants", bytes.NewBuffer(reqBody))
+		req := httptest.NewRequest(http.MethodPut, "/api/v1/restaurants", strings.NewReader(restaurant))
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 
@@ -172,15 +155,14 @@ func TestController_Update(t *testing.T) {
 		// Arrange
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
-		controller := Controller{
+		restaurantController := restaurantController{
 			s: mockService,
 		}
-		r.Put("/api/v1/restaurants", controller.Update)
+		r.Put("/api/v1/restaurants", restaurantController.Update)
 
 		// Act
 		mockService.On("UpdateRestaurant", restaurant).Return(errors.New("error updating restaurant"))
-		reqBody, _ := json.Marshal(restaurant)
-		req := httptest.NewRequest(http.MethodPut, "/api/v1/restaurants", bytes.NewBuffer(reqBody))
+		req := httptest.NewRequest(http.MethodPut, "/api/v1/restaurants", strings.NewReader(restaurant))
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
 
@@ -192,15 +174,15 @@ func TestController_Update(t *testing.T) {
 	})
 }
 
-func TestController_Delete(t *testing.T) {
+func TestrestaurantController_Delete(t *testing.T) {
 	t.Run("on delete, return NoContent", func(t *testing.T) {
 		// Arrange
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
-		controller := Controller{
+		restaurantController := restaurantController{
 			s: mockService,
 		}
-		r.Delete("/api/v1/restaurants/{restaurant_id}", controller.Delete)
+		r.Delete("/api/v1/restaurants/{restaurant_id}", restaurantController.Delete)
 
 		// Act
 		mockService.On("DeleteRestaurant", int64(1)).Return(nil)
@@ -216,10 +198,10 @@ func TestController_Delete(t *testing.T) {
 		// Arrange
 		r := chi.NewRouter()
 		mockService := new(mocks.RestaurantService)
-		controller := Controller{
+		restaurantController := restaurantController{
 			s: mockService,
 		}
-		r.Delete("/api/v1/restaurants/{restaurant_id}", controller.Delete)
+		r.Delete("/api/v1/restaurants/{restaurant_id}", restaurantController.Delete)
 
 		// Act
 		mockService.On("DeleteRestaurant", int64(13)).Return(errors.New("error deleting restaurant"))

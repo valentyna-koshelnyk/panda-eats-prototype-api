@@ -32,7 +32,7 @@ func TestMenuService_GetMenu(t *testing.T) {
 		}
 
 		// Act
-		actualMenu, _ := ms.GetMenu(1, 1, 1)
+		actualMenu, _ := ms.GetRestaurantMenu(1, 1, 1)
 
 		// Assert
 		assert.Equal(t, pagedResponse, actualMenu)
@@ -47,7 +47,7 @@ func TestMenuService_GetMenu(t *testing.T) {
 		}
 
 		// Act
-		actualMenu, err := ms.GetMenu(1, 1, 1)
+		actualMenu, err := ms.GetRestaurantMenu(1, 1, 1)
 
 		// Assert
 		assert.Error(t, err)

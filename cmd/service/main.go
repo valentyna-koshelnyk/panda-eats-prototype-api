@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	v1 "github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/cart"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/menu"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/order"
@@ -59,7 +59,7 @@ func main() {
 	cartService := service.NewCartService(cartRepository, userService, menuService)
 	orderService := service.NewOrderService(orderRepository, cartService, userService)
 
-	controllers := new(v1.HTTPController)
+	controllers := new(controller.HTTPController)
 	controllers.Restaurant = restaurant.NewRestaurantController(restaurantService)
 	controllers.Cart = cart.NewCartController(cartService, userTokenService)
 	controllers.User = user.NewUserController(userService)

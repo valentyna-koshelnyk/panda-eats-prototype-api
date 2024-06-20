@@ -23,7 +23,7 @@ func Routes(c OrderController) chi.Router {
 		r.Post("/", c.CreateOrder)
 		r.Patch("/shipping", c.UpdateOrderStatusShipped)
 		r.Patch("/delivery", c.UpdateOrderStatusDelivered)
-		r.Get("/orders", c.GetOrdersHistory)
+		r.Get("/history", c.GetOrdersHistory)
 	})
 	return r
 }

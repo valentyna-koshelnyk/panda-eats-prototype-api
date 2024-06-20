@@ -31,7 +31,7 @@ func NewUserController(userService service.UserService) UserController {
 func (c *userController) RegistrationUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var user *entity.User
+	var user entity.User
 
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -49,7 +49,7 @@ func (c *userController) RegistrationUser(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	_, err = c.userService.CreateUser(*user)
+	_, err = c.userService.CreateUser(user)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error creating new user: %s", err)

@@ -17,7 +17,7 @@ type orderService struct {
 
 type OrderService interface {
 	CreateOrder(userID string) error
-	calculateTotalOrderPrice(carts []entity.Cart) float64
+	CalculateTotalOrderPrice(carts []entity.Cart) float64
 	GetOrderHistory(userID string) ([]entity.Order, error)
 	UpdateOrderStatusShipped(userID, orderID string) error
 	UpdateOrderStatusDelivered(userID, orderID string) error
@@ -33,6 +33,7 @@ func NewOrderService(orderRepository repository.OrderRepository, cartService Car
 }
 
 // CreateOrder imlpements order placement and empties the cart once order is persisted through repository layer
+// TODO: to change type to Menu and extract from Cart just items
 func (s *orderService) CreateOrder(userID string) error {
 	cartItems, err := s.cartService.GetItemsList(userID)
 	if err != nil {
@@ -45,10 +46,10 @@ func (s *orderService) CreateOrder(userID string) error {
 
 	order.OrderID = nanoid.New()
 	order.Items = cartItems
-	order.TotalOrderPrice = s.calculateTotalOrderPrice(cartItems)
+	order.TotalOrderPrice = s.CalculateTotalOrderPrice(cartItems)
 	order.UserID = userID
 	order.AddedAt = time.Now()
-	order.Status = 1
+	order.Status = entity.InProcess
 
 	err = s.orderRepository.CreateOrder(order)
 	err = s.cartService.RemoveItems(cartItems)
@@ -58,8 +59,8 @@ func (s *orderService) CreateOrder(userID string) error {
 	return nil
 }
 
-// calculateTotalOrderPrice calculates total price of the order based on totalPrice attribute of the cart
-func (s *orderService) calculateTotalOrderPrice(carts []entity.Cart) float64 {
+// CalculateTotalOrderPrice calculates total price of the order based on totalPrice attribute of the cart
+func (s *orderService) CalculateTotalOrderPrice(carts []entity.Cart) float64 {
 	var totalPrice float64
 	for _, cart := range carts {
 		totalPrice += cart.TotalPrice
