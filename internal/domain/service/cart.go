@@ -38,7 +38,7 @@ func NewCartService(cartRepository repository.CartRepository, userService UserSe
 // AddItem after validating user input (userId/itemId) adds item to cart using cart repository
 func (c *cartService) AddItem(userID, itemID string, quantity int64) error {
 	// TODO: to replace getUserById to bool isUserPresent, so we needn't to retrieve entire object but bool value
-	user, _ := c.userService.GetUserById(userID)
+	user, _ := c.userService.GetUserByID(userID)
 	if user == nil {
 		return errors.New("user not found")
 	}
@@ -53,7 +53,7 @@ func (c *cartService) AddItem(userID, itemID string, quantity int64) error {
 
 	existingCartItem, _ := c.cartRepository.GetCartItem(user.UserID, itemID)
 	if existingCartItem != nil {
-		return c.UpdateUserItem(user.UserID, itemID, existingCartItem.Quantity)
+		return c.UpdateUserItem(user.UserID, itemID, quantity)
 	}
 
 	var cart entity.Cart
@@ -79,7 +79,15 @@ func (c *cartService) GetItemsList(userID string) ([]entity.Cart, error) {
 
 // RemoveItem removes entire item from user's cart
 func (c *cartService) RemoveItem(userID, itemID string) error {
-	err := c.cartRepository.RemoveItem(userID, itemID)
+	existingItem, err := c.cartRepository.GetCartItem(userID, itemID)
+	if err != nil {
+		return err
+	}
+	if existingItem == nil {
+		err = errors.New("item doesn't exist")
+		return err
+	}
+	err = c.cartRepository.RemoveItem(userID, itemID)
 	if err != nil {
 		return err
 	}
@@ -94,6 +102,7 @@ func (c *cartService) RemoveItems(cartItems []entity.Cart) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
