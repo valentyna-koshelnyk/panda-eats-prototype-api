@@ -8,7 +8,6 @@ import (
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service/mocks"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
@@ -16,10 +15,6 @@ const (
 	userID  = "50aa4686-bb62-4202-b2ce-471df794adea"
 	orderID = "jQ8pMyTsrfs7ZkvmDj6y8"
 )
-
-var orderIDRequest = `{
-		"order_id" : "jQ8pMyTsrfs7ZkvmDj6y8"
-}`
 
 var orders = []entity.Order{
 	{OrderID: orderID,
@@ -52,11 +47,11 @@ func TestOrderController_CreateOrder(t *testing.T) {
 		controller := orderController{
 			orderService: mockOrderService,
 		}
-		r.Post("/api/v1/cart/order", controller.CreateOrder)
+		r.Post("/api/v1/order", controller.CreateOrder)
 
 		// Act
 		mockOrderService.On("CreateOrder", userID).Return(nil)
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/cart/order", nil)
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/order", nil)
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
@@ -73,11 +68,11 @@ func TestOrderController_CreateOrder(t *testing.T) {
 		controller := orderController{
 			orderService: mockOrderService,
 		}
-		r.Post("/api/v1/cart/order", controller.CreateOrder)
+		r.Post("/api/v1/order", controller.CreateOrder)
 
 		// Act
 		mockOrderService.On("CreateOrder", userID).Return(errors.New("user doesn't exist"))
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/cart/order", nil)
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/order", nil)
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
@@ -95,10 +90,10 @@ func TestOrderController_UpdateOrderStatusShipped(t *testing.T) {
 		controller := orderController{
 			orderService: mockOrderService,
 		}
-		r.Patch("/api/v1/cart/order/shipped", controller.UpdateOrderStatusShipped)
+		r.Patch("/api/v1/order/{order_id}/shipping", controller.UpdateOrderStatusShipped)
 		// Act
 		mockOrderService.On("UpdateOrderStatusShipped", userID, orderID).Return(nil)
-		req := httptest.NewRequest(http.MethodPatch, "/api/v1/cart/order/shipped", strings.NewReader(orderIDRequest))
+		req := httptest.NewRequest(http.MethodPatch, "/api/v1/order/jQ8pMyTsrfs7ZkvmDj6y8/shipping", nil)
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
@@ -112,10 +107,10 @@ func TestOrderController_UpdateOrderStatusShipped(t *testing.T) {
 		controller := orderController{
 			orderService: mockOrderService,
 		}
-		r.Patch("/api/v1/cart/order/shipped", controller.UpdateOrderStatusShipped)
+		r.Patch("/api/v1/cart/order/{order_id}/shipping", controller.UpdateOrderStatusShipped)
 		// Act
 		mockOrderService.On("UpdateOrderStatusShipped", userID, orderID).Return(errors.New("order not found"))
-		req := httptest.NewRequest(http.MethodPatch, "/api/v1/cart/order/shipped", strings.NewReader(orderIDRequest))
+		req := httptest.NewRequest(http.MethodPatch, "/api/v1/cart/order/jQ8pMyTsrfs7ZkvmDj6y8/shipping", nil)
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
@@ -132,10 +127,10 @@ func TestOrderController_UpdateOrderStatusDelivered(t *testing.T) {
 		controller := orderController{
 			orderService: mockOrderService,
 		}
-		r.Patch("/api/v1/cart/order", controller.UpdateOrderStatusDelivered)
+		r.Patch("/api/v1/order/{order_id}/delivered", controller.UpdateOrderStatusDelivered)
 		// Act
 		mockOrderService.On("UpdateOrderStatusDelivered", userID, orderID).Return(nil)
-		req := httptest.NewRequest(http.MethodPatch, "/api/v1/cart/order", strings.NewReader(orderIDRequest))
+		req := httptest.NewRequest(http.MethodPatch, "/api/v1/order/jQ8pMyTsrfs7ZkvmDj6y8/delivered", nil)
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
@@ -149,10 +144,10 @@ func TestOrderController_UpdateOrderStatusDelivered(t *testing.T) {
 		controller := orderController{
 			orderService: mockOrderService,
 		}
-		r.Patch("/api/v1/cart/order/delivery", controller.UpdateOrderStatusDelivered)
+		r.Patch("/api/v1/order/{order_id}/delivery", controller.UpdateOrderStatusDelivered)
 		// Act
 		mockOrderService.On("UpdateOrderStatusDelivered", userID, orderID).Return(errors.New("order not found"))
-		req := httptest.NewRequest(http.MethodPatch, "/api/v1/cart/order/delivery", strings.NewReader(orderIDRequest))
+		req := httptest.NewRequest(http.MethodPatch, "/api/v1/order/jQ8pMyTsrfs7ZkvmDj6y8/delivery", nil)
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
@@ -172,7 +167,7 @@ func TestOrderController_GetOrdersHistory(t *testing.T) {
 		r.Get("/api/v1/cart/order/orders", controller.GetOrdersHistory)
 		// Act
 		mockOrderService.On("GetOrderHistory", userID).Return(orders, nil)
-		req := httptest.NewRequest(http.MethodGet, "/api/v1/cart/order/orders", strings.NewReader(orderIDRequest))
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/cart/order/orders", nil)
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
@@ -191,7 +186,7 @@ func TestOrderController_GetOrdersHistory(t *testing.T) {
 		r.Get("/api/v1/cart/order/orders", controller.GetOrdersHistory)
 		// Act
 		mockOrderService.On("GetOrderHistory", userID).Return([]entity.Order{}, nil)
-		req := httptest.NewRequest(http.MethodGet, "/api/v1/cart/order/orders", strings.NewReader(orderIDRequest))
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/cart/order/orders", nil)
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
