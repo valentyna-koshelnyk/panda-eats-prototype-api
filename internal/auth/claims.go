@@ -6,6 +6,6 @@ import (
 
 // Claims represents the JWT claims
 type Claims struct {
-	Email string `json:"email"`
+	UserID string `json:"user_id"`
 	jwt.RegisteredClaims
 }
