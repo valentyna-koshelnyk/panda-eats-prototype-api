@@ -11,6 +11,9 @@ type CustomResponse struct {
 	Error string `json:"error,omitempty"`
 	Data  any    `json:"data,omitempty"`
 }
+type TokenData struct {
+	Token string `json:"token"`
+}
 
 type PaginatedResponse struct {
 	APIVersion string        `json:"apiVersion"`
@@ -46,4 +49,13 @@ func NewPaginatedResponse(pagination *utils.Pagination) *PaginatedResponse {
 // RespondWithJSON message into JSON as http response
 func RespondWithJSON(w http.ResponseWriter, r *http.Request, msg string, err string) {
 	render.JSON(w, r, CustomResponse{Data: msg, Error: err})
+}
+
+func RespondWithTokenJSON(w http.ResponseWriter, r *http.Request, msg string, err string) {
+	render.JSON(w, r, CustomResponse{
+		Data: TokenData{
+			Token: msg,
+		},
+		Error: err,
+	})
 }
