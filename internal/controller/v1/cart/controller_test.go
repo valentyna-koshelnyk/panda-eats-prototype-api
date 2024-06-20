@@ -1,8 +1,6 @@
 package cart
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
@@ -81,8 +79,12 @@ func TestCartController_AddItem(t *testing.T) {
 		// Act
 
 		mockService.On("AddItem", userID, itemID, int64(quantity)).Return(errors.New("not found"))
-		reqBody, _ := json.Marshal(entity.QuantityItemRequest{Quantity: int64(quantity)})
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/cart/item/5", bytes.NewBuffer(reqBody))
+		reqBody := `
+			{
+				"quantity": 3
+			}
+		`
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/cart/item/5", strings.NewReader(reqBody))
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
@@ -147,8 +149,12 @@ func TestController_UpdateItem(t *testing.T) {
 
 		// Act
 		mockService.On("UpdateUserItem", userID, itemID, int64(quantity)).Return(nil)
-		reqBody, _ := json.Marshal(entity.QuantityItemRequest{Quantity: int64(quantity)})
-		req := httptest.NewRequest(http.MethodPatch, "/api/v1/cart/item/5", bytes.NewBuffer(reqBody))
+		reqBody := `
+			{
+				"quantity": 3
+			}
+		`
+		req := httptest.NewRequest(http.MethodPatch, "/api/v1/cart/item/5", strings.NewReader(reqBody))
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, req)
