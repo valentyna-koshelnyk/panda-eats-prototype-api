@@ -85,6 +85,6 @@ func (c *userController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	entity.RespondWithJSON(w, r, response, "")
+	entity.RespondWithTokenJSON(w, r, response, "")
 	return
 }

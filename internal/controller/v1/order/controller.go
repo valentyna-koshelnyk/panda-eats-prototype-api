@@ -1,12 +1,11 @@
 package order
 
 import (
-	"encoding/json"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/entity"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
-	"io"
 	"net/http"
 )
 
@@ -54,19 +53,10 @@ func (c *orderController) CreateOrder(w http.ResponseWriter, r *http.Request) {
 // UpdateOrderStatusShipped updates status of the order to be set as shipped
 func (c *orderController) UpdateOrderStatusShipped(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
-	var orderID entity.OrderIDRequest
+	orderID := chi.URLParam(r, "order_id")
 	userID := "50aa4686-bb62-4202-b2ce-471df794adea"
-	data, err := io.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		log.Errorf("error reading body: %s", err)
-		entity.RespondWithJSON(w, r, "", "error retrieving user")
-		return
-	}
-	err = json.Unmarshal(data, &orderID)
 
-	err = c.orderService.UpdateOrderStatusShipped(userID, orderID.OrderID)
+	err := c.orderService.UpdateOrderStatusShipped(userID, orderID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error updating the order: %s", err)
@@ -82,19 +72,11 @@ func (c *orderController) UpdateOrderStatusShipped(w http.ResponseWriter, r *htt
 // UpdateOrderStatusDelivered updates status of the order to be set as delivered
 func (c *orderController) UpdateOrderStatusDelivered(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
-	var orderID entity.OrderIDRequest
+	orderID := chi.URLParam(r, "order_id")
 	userID := "50aa4686-bb62-4202-b2ce-471df794adea"
-	data, err := io.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		log.Errorf("error reading body: %s", err)
-		entity.RespondWithJSON(w, r, "", "error retrieving user")
-		return
-	}
-	err = json.Unmarshal(data, &orderID)
 
-	if err = c.orderService.UpdateOrderStatusDelivered(userID, orderID.OrderID); err != nil {
+	err := c.orderService.UpdateOrderStatusDelivered(userID, orderID)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error updating the order: %s", err)
 		entity.RespondWithJSON(w, r, "", "error updating the order")

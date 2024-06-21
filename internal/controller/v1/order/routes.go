@@ -21,8 +21,8 @@ func Routes(c OrderController) chi.Router {
 		r.Use(jwtauth.Verifier(tokenAuth))
 		//r.Use(jwtauth.Authenticator(tokenAuth))
 		r.Post("/", c.CreateOrder)
-		r.Patch("/shipping", c.UpdateOrderStatusShipped)
-		r.Patch("/delivery", c.UpdateOrderStatusDelivered)
+		r.Patch("/{order_id}/shipping", c.UpdateOrderStatusShipped)
+		r.Patch("/{order_id}/delivery", c.UpdateOrderStatusDelivered)
 		r.Get("/history", c.GetOrdersHistory)
 	})
 	return r
