@@ -50,7 +50,7 @@ func main() {
 	cartRepository := repository.NewCartRepository(&cartTable)
 	orderRepository := repository.NewOrderRepository(&orderTable)
 
-	userTokenService := service.NewTokenService()
+	userTokenService := service.NewTokenService(viper.GetString("secret.key"))
 	userAuthService := service.NewAuthService()
 
 	restaurantService := service.NewRestaurantService(restaurantRepository)
