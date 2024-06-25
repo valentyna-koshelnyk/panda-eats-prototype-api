@@ -2,7 +2,16 @@ package server
 
 import (
 	"context"
+	"github.com/spf13/viper"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/config"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/cart"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/menu"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/order"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/restaurant"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/user"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
+	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -46,4 +55,36 @@ func (s *Server) Shutdown(ctx context.Context) error {
 		return s.httpServer.Shutdown(ctx)
 	}
 	return nil
+}
+
+func SetupApplication() *Server {
+	config.InitViperConfig()
+
+	cartTable := config.InitDynamoSession("cart")
+	orderTable := config.InitDynamoSession("order")
+	db := config.GetDB()
+
+	restaurantRepository := repository.NewRestaurantRepository(db)
+	userRepository := repository.NewUserRepository(db)
+	menuRepository := repository.NewMenuRepository(db)
+	cartRepository := repository.NewCartRepository(&cartTable)
+	orderRepository := repository.NewOrderRepository(&orderTable)
+
+	userTokenService := service.NewTokenService(viper.GetString("secret.key"))
+	userAuthService := service.NewAuthService()
+	restaurantService := service.NewRestaurantService(restaurantRepository)
+	userService := service.NewUserService(userRepository, userAuthService, userTokenService)
+	menuService := service.NewMenuService(menuRepository)
+	cartService := service.NewCartService(cartRepository, userService, menuService)
+	orderService := service.NewOrderService(orderRepository, cartService, userService)
+
+	controllers := new(controller.HTTPController)
+	controllers.Restaurant = restaurant.NewRestaurantController(restaurantService)
+	controllers.Cart = cart.NewCartController(cartService, userTokenService)
+	controllers.User = user.NewUserController(userService)
+	controllers.Order = order.NewController(orderService, userTokenService)
+	controllers.Menu = menu.NewController(menuService)
+
+	port := viper.GetString("server.port")
+	return CreateNewServer(port, controllers)
 }

@@ -3,14 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/cart"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/menu"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/order"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/restaurant"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/controller/v1/user"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/repository"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/domain/service"
 	"net/http"
 	"os"
 	"os/signal"
@@ -21,7 +13,6 @@ import (
 	"github.com/spf13/viper"
 
 	_ "github.com/valentyna-koshelnyk/panda-eats-prototype-api/docs"
-	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/config"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/server"
 )
 
@@ -38,37 +29,8 @@ func init() {
 }
 
 func main() {
-	config.InitViperConfig()
-
-	cartTable := config.InitDynamoSession("cart")
-	orderTable := config.InitDynamoSession("order")
-	db := config.GetDB()
-
-	restaurantRepository := repository.NewRestaurantRepository(db)
-	userRepository := repository.NewUserRepository(db)
-	menuRepository := repository.NewMenuRepository(db)
-	cartRepository := repository.NewCartRepository(&cartTable)
-	orderRepository := repository.NewOrderRepository(&orderTable)
-
-	userTokenService := service.NewTokenService()
-	userAuthService := service.NewAuthService()
-
-	restaurantService := service.NewRestaurantService(restaurantRepository)
-	userService := service.NewUserService(userRepository, userAuthService, userTokenService)
-	menuService := service.NewMenuService(menuRepository)
-	cartService := service.NewCartService(cartRepository, userService, menuService)
-	orderService := service.NewOrderService(orderRepository, cartService, userService)
-
-	controllers := new(controller.HTTPController)
-	controllers.Restaurant = restaurant.NewRestaurantController(restaurantService)
-	controllers.Cart = cart.NewCartController(cartService, userTokenService)
-	controllers.User = user.NewUserController(userService)
-	controllers.Order = order.NewController(orderService, userTokenService)
-	controllers.Menu = menu.NewController(menuService)
-
-	port := viper.GetString("server.port")
-	srv := server.CreateNewServer(port, controllers)
-	log.Info("Starting server on port :", port)
+	srv := server.SetupApplication()
+	log.Info("Starting server on port :", viper.GetString("server.port"))
 
 	go func() {
 		fmt.Println("Starting HTTP server...")
