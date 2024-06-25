@@ -1,12 +1,12 @@
 package service
 
 import (
-	"errors"
 	"fmt"
-	"github.com/spf13/viper"
+	"github.com/go-chi/jwtauth/v5"
+	"github.com/golang-jwt/jwt/v5"
+	"net/http"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/valentyna-koshelnyk/panda-eats-prototype-api/internal/auth"
 )
 
@@ -15,73 +15,52 @@ import (
 // TokenService is an interface for the token service
 type TokenService interface {
 	GenerateToken(userID string) (string, error)
-	VerifyToken(tokenString string) error
-	ExtractIDFromToken(requestToken string, secret string) (string, error)
+	ExtractIDFromToken(r *http.Request) (string, error)
 }
 
-type tokenService struct{}
+type tokenService struct {
+	Secret string
+}
 
 // NewTokenService creates a new instance of the TokenService
-func NewTokenService() TokenService {
-	return &tokenService{}
+func NewTokenService(secret string) TokenService {
+	return &tokenService{
+		Secret: secret,
+	}
 }
-
-var secretKey = []byte(viper.GetString("secret.key"))
 
 // GenerateToken generates JWT token from user ID and returns it as string
 func (t *tokenService) GenerateToken(userID string) (string, error) {
 	claims := &auth.Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   userID,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 1)),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(secretKey)
+
+	tokenString, err := token.SignedString([]byte(t.Secret))
 	if err != nil {
 		return "", err
 	}
 	return tokenString, nil
 }
 
-// VerifyToken verifies a JWT token, a middleware for services which require authentication
-func (t *tokenService) VerifyToken(tokenString string) error {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid signing method")
-		}
-		return secretKey, nil
-	})
-
-	if err != nil {
-		return err
-	}
-
-	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return nil
-	}
-
-	return errors.New("invalid token")
-}
-
-func (t *tokenService) ExtractIDFromToken(requestToken string, secret string) (string, error) {
-	token, err := jwt.Parse(requestToken, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("unexpected signing method")
-		}
-		return []byte(secret), nil
+func (t *tokenService) ExtractIDFromToken(r *http.Request) (string, error) {
+	requestToken := jwtauth.TokenFromHeader(r)
+	token, err := jwt.ParseWithClaims(requestToken, &auth.Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(t.Secret), nil
 	})
 
 	if err != nil {
 		return "", err
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
+	claims, ok := token.Claims.(*auth.Claims)
 
 	if !ok && !token.Valid {
 		return "", fmt.Errorf("invalid Token")
 	}
 
-	return claims["user_id"].(string), nil
+	return claims.UserID, nil
 }

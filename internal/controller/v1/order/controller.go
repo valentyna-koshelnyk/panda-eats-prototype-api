@@ -33,12 +33,10 @@ func NewController(orderService service.OrderService, tokenService service.Token
 
 // CreateOrder is a handler for placing the order
 func (c *orderController) CreateOrder(w http.ResponseWriter, r *http.Request) {
-	//token := jwtauth.TokenFromHeader(r)
-	//userID, err := c.tokenService.ExtractEmailFromToken(token, viper.GetString("secret.key"))
-	userID := "50aa4686-bb62-4202-b2ce-471df794adea"
+	userID, err := c.tokenService.ExtractIDFromToken(r)
 	w.Header().Set("Content-Type", "application/json")
 
-	err := c.orderService.CreateOrder(userID)
+	err = c.orderService.CreateOrder(userID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error creating order: %s", err)
@@ -54,9 +52,9 @@ func (c *orderController) CreateOrder(w http.ResponseWriter, r *http.Request) {
 func (c *orderController) UpdateOrderStatusShipped(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	orderID := chi.URLParam(r, "order_id")
-	userID := "50aa4686-bb62-4202-b2ce-471df794adea"
+	userID, err := c.tokenService.ExtractIDFromToken(r)
 
-	err := c.orderService.UpdateOrderStatusShipped(userID, orderID)
+	err = c.orderService.UpdateOrderStatusShipped(userID, orderID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error updating the order: %s", err)
@@ -72,10 +70,10 @@ func (c *orderController) UpdateOrderStatusShipped(w http.ResponseWriter, r *htt
 // UpdateOrderStatusDelivered updates status of the order to be set as delivered
 func (c *orderController) UpdateOrderStatusDelivered(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	userID, err := c.tokenService.ExtractIDFromToken(r)
 	orderID := chi.URLParam(r, "order_id")
-	userID := "50aa4686-bb62-4202-b2ce-471df794adea"
 
-	err := c.orderService.UpdateOrderStatusDelivered(userID, orderID)
+	err = c.orderService.UpdateOrderStatusDelivered(userID, orderID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Errorf("error updating the order: %s", err)
@@ -91,8 +89,7 @@ func (c *orderController) UpdateOrderStatusDelivered(w http.ResponseWriter, r *h
 // GetOrdersHistory retrieves orders history  of the particular user
 func (c *orderController) GetOrdersHistory(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	userID := "50aa4686-bb62-4202-b2ce-471df794adea"
-
+	userID, err := c.tokenService.ExtractIDFromToken(r)
 	orders, err := c.orderService.GetOrderHistory(userID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
