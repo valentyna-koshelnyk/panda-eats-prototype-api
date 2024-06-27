@@ -110,7 +110,7 @@ func Test_AllEndpoints(t *testing.T) {
 		_ = json.Unmarshal(body, &data)
 		tokenRAW := gjson.Get(string(body), "data.token").String()
 		tokenData.Token = "Bearer " + tokenRAW
-		t.Logf("Received response: %s", tokenData.Token)
+		t.Logf("Received response: %s", body)
 	})
 	t.Run("Add_Item", func(t *testing.T) {
 		req, err := http.NewRequest("POST", "http://localhost:3000/api/v1/cart/item/12", strings.NewReader(quantity))
