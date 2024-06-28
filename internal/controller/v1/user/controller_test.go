@@ -1,10 +1,10 @@
 package user
 
 import (
-	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -22,12 +22,10 @@ var (
 		Password: "password1234!",
 	}
 
-	emptyUser = entity.User{}
-
-	wrongPassword = entity.User{
-		Email:    "user@example.com",
-		Password: "pass",
-	}
+	userJSON = `{
+    "email": "user@example.com",
+    "password": "password1234!"
+}`
 )
 
 func TestController_RegistrationUser(t *testing.T) {
@@ -43,8 +41,7 @@ func TestController_RegistrationUser(t *testing.T) {
 
 		// Act
 		mockService.On("CreateUser", user).Return(&user, nil)
-		reqBody, _ := json.Marshal(user)
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/signup", bytes.NewBuffer(reqBody))
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/signup", strings.NewReader(userJSON))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
@@ -66,9 +63,8 @@ func TestController_RegistrationUser(t *testing.T) {
 		r.Post("/api/v1/auth/signup", controller.RegistrationUser)
 
 		// Act
-		mockService.On("CreateUser", wrongPassword).Return(nil, ce.ErrShortPassword)
-		reqBody, _ := json.Marshal(wrongPassword)
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/signup", bytes.NewBuffer(reqBody))
+		mockService.On("CreateUser", user).Return(nil, ce.ErrShortPassword)
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/signup", strings.NewReader(userJSON))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
@@ -88,9 +84,8 @@ func TestController_RegistrationUser(t *testing.T) {
 		r.Post("/api/v1/auth/signup", controller.RegistrationUser)
 
 		// Act
-		mockService.On("CreateUser", emptyUser).Return(nil, errors.New("invalid request body"))
-		reqBody, _ := json.Marshal(emptyUser)
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/signup", bytes.NewBuffer(reqBody))
+		mockService.On("CreateUser", user).Return(nil, errors.New("invalid request body"))
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/signup", strings.NewReader(userJSON))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
@@ -117,8 +112,7 @@ func TestController_LoginUser(t *testing.T) {
 
 		// Act
 		mockService.On("GenerateTokenResponse", user.Email, user.Password).Return("string", nil)
-		reqBody, _ := json.Marshal(user)
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", bytes.NewBuffer(reqBody))
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", strings.NewReader(userJSON))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
@@ -138,11 +132,10 @@ func TestController_LoginUser(t *testing.T) {
 
 		r.Post("/api/v1/auth/login", controller.LoginUser)
 		// Act
-		mockService.On("GenerateTokenResponse", wrongPassword.Email, wrongPassword.Password).Return("", errors.New("incorrect password"))
-		reqBody, _ := json.Marshal(wrongPassword)
+		mockService.On("GenerateTokenResponse", user.Email, user.Password).Return("", errors.New("incorrect password"))
 		r.Post("/api/v1/auth/login", controller.LoginUser)
 
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", bytes.NewBuffer(reqBody))
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", strings.NewReader(userJSON))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
