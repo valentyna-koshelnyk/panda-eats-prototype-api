@@ -19,7 +19,6 @@ import (
 var version string
 
 func init() {
-	// TODO: implement a custom structured logger
 	// Log as JSON instead of the default ASCII formatter.
 	log.SetFormatter(&log.JSONFormatter{})
 	// Log for informational purposes, then depends on necessity use log.SetLevel(log.WarnLevel)
