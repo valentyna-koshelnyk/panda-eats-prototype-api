@@ -32,6 +32,12 @@ func NewController(orderService service.OrderService, tokenService service.Token
 }
 
 // CreateOrder is a handler for placing the order
+// @Summary Create Order
+// @Description moves cart items to the order
+// @Produce  json
+// @Success      201  {object}  entity.CustomResponse{data=string}
+// @Failure 400 {object}  entity.CustomResponse{data=string}//
+// @Router /order [post]
 func (c *orderController) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	userID, err := c.tokenService.ExtractIDFromToken(r)
 	w.Header().Set("Content-Type", "application/json")
@@ -49,6 +55,12 @@ func (c *orderController) CreateOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateOrderStatusShipped updates status of the order to be set as shipped
+// @Summary Updates Order status to shipped
+// @Description update the status of order to shipped
+// @Produce  json
+// @Success      202  {object}  entity.CustomResponse{data=string}
+// @Failure 400 {object}  entity.CustomResponse{data=string}
+// @Router /{order_id}/shipping [patch]
 func (c *orderController) UpdateOrderStatusShipped(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	orderID := chi.URLParam(r, "order_id")
@@ -68,6 +80,12 @@ func (c *orderController) UpdateOrderStatusShipped(w http.ResponseWriter, r *htt
 }
 
 // UpdateOrderStatusDelivered updates status of the order to be set as delivered
+// @Summary Updates Order status to delivered
+// @Description update the status of order to delivered
+// @Produce  json
+// @Success      202  {object}  entity.CustomResponse{data=string}
+// @Failure 400 {object}  entity.CustomResponse{data=string}
+// @Router /{order_id}/delivery [patch]
 func (c *orderController) UpdateOrderStatusDelivered(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	userID, err := c.tokenService.ExtractIDFromToken(r)
@@ -87,6 +105,12 @@ func (c *orderController) UpdateOrderStatusDelivered(w http.ResponseWriter, r *h
 }
 
 // GetOrdersHistory retrieves orders history  of the particular user
+// @Summary Get Order History of the user
+// @Description Retrieves history of orders of the user
+// @Produce  json
+// @Success      200  {object}  entity.CustomResponse{data=[]entity.Order}
+// @Failure 400 {object}  entity.CustomResponse{data=string}
+// @Router /history [get]
 func (c *orderController) GetOrdersHistory(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	userID, err := c.tokenService.ExtractIDFromToken(r)

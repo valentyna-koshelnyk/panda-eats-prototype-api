@@ -31,13 +31,13 @@ func NewController(s service.MenuService) MenuController {
 	}
 }
 
+// GetMenuByRestaurant retrieves menu of the specified restaurant
 // @Summary List menu of the restaurant
 // @Description get menu by restaurantID
-// @ID restaurant_id
 // @Accept  json
 // @Produce  json
-// @Param id path int true "restaurant_id"
-// @Success 200 {array} Menu
+// @Param {restaurant_id} path int true "restaurant_id"
+// @Success 200 {array} entity.Menu
 // @Router /restaurants/{restaurant_id}/items [get]
 func (c *menuController) GetMenuByRestaurant(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
