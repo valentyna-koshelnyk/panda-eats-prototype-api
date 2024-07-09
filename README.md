@@ -25,6 +25,6 @@ Install Food Ordering Web Application `PandaEats` with **Github**
 
 
 ```bash
-  docker build .
+   docker build -t pandaeats .
 ```
 
