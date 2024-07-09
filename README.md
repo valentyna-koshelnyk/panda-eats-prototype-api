@@ -3,11 +3,17 @@ A web application service that provides a platform for users to search for resta
 
 ## Tech Stack
 **Language:** Golang 1.22.2
+
 **Database:** Postgres, DynamoDB
+
 **Router:** chi
+
 **Security:** JWT authentication
+
 **Additional Plugins/API:** Mockery for Unit testing
+
 **Dataset:** Pubic UberEats Dataset
+
 
 
 
