@@ -16,7 +16,7 @@ A web application service that provides a platform for users to search for resta
 
 ## Installation
 
-Install food tracking app `PandaEats` with **Github**
+Install Food Ordering Web Application `PandaEats` with **Github**
 
 ```bash
   git clone git@github.com:valentyna-koshelnyk/panda-eats-prototype-api.git
