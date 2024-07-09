@@ -47,6 +47,3 @@ resource "aws_dynamodb_table" "order_table" {
     type = "S"
   }
 }
-resource "aws_s3_bucket" "s3-localstack" {
-  bucket = "panda-eats"
-}
