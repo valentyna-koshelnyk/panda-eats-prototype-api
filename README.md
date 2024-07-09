@@ -14,6 +14,15 @@ A web application service that provides a platform for users to search for resta
 
 **Dataset:** Pubic UberEats Dataset
 
+## Installation
+
+Install food tracking app `PandaEats` with **Github**
+
+```bash
+  git clone git@github.com:valentyna-koshelnyk/panda-eats-prototype-api.git
+  cd panda-eats-prototype-api
+```
+
 
 
 
