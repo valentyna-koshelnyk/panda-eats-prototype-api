@@ -24,7 +24,7 @@ Install food tracking app `PandaEats` with **Github**
 ```
 
 
-
-
-
+```bash
+  docker build .
+```
 
