@@ -30,7 +30,6 @@ func Routes(c *controller.HTTPController) chi.Router {
 		r.Mount("/order", order.Routes(c.Order))
 		r.Mount("/cart", cart.Routes(c.Cart))
 	})
-
 	r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL("doc.json")))
 	return r
 }

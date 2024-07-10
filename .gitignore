@@ -37,3 +37,6 @@ config/config.dev.yaml
 **/*.terraform.tfstate.lock.info
 **/*.terraform.tfstate.backup
 testenv/.terraform.tfstate.lock.info
+
+config/.terraform.tfstate.lock.info
+././

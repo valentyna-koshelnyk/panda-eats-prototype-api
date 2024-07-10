@@ -1,37 +1,85 @@
+basePath: /api/v1
 definitions:
-  menu.Menu:
+  entity.Cart:
+    properties:
+      addedAt:
+        type: string
+      item:
+        $ref: '#/definitions/entity.Menu'
+      itemID:
+        type: string
+      pricePerUnit:
+        type: number
+      quantity:
+        type: integer
+      totalPrice:
+        type: number
+      userID:
+        type: string
+    type: object
+  entity.CustomResponse:
+    properties:
+      data: {}
+      error:
+        type: string
+    type: object
+  entity.Menu:
     properties:
       category:
-        type: string
-      created_at:
         type: string
       description:
         type: string
       id:
-        type: integer
+        type: string
       name:
         type: string
       price:
         type: string
       restaurant_id:
         type: integer
-      updated_at:
+    type: object
+  entity.Order:
+    properties:
+      addedAt:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/entity.Cart'
+        type: array
+      order_id:
+        type: string
+      status:
+        $ref: '#/definitions/entity.OrderStatus'
+      totalOrderPrice:
+        type: number
+      userID:
         type: string
     type: object
-  restaurant.Restaurant:
+  entity.OrderStatus:
+    enum:
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - InProcess
+    - Shipped
+    - Delivered
+  entity.QuantityItemRequest:
     properties:
-      ID:
+      quantity:
         type: integer
+    type: object
+  entity.Restaurant:
+    properties:
       category:
-        type: string
-      created_at:
         type: string
       full_address:
         type: string
+      id:
+        type: integer
       lat:
-        description: |-
-          JS might not handle very large integers or high-precision floating numbers accurately
-          TODO: add validation
+        description: 'TODO: add validation'
         type: string
       lng:
         description: 'TODO: add validation'
@@ -46,25 +94,361 @@ definitions:
         type: integer
       score:
         type: number
-      updated_at:
-        type: string
       zip_code:
         description: 'TODO: Add additional validation for the zip range'
         type: string
     type: object
+  entity.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+host: localhost:3000
 info:
-  contact: {}
+  contact:
+    email: valentyna.koshelnyk@deliveryhero.com
+    name: PandaEats API
+  description: A simple food ordering app
+  title: PandaEats API
+  version: "1.0"
 paths:
+  /{order_id}/delivery:
+    patch:
+      description: update the status of order to delivered
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            allOf:
+            - $ref: '#/definitions/entity.CustomResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/entity.CustomResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Updates Order status to delivered
+  /{order_id}/shipping:
+    patch:
+      description: update the status of order to shipped
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            allOf:
+            - $ref: '#/definitions/entity.CustomResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/entity.CustomResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Updates Order status to shipped
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: User authentication handler
+      parameters:
+      - description: User Login Information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/entity.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/entity.CustomResponse'
+      summary: Login system
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new account in the system
+      parameters:
+      - description: User Registration Information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/entity.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/entity.CustomResponse'
+      summary: Registration of a new user
+  /cart/:
+    get:
+      description: retrieve the items that are currently in the user's cart and haven't
+        been added to the order
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/entity.CustomResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.Cart'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entity.CustomResponse'
+      summary: Gets cart items
+  /cart/item/{item_id}:
+    delete:
+      description: updates  item quantity
+      parameters:
+      - description: The input is quantity
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.QuantityItemRequest'
+      - description: item_id
+        in: path
+        name: '{item_id}'
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/entity.CustomResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entity.CustomResponse'
+      summary: Updates item quantity
+    post:
+      description: user selects item from the menu of the restaurant and adds his
+        to the cart by the item id
+      parameters:
+      - description: The input is quantity
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.QuantityItemRequest'
+      - description: item_id
+        in: path
+        name: '{item_id}'
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/entity.CustomResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/entity.CustomResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Adds items to the user's cart
+  /history:
+    get:
+      description: Retrieves history of orders of the user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/entity.CustomResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.Order'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/entity.CustomResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get Order History of the user
+  /order:
+    post:
+      description: moves cart items to the order
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/entity.CustomResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/entity.CustomResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Create Order
+  /restaurants:
+    get:
+      description: Retrieves the list of all restaurants from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Restaurant'
+            type: array
+      summary: Get all restaurants
+    post:
+      consumes:
+      - application/json
+      description: Adds a new restaurant to the restaurants table
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Restaurant created
+          schema:
+            type: string
+        "400":
+          description: Error reading request body or decoding restaurant
+          schema:
+            type: string
+        "422":
+          description: Error creating restaurant
+          schema:
+            type: string
+      summary: Adds a new restaurant
+  /restaurants/{id}:
+    delete:
+      description: Deletes the restaurant
+      parameters:
+      - description: Restaurant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Deletes a restaurant record
+    put:
+      consumes:
+      - application/json
+      description: Updates info about the restaurant
+      parameters:
+      - description: Restaurant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Restaurant
+        in: body
+        name: restaurant
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Restaurant'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Successfully updated restaurant
+          schema:
+            type: string
+        "400":
+          description: Error updating restaurant
+          schema:
+            type: string
+        "409":
+          description: Error decoding restaurant
+          schema:
+            type: string
+      summary: Updates a restaurant information
   /restaurants/{restaurant_id}/items:
     get:
       consumes:
       - application/json
       description: get menu by restaurantID
-      operationId: restaurant_id
       parameters:
       - description: restaurant_id
         in: path
-        name: id
+        name: '{restaurant_id}'
         required: true
         type: integer
       produces:
@@ -74,7 +458,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/menu.Menu'
+              $ref: '#/definitions/entity.Menu'
             type: array
       summary: List menu of the restaurant
 swagger: "2.0"

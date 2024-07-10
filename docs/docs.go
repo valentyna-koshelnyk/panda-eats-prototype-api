@@ -9,12 +9,454 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "contact": {
+            "name": "PandaEats API",
+            "email": "valentyna.koshelnyk@deliveryhero.com"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "User authentication handler",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Login system",
+                "parameters": [
+                    {
+                        "description": "User Login Information",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.User"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/entity.CustomResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/signup": {
+            "post": {
+                "description": "Creates a new account in the system",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Registration of a new user",
+                "parameters": [
+                    {
+                        "description": "User Registration Information",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/entity.CustomResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/cart/": {
+            "get": {
+                "description": "retrieve the items that are currently in the user's cart and haven't been added to the order",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Gets cart items",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/entity.CustomResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.Cart"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/entity.CustomResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/cart/item/{item_id}": {
+            "post": {
+                "description": "user selects item from the menu of the restaurant and adds his to the cart by the item id",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Adds items to the user's cart",
+                "parameters": [
+                    {
+                        "description": "The input is quantity",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.QuantityItemRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "item_id",
+                        "name": "{item_id}",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/entity.CustomResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/entity.CustomResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "updates  item quantity",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Updates item quantity",
+                "parameters": [
+                    {
+                        "description": "The input is quantity",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.QuantityItemRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "item_id",
+                        "name": "{item_id}",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/entity.CustomResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/entity.CustomResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/history": {
+            "get": {
+                "description": "Retrieves history of orders of the user",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get Order History of the user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/entity.CustomResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.Order"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/entity.CustomResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/order": {
+            "post": {
+                "description": "moves cart items to the order",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create Order",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/entity.CustomResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/entity.CustomResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/restaurants": {
+            "get": {
+                "description": "Retrieves the list of all restaurants from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all restaurants",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Restaurant"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Adds a new restaurant to the restaurants table",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Adds a new restaurant",
+                "responses": {
+                    "201": {
+                        "description": "Restaurant created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Error reading request body or decoding restaurant",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Error creating restaurant",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/restaurants/{id}": {
+            "put": {
+                "description": "Updates info about the restaurant",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Updates a restaurant information",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Restaurant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Restaurant",
+                        "name": "restaurant",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Restaurant"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successfully updated restaurant",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Error updating restaurant",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Error decoding restaurant",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes the restaurant",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Deletes a restaurant record",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Restaurant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/restaurants/{restaurant_id}/items": {
             "get": {
                 "description": "get menu by restaurantID",
@@ -25,12 +467,11 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "summary": "List menu of the restaurant",
-                "operationId": "restaurant_id",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "restaurant_id",
-                        "name": "id",
+                        "name": "{restaurant_id}",
                         "in": "path",
                         "required": true
                     }
@@ -41,8 +482,102 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/menu.Menu"
+                                "$ref": "#/definitions/entity.Menu"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/{order_id}/delivery": {
+            "patch": {
+                "description": "update the status of order to delivered",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Updates Order status to delivered",
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/entity.CustomResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/entity.CustomResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/{order_id}/shipping": {
+            "patch": {
+                "description": "update the status of order to shipped",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Updates Order status to shipped",
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/entity.CustomResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/entity.CustomResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -50,20 +585,52 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "menu.Menu": {
+        "entity.Cart": {
+            "type": "object",
+            "properties": {
+                "addedAt": {
+                    "type": "string"
+                },
+                "item": {
+                    "$ref": "#/definitions/entity.Menu"
+                },
+                "itemID": {
+                    "type": "string"
+                },
+                "pricePerUnit": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "totalPrice": {
+                    "type": "number"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.CustomResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.Menu": {
             "type": "object",
             "properties": {
                 "category": {
-                    "type": "string"
-                },
-                "created_at": {
                     "type": "string"
                 },
                 "description": {
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
@@ -73,29 +640,70 @@ const docTemplate = `{
                 },
                 "restaurant_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "entity.Order": {
+            "type": "object",
+            "properties": {
+                "addedAt": {
+                    "type": "string"
                 },
-                "updated_at": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Cart"
+                    }
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.OrderStatus"
+                },
+                "totalOrderPrice": {
+                    "type": "number"
+                },
+                "userID": {
                     "type": "string"
                 }
             }
         },
-        "restaurant.Restaurant": {
+        "entity.OrderStatus": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "InProcess",
+                "Shipped",
+                "Delivered"
+            ]
+        },
+        "entity.QuantityItemRequest": {
             "type": "object",
             "properties": {
-                "ID": {
+                "quantity": {
                     "type": "integer"
-                },
+                }
+            }
+        },
+        "entity.Restaurant": {
+            "type": "object",
+            "properties": {
                 "category": {
-                    "type": "string"
-                },
-                "created_at": {
                     "type": "string"
                 },
                 "full_address": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "lat": {
-                    "description": "JS might not handle very large integers or high-precision floating numbers accurately\nTODO: add validation",
+                    "description": "TODO: add validation",
                     "type": "string"
                 },
                 "lng": {
@@ -117,11 +725,31 @@ const docTemplate = `{
                 "score": {
                     "type": "number"
                 },
+                "zip_code": {
+                    "description": "TODO: Add additional validation for the zip range",
+                    "type": "string"
+                }
+            }
+        },
+        "entity.User": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
                 "updated_at": {
                     "type": "string"
                 },
-                "zip_code": {
-                    "description": "TODO: Add additional validation for the zip range",
+                "user_id": {
                     "type": "string"
                 }
             }
@@ -131,12 +759,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
+	Version:          "1.0",
+	Host:             "localhost:3000",
+	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "PandaEats API",
+	Description:      "A simple food ordering app",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

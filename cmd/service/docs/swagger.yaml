@@ -1,0 +1,11 @@
+basePath: /api/v1
+host: localhost:3000
+info:
+  contact:
+    email: valentyna.koshelnyk@deliveryhero.com
+    name: PandaEats API
+  description: A simple food ordering app
+  title: PandaEats API
+  version: "1.0"
+paths: {}
+swagger: "2.0"
