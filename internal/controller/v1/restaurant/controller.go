@@ -31,9 +31,12 @@ func NewRestaurantController(service service.RestaurantService) RestaurantContro
 	return &restaurantController{s: service}
 }
 
+// GetAll retrieves all restaurants
 // @Summary Get all restaurants
 // @Description Retrieves the list of all restaurants from the database
 // @Produce  json
+// @Success 200 {array} entity.Restaurant
+// @Router  /restaurants [get]
 func (c *restaurantController) GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -63,11 +66,15 @@ func (c *restaurantController) GetAll(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// Create creates a restaurant
 // @Summary Adds a new restaurant
 // @Description Adds a new restaurant to the restaurants table
 // @Accept  json
 // @Produce  json
-// @Param restaurant body restaurant.Restaurant true "Restaurant"
+// @Success 201 {string} string "Restaurant created"
+// @Failure 400 {string} string "Error reading request body or decoding restaurant"
+// @Failure 422 {string} string "Error creating restaurant"
+// @Router /restaurants [post]
 func (c *restaurantController) Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -99,11 +106,17 @@ func (c *restaurantController) Create(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// Update updates restaurant information
 // @Summary Updates a restaurant information
 // @Description Updates info about the restaurant
 // @Accept  json
 // @Produce  json
-// @Param restaurant body restaurant.Restaurant true "Restaurant"
+// @Param id path string true "Restaurant ID"
+// @Param restaurant body entity.Restaurant true "Restaurant"
+// @Success 204 {string} string "Successfully updated restaurant"
+// @Failure 400 {string} string "Error updating restaurant"
+// @Failure 409 {string} string "Error decoding restaurant"
+// @Router /restaurants/{id} [put]
 func (c *restaurantController) Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -129,10 +142,12 @@ func (c *restaurantController) Update(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// Delete deletes restaurant from the list
 // @Summary Deletes a restaurant record
 // @Description Deletes the restaurant
-// @Accept  json
 // @Produce  json
+// @Param id   path      int  true  "Restaurant ID"
+// @Router /restaurants/{id} [delete]
 func (c *restaurantController) Delete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

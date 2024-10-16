@@ -27,7 +27,16 @@ func NewUserController(userService service.UserService) UserController {
 	return &userController{userService: userService}
 }
 
-// RegistrationUser handles user registration by validating and creating a new user
+// RegistrationUser handler for a user registration
+//
+//		@Summary Registration of a new user
+//		@Description Creates a new account in the system
+//		@Accept json
+//	    @Produce  json
+//		@Success      201
+//	    @Failure 404 {object}  entity.CustomResponse
+//		@Param user body entity.User true "User Registration Information"
+//		@Router /auth/signup [post]
 func (c *userController) RegistrationUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -62,7 +71,16 @@ func (c *userController) RegistrationUser(w http.ResponseWriter, r *http.Request
 	return
 }
 
-// LoginUser is a handler for user's signing in process
+// LoginUser handler for login user
+//
+//		@Summary Login system
+//		@Description User authentication handler
+//		@Accept json
+//	    @Produce  json
+//		@Param user body entity.User true "User Login Information"
+//		@Success      200  {object}  entity.User
+//	    @Failure 404 {object}  entity.CustomResponse
+//		@Router /auth/login [post]
 func (c *userController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var user *entity.User
